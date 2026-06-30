@@ -1,0 +1,12 @@
+{
+  "Layout": {
+    "siteName": "Balık Oltamda Guide",
+    "moduleName": "LureAtlas",
+    "tagline": "Balıkçılık bilgi platformu",
+    "navHome": "Ana sayfa",
+    "footer": "© Balık Oltamda. Tüm hakları saklıdır.",
+    "localeTr": "Türkçe",
+    "localeEn": "English",
+    "skipToContent": "İçeriğe atla"
+  }
+}

@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Sprint 1 platform placeholder — expanded in Sprint 2+ per `007_DATABASE_VISION.md`.
+model PlatformMeta {
+  id        String   @id @default(uuid()) @db.Uuid
+  key       String   @unique @db.VarChar(128)
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("platform_meta")
+}

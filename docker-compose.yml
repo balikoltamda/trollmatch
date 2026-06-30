@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: trollmatch-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-trollmatch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trollmatch}
+      POSTGRES_DB: ${POSTGRES_DB:-trollmatch}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-trollmatch} -d ${POSTGRES_DB:-trollmatch}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+    container_name: trollmatch-ui
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-trollmatch}:${POSTGRES_PASSWORD:-trollmatch}@postgres:5432/${POSTGRES_DB:-trollmatch}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

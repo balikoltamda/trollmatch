@@ -1,0 +1,12 @@
+{
+  "Layout": {
+    "siteName": "Balık Oltamda Guide",
+    "moduleName": "LureAtlas",
+    "tagline": "Fishing knowledge platform",
+    "navHome": "Home",
+    "footer": "© Balık Oltamda. All rights reserved.",
+    "localeTr": "Türkçe",
+    "localeEn": "English",
+    "skipToContent": "Skip to content"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "trollmatch",
+  "private": true,
+  "workspaces": [
+    "ui"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=ui",
+    "build": "npm run build --workspace=ui",
+    "start": "npm run start --workspace=ui",
+    "lint": "npm run lint --workspace=ui",
+    "format": "npm run format --workspace=ui",
+    "format:check": "npm run format:check --workspace=ui",
+    "db:generate": "npm run db:generate --workspace=ui",
+    "db:migrate": "npm run db:migrate --workspace=ui",
+    "db:push": "npm run db:push --workspace=ui"
+  }
+}

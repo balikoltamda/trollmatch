@@ -1,5 +1,38 @@
+# Dependencies
 node_modules
+ui/node_modules
+
+# Next.js
 .next
-.env*
+ui/.next
+out
+ui/out
+
+# Build & coverage
 dist
 coverage
+ui/dist
+
+# Environment
+.env
+.env.*
+!.env.example
+ui/.env
+ui/.env.*
+!ui/.env.example
+
+# Prisma generated client (built in CI/Docker)
+ui/src/generated
+
+# Debug
+npm-debug.log*
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# Vercel
+.vercel
+
+# Docker
+postgres_data
