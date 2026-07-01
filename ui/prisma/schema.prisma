@@ -38,6 +38,23 @@ enum ImageRole {
   @@map("image_role")
 }
 
+enum ProductAliasKind {
+  DISPLAY_NAME
+  MODEL_CODE
+  MARKETING_NAME
+  SEARCH_TERM
+
+  @@map("product_alias_kind")
+}
+
+enum ColorAliasKind {
+  MANUFACTURER_CODE
+  MARKETING_NAME
+  SEARCH_TERM
+
+  @@map("color_alias_kind")
+}
+
 // ---------------------------------------------------------------------------
 // LureAtlas catalog core (Sprint 2.1 — not the final long-horizon model)
 // ---------------------------------------------------------------------------
@@ -55,8 +72,10 @@ model Manufacturer {
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  productLines ProductLine[]
-  lureModels   LureModel[]
+  productLines  ProductLine[]
+  lureModels    LureModel[]
+  productAliases ProductAlias[]
+  colorAliases  ColorAlias[]
 
   @@index([deletedAt])
   @@map("manufacturers")
@@ -107,6 +126,7 @@ model LureModel {
   images           Image[]
   lureTechniques   LureTechnique[]
   lureSpeciesLinks LureSpecies[]
+  aliases          ProductAlias[]
 
   @@index([manufacturerId])
   @@index([productLineId])
@@ -119,12 +139,12 @@ model LureModel {
 model LureVariant {
   id          String    @id @default(uuid()) @db.Uuid
   lureModelId String    @map("lure_model_id") @db.Uuid
+  colorId     String    @map("color_id") @db.Uuid
   slug        String    @db.VarChar(128)
   labelEn     String    @map("label_en") @db.VarChar(256)
   labelTr     String    @map("label_tr") @db.VarChar(256)
   lengthMm    Int?      @map("length_mm")
   weightG     Int?      @map("weight_g")
-  colorCode   String?   @map("color_code") @db.VarChar(64)
   sortOrder   Int       @default(0) @map("sort_order")
   isDefault   Boolean   @default(false) @map("is_default")
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -132,10 +152,12 @@ model LureVariant {
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
 
   lureModel LureModel @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+  color     Color     @relation(fields: [colorId], references: [id], onDelete: Restrict)
   images    Image[]
 
   @@unique([lureModelId, slug])
   @@index([lureModelId])
+  @@index([colorId])
   @@index([deletedAt])
   @@map("lure_variants")
 }
@@ -250,4 +272,81 @@ model LureSpecies {
   @@index([associationKind])
   @@index([deletedAt])
   @@map("lure_species")
+}
+
+// ---------------------------------------------------------------------------
+// Canonical product identity (Sprint Foundation F001)
+// ---------------------------------------------------------------------------
+
+/// Canonical color — normalized colorway referenced by every lure variant.
+model Color {
+  id        String    @id @default(uuid()) @db.Uuid
+  slug      String    @unique @db.VarChar(128)
+  nameEn    String    @map("name_en") @db.VarChar(256)
+  nameTr    String    @map("name_tr") @db.VarChar(256)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  aliases  ColorAlias[]
+  variants LureVariant[]
+
+  @@index([deletedAt])
+  @@map("colors")
+}
+
+/// Alternate name or code for a canonical color (manufacturer codes, regional names, search terms).
+model ColorAlias {
+  id                String         @id @default(uuid()) @db.Uuid
+  colorId           String         @map("color_id") @db.Uuid
+  manufacturerId    String?        @map("manufacturer_id") @db.Uuid
+  /// Uniqueness scope: manufacturer UUID or literal `platform` when manufacturerId is null.
+  manufacturerScope String         @default("platform") @map("manufacturer_scope") @db.VarChar(36)
+  /// Locale code (`tr`, `en`) or `any` for locale-invariant aliases (e.g. manufacturer SKU codes).
+  locale            String         @default("any") @db.VarChar(8)
+  alias             String         @db.VarChar(512)
+  aliasNormalized   String         @map("alias_normalized") @db.VarChar(512)
+  kind              ColorAliasKind @default(MANUFACTURER_CODE)
+  createdAt         DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime?      @map("deleted_at") @db.Timestamptz(6)
+
+  color        Color         @relation(fields: [colorId], references: [id], onDelete: Cascade)
+  manufacturer Manufacturer? @relation(fields: [manufacturerId], references: [id], onDelete: SetNull)
+
+  @@unique([aliasNormalized, locale, manufacturerScope])
+  @@index([colorId])
+  @@index([manufacturerId])
+  @@index([locale])
+  @@index([kind])
+  @@index([deletedAt])
+  @@map("color_aliases")
+}
+
+/// Alternate name or identifier for a lure model (model codes, marketing names, search terms).
+model ProductAlias {
+  id                String           @id @default(uuid()) @db.Uuid
+  lureModelId       String           @map("lure_model_id") @db.Uuid
+  manufacturerId    String?          @map("manufacturer_id") @db.Uuid
+  /// Uniqueness scope: manufacturer UUID or literal `platform` when manufacturerId is null.
+  manufacturerScope String           @default("platform") @map("manufacturer_scope") @db.VarChar(36)
+  /// Locale code (`tr`, `en`) or `any` for locale-invariant aliases (e.g. manufacturer model codes).
+  locale            String           @default("any") @db.VarChar(8)
+  alias             String           @db.VarChar(512)
+  aliasNormalized   String           @map("alias_normalized") @db.VarChar(512)
+  kind              ProductAliasKind @default(DISPLAY_NAME)
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime?        @map("deleted_at") @db.Timestamptz(6)
+
+  lureModel    LureModel     @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+  manufacturer Manufacturer? @relation(fields: [manufacturerId], references: [id], onDelete: SetNull)
+
+  @@unique([aliasNormalized, locale, manufacturerScope])
+  @@index([lureModelId])
+  @@index([manufacturerId])
+  @@index([locale])
+  @@index([kind])
+  @@index([deletedAt])
+  @@map("product_aliases")
 }
