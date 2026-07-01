@@ -7,12 +7,247 @@ datasource db {
   provider = "postgresql"
 }
 
-/// Sprint 1 platform placeholder — expanded in Sprint 2+ per `007_DATABASE_VISION.md`.
-model PlatformMeta {
-  id        String   @id @default(uuid()) @db.Uuid
-  key       String   @unique @db.VarChar(128)
-  value     String   @db.Text
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+// ---------------------------------------------------------------------------
+// Shared enums (minimal — expanded in later sprints per 007_DATABASE_VISION.md)
+// ---------------------------------------------------------------------------
 
-  @@map("platform_meta")
+enum ContentLifecycleState {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  DEPRECATED
+  REJECTED
+
+  @@map("content_lifecycle_state")
+}
+
+enum LureSpeciesAssociationKind {
+  MANUFACTURER_MARKETING
+  MODERATOR_CURATED
+  COMMUNITY_EFFECTIVENESS
+
+  @@map("lure_species_association_kind")
+}
+
+enum ImageRole {
+  HERO
+  PRODUCT
+  RIGGING_DIAGRAM
+  TECHNICAL_DIAGRAM
+
+  @@map("image_role")
+}
+
+// ---------------------------------------------------------------------------
+// LureAtlas catalog core (Sprint 2.1 — not the final long-horizon model)
+// ---------------------------------------------------------------------------
+
+/// Manufacturer — catalog owner (LureAtlas Manufacturer facade, L4).
+model Manufacturer {
+  id          String    @id @default(uuid()) @db.Uuid
+  slug        String    @unique @db.VarChar(128)
+  nameEn      String    @map("name_en") @db.VarChar(256)
+  nameTr      String    @map("name_tr") @db.VarChar(256)
+  countryCode String?   @map("country_code") @db.Char(2)
+  website     String?   @db.VarChar(512)
+  logoUrl     String?   @map("logo_url") @db.VarChar(1024)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  productLines ProductLine[]
+  lureModels   LureModel[]
+
+  @@index([deletedAt])
+  @@map("manufacturers")
+}
+
+/// Product line — manufacturer series grouping multiple lure models.
+model ProductLine {
+  id             String    @id @default(uuid()) @db.Uuid
+  manufacturerId String    @map("manufacturer_id") @db.Uuid
+  slug           String    @db.VarChar(128)
+  nameEn         String    @map("name_en") @db.VarChar(256)
+  nameTr         String    @map("name_tr") @db.VarChar(256)
+  descriptionEn  String?   @map("description_en") @db.Text
+  descriptionTr  String?   @map("description_tr") @db.Text
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
+  lureModels   LureModel[]
+
+  @@unique([manufacturerId, slug])
+  @@index([manufacturerId])
+  @@index([deletedAt])
+  @@map("product_lines")
+}
+
+/// LureAtlas Model — canonical lure design (all variants share core identity).
+model LureModel {
+  id                String                @id @default(uuid()) @db.Uuid
+  manufacturerId    String                @map("manufacturer_id") @db.Uuid
+  productLineId     String                @map("product_line_id") @db.Uuid
+  slug              String                @unique @db.VarChar(128)
+  nameEn            String                @map("name_en") @db.VarChar(256)
+  nameTr            String                @map("name_tr") @db.VarChar(256)
+  formFactorEn      String?               @map("form_factor_en") @db.VarChar(128)
+  formFactorTr      String?               @map("form_factor_tr") @db.VarChar(128)
+  shortDescriptionEn String?              @map("short_description_en") @db.Text
+  shortDescriptionTr String?              @map("short_description_tr") @db.Text
+  lifecycleState    ContentLifecycleState @default(DRAFT) @map("lifecycle_state")
+  createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt         DateTime?             @map("deleted_at") @db.Timestamptz(6)
+
+  manufacturer     Manufacturer     @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
+  productLine      ProductLine      @relation(fields: [productLineId], references: [id], onDelete: Restrict)
+  variants         LureVariant[]
+  images           Image[]
+  lureTechniques   LureTechnique[]
+  lureSpeciesLinks LureSpecies[]
+
+  @@index([manufacturerId])
+  @@index([productLineId])
+  @@index([lifecycleState])
+  @@index([deletedAt])
+  @@map("lure_models")
+}
+
+/// LureAtlas Variant — SKU-level size / weight / color release.
+model LureVariant {
+  id          String    @id @default(uuid()) @db.Uuid
+  lureModelId String    @map("lure_model_id") @db.Uuid
+  slug        String    @db.VarChar(128)
+  labelEn     String    @map("label_en") @db.VarChar(256)
+  labelTr     String    @map("label_tr") @db.VarChar(256)
+  lengthMm    Int?      @map("length_mm")
+  weightG     Int?      @map("weight_g")
+  colorCode   String?   @map("color_code") @db.VarChar(64)
+  sortOrder   Int       @default(0) @map("sort_order")
+  isDefault   Boolean   @default(false) @map("is_default")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  lureModel LureModel @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+  images    Image[]
+
+  @@unique([lureModelId, slug])
+  @@index([lureModelId])
+  @@index([deletedAt])
+  @@map("lure_variants")
+}
+
+/// Image — media attachment for lure model or variant.
+model Image {
+  id            String    @id @default(uuid()) @db.Uuid
+  lureModelId   String    @map("lure_model_id") @db.Uuid
+  lureVariantId String?   @map("lure_variant_id") @db.Uuid
+  url           String    @db.VarChar(1024)
+  altTextEn     String?   @map("alt_text_en") @db.VarChar(512)
+  altTextTr     String?   @map("alt_text_tr") @db.VarChar(512)
+  role          ImageRole @default(PRODUCT)
+  sortOrder     Int       @default(0) @map("sort_order")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  lureModel   LureModel    @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+  lureVariant LureVariant? @relation(fields: [lureVariantId], references: [id], onDelete: SetNull)
+
+  @@index([lureModelId])
+  @@index([lureVariantId])
+  @@index([deletedAt])
+  @@map("images")
+}
+
+// ---------------------------------------------------------------------------
+// Reference taxonomy (simplified facades — full Taxonomy Term layer deferred)
+// ---------------------------------------------------------------------------
+
+/// Fish species — platform biological anchor (Fish Species facade, L3).
+model FishSpecies {
+  id              String    @id @default(uuid()) @db.Uuid
+  slug            String    @unique @db.VarChar(128)
+  scientificName  String    @map("scientific_name") @db.VarChar(256)
+  nameEn          String    @map("name_en") @db.VarChar(256)
+  nameTr          String    @map("name_tr") @db.VarChar(256)
+  parentId        String?   @map("parent_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  parent   FishSpecies?  @relation("FishSpeciesHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children FishSpecies[] @relation("FishSpeciesHierarchy")
+  lureLinks LureSpecies[]
+
+  @@index([parentId])
+  @@index([deletedAt])
+  @@map("fish_species")
+}
+
+/// Fishing technique — discovery and compatibility axis (Fishing Technique facade, L3).
+model Technique {
+  id        String    @id @default(uuid()) @db.Uuid
+  slug      String    @unique @db.VarChar(128)
+  nameEn    String    @map("name_en") @db.VarChar(256)
+  nameTr    String    @map("name_tr") @db.VarChar(256)
+  parentId  String?   @map("parent_id") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  parent         Technique?      @relation("TechniqueHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children       Technique[]     @relation("TechniqueHierarchy")
+  lureTechniques LureTechnique[]
+
+  @@index([parentId])
+  @@index([deletedAt])
+  @@map("techniques")
+}
+
+// ---------------------------------------------------------------------------
+// Association links (typed edges — Entity Association Link pattern, simplified)
+// ---------------------------------------------------------------------------
+
+/// Lure ↔ technique compatibility link.
+model LureTechnique {
+  id          String    @id @default(uuid()) @db.Uuid
+  lureModelId String    @map("lure_model_id") @db.Uuid
+  techniqueId String    @map("technique_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  lureModel LureModel @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+  technique Technique @relation(fields: [techniqueId], references: [id], onDelete: Restrict)
+
+  @@unique([lureModelId, techniqueId])
+  @@index([lureModelId])
+  @@index([techniqueId])
+  @@index([deletedAt])
+  @@map("lure_techniques")
+}
+
+/// Lure ↔ species target link with association kind (007 §4.5 catalog tag semantics).
+model LureSpecies {
+  id               String                     @id @default(uuid()) @db.Uuid
+  lureModelId      String                     @map("lure_model_id") @db.Uuid
+  fishSpeciesId    String                     @map("fish_species_id") @db.Uuid
+  associationKind  LureSpeciesAssociationKind @map("association_kind")
+  createdAt        DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime                   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt        DateTime?                  @map("deleted_at") @db.Timestamptz(6)
+
+  lureModel   LureModel   @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+  fishSpecies FishSpecies @relation(fields: [fishSpeciesId], references: [id], onDelete: Restrict)
+
+  @@unique([lureModelId, fishSpeciesId, associationKind])
+  @@index([lureModelId])
+  @@index([fishSpeciesId])
+  @@index([associationKind])
+  @@index([deletedAt])
+  @@map("lure_species")
 }
