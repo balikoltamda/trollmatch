@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Sprint S007 — First End-to-End Import** — **Complete**
+**Sprint S008 — Manufacturer Registry** — **Complete**
 
-Full pipeline: `sample-lure.json` → demo importer → `CanonicalLureImport` → validator → Prisma persistence (transactional, idempotent lookups). Creates only missing catalog rows. Run: `npm run import:run --workspace=ui` (requires Postgres + migrations).
+Declarative manufacturer registry at `manufacturer-registry/` — YAML configs for Halco, Rapala, Yo-Zuri, Maria, Shimano (sources, connectors, trust scores). Configuration only; no importer code.
 
 ---
 
@@ -43,7 +43,8 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint S004** | `382a2b7` | Import framework interfaces (`modules/import/`) — parser, validator, mapper, job, provider contracts |
 | **Sprint S005** | `679bdcd` | `CanonicalLureImport` DTO — canonical import contract for all manufacturer mappers |
 | **Sprint S006** | `b8d1576` | Demo importer — static JSON → `CanonicalLureImport`; `npm run import:demo` |
-| **Sprint S007** | *(uncommitted)* | End-to-end import — JSON → canonical → Prisma (transactional, dedupe); `npm run import:run` |
+| **Sprint S007** | `65e6302` | End-to-end import — JSON → canonical → Prisma (transactional, dedupe); `npm run import:run` |
+| **Sprint S008** | *(uncommitted)* | Manufacturer registry YAML configs (`manufacturer-registry/*.yaml`) |
 
 ---
 
@@ -59,19 +60,19 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `b8d1576` |
-| **Message** | feat(import): first working importer |
+| **Hash** | `65e6302` |
+| **Message** | feat(import): first end-to-end import |
 | **Date** | 2026-06-30 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint S008 — Halco importer OR wire lure detail to DB** (product owner to prioritize)
+**Sprint S009 — First real manufacturer importer** (product owner to prioritize)
 
 Recommended sequence:
 
-1. **Real manufacturer provider** — Halco static feed → `CanonicalLureImport`
+1. **Halco provider** — wire `manufacturer-registry/halco.yaml` → static feed → `CanonicalLureImport`
 2. **Ingestion Batch record** — audit trail per 007 §15.1
 3. **Wire lure detail page** — read imported Halco Laser Pro from DB (BL-042)
 4. **Phase A remainder (P0):** BL-003–BL-011 — platform kernel tables, taxonomy seeds
@@ -112,9 +113,64 @@ Recommended sequence:
 | Manufacturer imports via `ManufacturerImportProvider` (parse → validate → map) | S004 | Active — interfaces only |
 | `CanonicalLureImport` as universal mapper target | S005 | Active |
 | Demo importer proves parse → validate → canonical map pipeline | S006 | Active |
-| Canonical → Prisma persistence with transactional dedupe | S007 | Active |
+| Manufacturer registry YAML drives future connector selection | S008 | Active — config only |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
+
+---
+
+## Frozen Decisions (until Milestone 1)
+
+The following architecture decisions are **frozen** until Milestone 1 is complete. Do not refactor, rename, or replace these without explicit product-owner approval.
+
+| Area | Frozen scope | Current implementation |
+|------|--------------|------------------------|
+| **Folder structure** | Monorepo layout; `ui/src/modules/*`, `ui/src/shared/*`, `ui/src/app/*` | R001 — `modules/lure`, `modules/import`, placeholder `species` / `technique` / `manufacturer` |
+| **Prisma core schema** | LureAtlas catalog tables in `ui/prisma/schema.prisma` (Manufacturer → Variant, Color, aliases, species identity) | Sprint 2.1, F001, F002 — migrations through `20250701130000_canonical_species_identity` |
+| **Canonical Identity** | Color + ProductAlias + ColorAlias; SpeciesScientificName + CommonName + Alias | F001, F002 — variant requires `colorId`; no duplicate identity models |
+| **Import Framework** | `ManufacturerImportProvider` pipeline: parse → validate → map → `CanonicalLureImport` → persistence | S004–S007 — `modules/import/{core,parsers,validators,mappers,jobs,providers,persistence}` |
+| **Module naming** | Domain modules under `ui/src/modules/` (`lure`, `import`, `species`, `technique`, `manufacturer`); no return to `features/` | R001, S004 |
+
+**Milestone 1 exit** (indicative): first real manufacturer catalog in Postgres, lure detail reads from DB, platform kernel or ingestion batch audit in place — see `009_ROADMAP.md` Phase 1 gate.
+
+---
+
+## Change Control Policy
+
+Changes are classified into three levels.
+
+### Level 1 — Allowed
+
+These changes may be implemented immediately.
+
+- Bug fixes
+- Performance improvements
+- UI polish
+- Documentation updates
+- Tests
+- Small refactoring without architectural impact
+
+### Level 2 — Requires Approval
+
+These require explicit Product Owner approval.
+
+- Database schema changes
+- New modules
+- New folders
+- Route changes
+- API contract changes
+- Import pipeline changes
+- Canonical model changes
+
+### Level 3 — Forbidden Until Milestone Completion
+
+These are frozen.
+
+- Folder structure
+- Core module names
+- Canonical identity model
+- Import framework
+- Prisma core entities
 
 ---
 
@@ -129,7 +185,8 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 | `api/` | **Empty** | Planned Fastify REST + workers |
 | `shared/` (repo root) | **Empty** | Planned monorepo-wide Zod schemas + domain types |
 | `database/` | **Empty** | Migrations live in `ui/prisma/` today |
-| `research/` | **Placeholder** | Evidence pipeline not wired |
+| `research/` | **Placeholder** | Evidence pipeline not wired; registry points to `research/manufacturers/` |
+| `manufacturer-registry/` | **Active** | Declarative YAML configs per manufacturer (S008) |
 | `docker-compose.yml` | **Active** | PostgreSQL 16; UI service under `full` profile |
 
 ### UI source layout (`ui/src/`)

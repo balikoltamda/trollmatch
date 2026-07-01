@@ -1,0 +1,19 @@
+id: rapala
+name: Rapala
+official_website: https://www.rapala.com
+country: FI
+supported_languages:
+  - en
+  - fi
+product_source:
+  type: static_json
+  location: research/manufacturers/rapala/products
+image_source:
+  type: manufacturer_assets
+  location: research/manufacturers/rapala/images
+catalog_source:
+  type: manufacturer_catalog
+  location: research/manufacturers/rapala/catalog
+connector_name: rapala
+update_frequency: quarterly
+trust_score: 82

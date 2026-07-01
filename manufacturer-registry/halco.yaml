@@ -1,0 +1,18 @@
+id: halco
+name: Halco
+official_website: https://www.halco.com.au
+country: AU
+supported_languages:
+  - en
+product_source:
+  type: static_json
+  location: research/manufacturers/halco/products
+image_source:
+  type: manufacturer_assets
+  location: research/manufacturers/halco/images
+catalog_source:
+  type: press_kit
+  location: research/manufacturers/halco/catalog
+connector_name: halco
+update_frequency: quarterly
+trust_score: 78

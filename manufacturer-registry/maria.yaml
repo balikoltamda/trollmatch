@@ -1,0 +1,19 @@
+id: maria
+name: Maria
+official_website: https://www.maria.co.jp
+country: JP
+supported_languages:
+  - en
+  - ja
+product_source:
+  type: static_json
+  location: research/manufacturers/maria/products
+image_source:
+  type: manufacturer_assets
+  location: research/manufacturers/maria/images
+catalog_source:
+  type: manufacturer_catalog
+  location: research/manufacturers/maria/catalog
+connector_name: maria
+update_frequency: semi_annual
+trust_score: 76

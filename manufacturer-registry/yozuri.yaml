@@ -1,0 +1,19 @@
+id: yo-zuri
+name: Yo-Zuri
+official_website: https://www.yo-zuri.com
+country: JP
+supported_languages:
+  - en
+  - ja
+product_source:
+  type: static_json
+  location: research/manufacturers/yo-zuri/products
+image_source:
+  type: manufacturer_assets
+  location: research/manufacturers/yo-zuri/images
+catalog_source:
+  type: manufacturer_catalog
+  location: research/manufacturers/yo-zuri/catalog
+connector_name: yo-zuri
+update_frequency: quarterly
+trust_score: 80
