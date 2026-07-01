@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Sprint S003** — **Complete**
+**Sprint S004 — Import Framework** — **Complete**
 
-First Add Lure page at `/[locale]/add-lure`: mobile-first layout, drag-and-drop image zone (UI only), cascading manufacturer/model/variant/color autocompletes with mock data, live preview card, disabled save button. No API, upload, or AI.
+Reusable manufacturer import architecture under `ui/src/modules/import/`: core types, `ManufacturerImportProvider` contract, parse → validate → map pipeline interfaces, job orchestration, and provider registry — interfaces only. No manufacturer implementations, UI, or API.
 
 ---
 
@@ -39,7 +39,8 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint Foundation F001** | `149de4c` | Canonical product identity: `Color`, `ColorAlias`, `ProductAlias`; variant → color FK |
 | **Sprint Foundation F002** | `294a9f4` | Canonical species identity: `SpeciesScientificName`, `SpeciesCommonName`, `SpeciesAlias` |
 | **Refactor Sprint R001** | `d07f17d` | Move `src/features/lures` → `src/modules/lure`; add empty `species`, `technique`, `manufacturer` modules; scaffold `src/shared/{db,ai,auth,seo,utils,types}` |
-| **Sprint S003** | *(uncommitted)* | Add Lure page (`/[locale]/add-lure`) — form UI with mock autocompletes, image drop zone, preview card, disabled save |
+| **Sprint S003** | `5d06937` | Add Lure page (`/[locale]/add-lure`) — form UI with mock autocompletes, image drop zone, preview card, disabled save |
+| **Sprint S004** | *(uncommitted)* | Import framework interfaces (`modules/import/`) — parser, validator, mapper, job, provider contracts |
 
 ---
 
@@ -55,21 +56,22 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `d07f17d` |
-| **Message** | refactor(core): modular project structure |
+| **Hash** | `5d06937` |
+| **Message** | feat(ui): add lure page |
 | **Date** | 2026-06-30 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint 4 — Platform kernel OR catalog ingestion** (product owner to prioritize)
+**Sprint S005 — First manufacturer importer OR platform kernel** (product owner to prioritize)
 
 Recommended sequence per `005_BACKLOG.md`:
 
-1. **Phase A remainder (P0):** BL-003–BL-011 — migrations CI proof, platform user/claims/outbox tables, taxonomy seeds (500 species, core techniques)
-2. **Phase B start:** BL-020–BL-026 — complete LureAtlas schema alignment with `007`, Knowledge Claims, ingestion pipeline
-3. **Wire Add Lure form** — connect S003 UI to API when catalog write path exists
+1. **First provider implementation** — e.g. Halco `ManufacturerImportProvider` under `modules/import/providers/`
+2. **Pipeline + persistence adapter** — wire `ImportPipeline` to Prisma draft writes + Ingestion Batch record
+3. **Phase A remainder (P0):** BL-003–BL-011 — platform user/claims/outbox tables, taxonomy seeds
+4. **Wire Add Lure form** — connect S003 UI to API when catalog write path exists
 
 Parallel UI track: wire lure detail page to real data (BL-042).
 
@@ -106,6 +108,7 @@ Parallel UI track: wire lure detail page to real data (BL-042).
 | Commerce isolated from ranking | Charter §17 | Policy only — no sponsored links code yet |
 | Env files not committed (`.env.local` for secrets) | `d45c8fe` | Active |
 | UI domain code under `src/modules/`; cross-cutting code under `src/shared/` | R001 | Active |
+| Manufacturer imports via `ManufacturerImportProvider` (parse → validate → map) | S004 | Active — interfaces only |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
@@ -129,6 +132,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
 | Path | Status | Notes |
 |------|--------|-------|
+| `modules/import/` | **Active** | Import framework interfaces: core, parsers, validators, mappers, jobs, providers |
 | `modules/lure/` | **Active** | Lure detail + Add Lure form (`components/add-lure/`), services, repositories, types, mock data |
 | `modules/species/` | **Placeholder** | Empty — future SpeciesCompass module |
 | `modules/technique/` | **Placeholder** | Empty — future TechniqueLibrary module |
@@ -162,6 +166,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 | Home route (empty) | Done |
 | Lure detail page | Done — **mock data only** |
 | Add Lure page | Done — **UI only** (`/[locale]/add-lure`); save disabled, mock autocompletes |
+| Import framework | Done — **interfaces only** (`modules/import/`); no manufacturer providers yet |
 | Browse / search / compare | Not started |
 | Auth / contributor flows | Not started (Add Lure UI precedes auth gate) |
 
@@ -190,7 +195,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
 | Goal | Progress |
 |------|----------|
-| G1 — Trustworthy lure reference | Early — schema + 1 mock UI page; 0 curated records |
+| G1 — Trustworthy lure reference | Early — schema + UI pages; import framework ready; 0 ingested records |
 | G2 — Bilingual experience | UI i18n framework done; content mostly mock |
 | G3 — Community contribution | Early — Add Lure form UI (no submit yet) |
 | G4 — Data provenance | Documented; not in runtime |
