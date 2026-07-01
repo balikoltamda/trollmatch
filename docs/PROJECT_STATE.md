@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Sprint S006 — First Working Importer** — **Complete**
+**Sprint S007 — First End-to-End Import** — **Complete**
 
-Demo static JSON importer at `modules/import/providers/demo/`: implements `ManufacturerImportProvider`, reads `sample-lure.json`, parse → validate → map to `CanonicalLureImport`, prints JSON. No web access, no database writes. Run: `npm run import:demo --workspace=ui`.
+Full pipeline: `sample-lure.json` → demo importer → `CanonicalLureImport` → validator → Prisma persistence (transactional, idempotent lookups). Creates only missing catalog rows. Run: `npm run import:run --workspace=ui` (requires Postgres + migrations).
 
 ---
 
@@ -42,7 +42,8 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint S003** | `5d06937` | Add Lure page (`/[locale]/add-lure`) — form UI with mock autocompletes, image drop zone, preview card, disabled save |
 | **Sprint S004** | `382a2b7` | Import framework interfaces (`modules/import/`) — parser, validator, mapper, job, provider contracts |
 | **Sprint S005** | `679bdcd` | `CanonicalLureImport` DTO — canonical import contract for all manufacturer mappers |
-| **Sprint S006** | *(uncommitted)* | Demo importer — static JSON → `CanonicalLureImport`; `npm run import:demo` |
+| **Sprint S006** | `b8d1576` | Demo importer — static JSON → `CanonicalLureImport`; `npm run import:demo` |
+| **Sprint S007** | *(uncommitted)* | End-to-end import — JSON → canonical → Prisma (transactional, dedupe); `npm run import:run` |
 
 ---
 
@@ -58,23 +59,22 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `679bdcd` |
-| **Message** | feat(import): canonical import dto |
+| **Hash** | `b8d1576` |
+| **Message** | feat(import): first working importer |
 | **Date** | 2026-06-30 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint S007 — Halco importer OR persistence adapter** (product owner to prioritize)
+**Sprint S008 — Halco importer OR wire lure detail to DB** (product owner to prioritize)
 
 Recommended sequence:
 
-1. **Real manufacturer provider** — Halco feed mapping to `CanonicalLureImport` (static JSON or local file first)
-2. **Persistence adapter** — write validated canonical records to Prisma as draft + Ingestion Batch
-3. **Phase A remainder (P0):** BL-003–BL-011 — platform kernel tables, taxonomy seeds
-
-Parallel UI track: wire lure detail page to real data (BL-042).
+1. **Real manufacturer provider** — Halco static feed → `CanonicalLureImport`
+2. **Ingestion Batch record** — audit trail per 007 §15.1
+3. **Wire lure detail page** — read imported Halco Laser Pro from DB (BL-042)
+4. **Phase A remainder (P0):** BL-003–BL-011 — platform kernel tables, taxonomy seeds
 
 ---
 
@@ -111,7 +111,8 @@ Parallel UI track: wire lure detail page to real data (BL-042).
 | UI domain code under `src/modules/`; cross-cutting code under `src/shared/` | R001 | Active |
 | Manufacturer imports via `ManufacturerImportProvider` (parse → validate → map) | S004 | Active — interfaces only |
 | `CanonicalLureImport` as universal mapper target | S005 | Active |
-| Demo importer proves parse → validate → canonical map pipeline | S006 | Active — no DB persist |
+| Demo importer proves parse → validate → canonical map pipeline | S006 | Active |
+| Canonical → Prisma persistence with transactional dedupe | S007 | Active |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
@@ -135,7 +136,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
 | Path | Status | Notes |
 |------|--------|-------|
-| `modules/import/` | **Active** | Framework + `CanonicalLureImport` + demo provider (`providers/demo/`) |
+| `modules/import/` | **Active** | Framework + canonical DTO + demo provider + `persistence/` Prisma adapter |
 | `modules/lure/` | **Active** | Lure detail + Add Lure form (`components/add-lure/`), services, repositories, types, mock data |
 | `modules/species/` | **Placeholder** | Empty — future SpeciesCompass module |
 | `modules/technique/` | **Placeholder** | Empty — future TechniqueLibrary module |
@@ -169,7 +170,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 | Home route (empty) | Done |
 | Lure detail page | Done — **mock data only** |
 | Add Lure page | Done — **UI only** (`/[locale]/add-lure`); save disabled, mock autocompletes |
-| Import framework | Done — demo importer runs end-to-end; no DB persist yet |
+| Import pipeline | Done — `import:demo` (dry run JSON); `import:run` (persist to Postgres) |
 | Browse / search / compare | Not started |
 | Auth / contributor flows | Not started (Add Lure UI precedes auth gate) |
 
@@ -189,7 +190,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 | Item | Status |
 |------|--------|
 | GitHub remote + main branch | Active |
-| Docker Compose (Postgres) | Configured |
+| Docker Compose (Postgres) | Configured — required for `import:run` |
 | `npm run db:migrate` / `db:check` | Scripts present |
 | CI (GitHub Actions) | Not configured |
 | Production deploy | Not configured — `guide.balikoltamda.net` planned |
@@ -198,7 +199,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
 | Goal | Progress |
 |------|----------|
-| G1 — Trustworthy lure reference | Early — schema + UI; demo import pipeline proven; 0 persisted records |
+| G1 — Trustworthy lure reference | Early — end-to-end import to Postgres proven; lure detail still mock |
 | G2 — Bilingual experience | UI i18n framework done; content mostly mock |
 | G3 — Community contribution | Early — Add Lure form UI (no submit yet) |
 | G4 — Data provenance | Documented; not in runtime |

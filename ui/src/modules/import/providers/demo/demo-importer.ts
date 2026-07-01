@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { CanonicalLureImport } from "../../core/canonical-lure";
+import type { CanonicalLureImport, CanonicalTag } from "../../core/canonical-lure";
 import type { ImportProviderMetadata } from "../../core/provider-metadata";
 import type { ManufacturerImportProvider } from "../../core/import-provider";
 import type {
@@ -9,10 +9,10 @@ import type {
   ImportIssue,
   ImportSourceFormat,
   ImportSourceInput,
-  ImportValidationContext,
   RawImportRecord,
   ValidatedImportRecord,
 } from "../../core/types";
+import type { ImportValidationContext } from "../../validators/record-validator";
 import type {
   CatalogMapper,
   ImportMappingContext,
@@ -199,7 +199,7 @@ function validateDemoRawLure(raw: DemoRawLure): ImportIssue[] {
   return issues;
 }
 
-class DemoRecordValidator implements RecordValidator<DemoRawLure> {
+class DemoRecordValidator implements RecordValidator {
   async validate(
     records: RawImportRecord[],
     context: ImportValidationContext,
@@ -327,8 +327,10 @@ function mapDemoRawToCanonical(
       hooks: raw.model.hooks,
       images: raw.model.images,
       videos: raw.model.videos,
-      tags: raw.model.tags,
-      externalIdentifiers: raw.model.externalIdentifiers,
+      tags: raw.model.tags as CanonicalTag[] | undefined,
+      externalIdentifiers: raw.model.externalIdentifiers as
+        | CanonicalLureImport["model"]["externalIdentifiers"]
+        | undefined,
     },
     variants: [
       {
@@ -339,7 +341,9 @@ function mapDemoRawToCanonical(
         sizes: raw.variant.size ? [raw.variant.size] : undefined,
         weights: raw.variant.weight ? [raw.variant.weight] : undefined,
         images: raw.variant.images,
-        externalIdentifiers: raw.variant.externalIdentifiers,
+        externalIdentifiers: raw.variant.externalIdentifiers as
+          | CanonicalLureImport["variants"][number]["externalIdentifiers"]
+          | undefined,
       },
     ],
     source: {
