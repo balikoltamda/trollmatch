@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { LureDetailView } from "@/features/lures/components/lure-detail-view";
+import { LureDetailView } from "@/modules/lure/components/lure-detail-view";
 import {
   getLureDetail,
   getLureSlugs,
   localize,
-} from "@/features/lures/services/get-lure-detail";
+} from "@/modules/lure/services/get-lure-detail";
 import { routing, type AppLocale } from "@/i18n/routing";
 
 type LureDetailPageProps = {
