@@ -16,6 +16,7 @@
     "db:push": "prisma db push",
     "db:check": "tsx scripts/verify-db.ts",
     "db:status": "prisma migrate status",
+    "import:demo": "tsx src/modules/import/providers/demo/demo-importer.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Sprint S005 — Canonical Import DTO** — **Complete**
+**Sprint S006 — First Working Importer** — **Complete**
 
-Manufacturer-neutral `CanonicalLureImport` contract in `modules/import/core/canonical-lure.ts` — interfaces only. Covers full catalog hierarchy, specs, media, tags, external IDs, source provenance, and import timestamp. Target shape for all future mappers.
+Demo static JSON importer at `modules/import/providers/demo/`: implements `ManufacturerImportProvider`, reads `sample-lure.json`, parse → validate → map to `CanonicalLureImport`, prints JSON. No web access, no database writes. Run: `npm run import:demo --workspace=ui`.
 
 ---
 
@@ -41,7 +41,8 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Refactor Sprint R001** | `d07f17d` | Move `src/features/lures` → `src/modules/lure`; add empty `species`, `technique`, `manufacturer` modules; scaffold `src/shared/{db,ai,auth,seo,utils,types}` |
 | **Sprint S003** | `5d06937` | Add Lure page (`/[locale]/add-lure`) — form UI with mock autocompletes, image drop zone, preview card, disabled save |
 | **Sprint S004** | `382a2b7` | Import framework interfaces (`modules/import/`) — parser, validator, mapper, job, provider contracts |
-| **Sprint S005** | *(uncommitted)* | `CanonicalLureImport` DTO — canonical import contract for all manufacturer mappers |
+| **Sprint S005** | `679bdcd` | `CanonicalLureImport` DTO — canonical import contract for all manufacturer mappers |
+| **Sprint S006** | *(uncommitted)* | Demo importer — static JSON → `CanonicalLureImport`; `npm run import:demo` |
 
 ---
 
@@ -57,22 +58,21 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `382a2b7` |
-| **Message** | feat(import): importer framework |
+| **Hash** | `679bdcd` |
+| **Message** | feat(import): canonical import dto |
 | **Date** | 2026-06-30 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint S006 — First manufacturer importer OR platform kernel** (product owner to prioritize)
+**Sprint S007 — Halco importer OR persistence adapter** (product owner to prioritize)
 
-Recommended sequence per `005_BACKLOG.md`:
+Recommended sequence:
 
-1. **First provider implementation** — e.g. Halco `ManufacturerImportProvider` mapping to `CanonicalLureImport`
-2. **Wire `CatalogMapper` output** — align `MappedCatalogBundle` with `CanonicalLureImport` or replace with canonical type
-3. **Pipeline + persistence adapter** — Prisma draft writes + Ingestion Batch record
-4. **Phase A remainder (P0):** BL-003–BL-011 — platform user/claims/outbox tables, taxonomy seeds
+1. **Real manufacturer provider** — Halco feed mapping to `CanonicalLureImport` (static JSON or local file first)
+2. **Persistence adapter** — write validated canonical records to Prisma as draft + Ingestion Batch
+3. **Phase A remainder (P0):** BL-003–BL-011 — platform kernel tables, taxonomy seeds
 
 Parallel UI track: wire lure detail page to real data (BL-042).
 
@@ -110,7 +110,8 @@ Parallel UI track: wire lure detail page to real data (BL-042).
 | Env files not committed (`.env.local` for secrets) | `d45c8fe` | Active |
 | UI domain code under `src/modules/`; cross-cutting code under `src/shared/` | R001 | Active |
 | Manufacturer imports via `ManufacturerImportProvider` (parse → validate → map) | S004 | Active — interfaces only |
-| `CanonicalLureImport` as universal mapper target | S005 | Active — interfaces only |
+| `CanonicalLureImport` as universal mapper target | S005 | Active |
+| Demo importer proves parse → validate → canonical map pipeline | S006 | Active — no DB persist |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
@@ -134,7 +135,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
 | Path | Status | Notes |
 |------|--------|-------|
-| `modules/import/` | **Active** | Import framework + `CanonicalLureImport` DTO (`core/canonical-lure.ts`) |
+| `modules/import/` | **Active** | Framework + `CanonicalLureImport` + demo provider (`providers/demo/`) |
 | `modules/lure/` | **Active** | Lure detail + Add Lure form (`components/add-lure/`), services, repositories, types, mock data |
 | `modules/species/` | **Placeholder** | Empty — future SpeciesCompass module |
 | `modules/technique/` | **Placeholder** | Empty — future TechniqueLibrary module |
@@ -168,7 +169,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 | Home route (empty) | Done |
 | Lure detail page | Done — **mock data only** |
 | Add Lure page | Done — **UI only** (`/[locale]/add-lure`); save disabled, mock autocompletes |
-| Import framework | Done — **interfaces only**; `CanonicalLureImport` DTO; no manufacturer providers yet |
+| Import framework | Done — demo importer runs end-to-end; no DB persist yet |
 | Browse / search / compare | Not started |
 | Auth / contributor flows | Not started (Add Lure UI precedes auth gate) |
 
@@ -197,7 +198,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
 | Goal | Progress |
 |------|----------|
-| G1 — Trustworthy lure reference | Early — schema + UI pages; import framework ready; 0 ingested records |
+| G1 — Trustworthy lure reference | Early — schema + UI; demo import pipeline proven; 0 persisted records |
 | G2 — Bilingual experience | UI i18n framework done; content mostly mock |
 | G3 — Community contribution | Early — Add Lure form UI (no submit yet) |
 | G4 — Data provenance | Documented; not in runtime |
