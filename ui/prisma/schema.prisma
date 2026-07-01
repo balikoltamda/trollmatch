@@ -55,6 +55,15 @@ enum ColorAliasKind {
   @@map("color_alias_kind")
 }
 
+enum SpeciesAliasKind {
+  SEARCH_TERM
+  REGIONAL_NAME
+  MISSPELLING
+  SYNONYM
+
+  @@map("species_alias_kind")
+}
+
 // ---------------------------------------------------------------------------
 // LureAtlas catalog core (Sprint 2.1 — not the final long-horizon model)
 // ---------------------------------------------------------------------------
@@ -201,9 +210,12 @@ model FishSpecies {
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  parent   FishSpecies?  @relation("FishSpeciesHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children FishSpecies[] @relation("FishSpeciesHierarchy")
-  lureLinks LureSpecies[]
+  parent          FishSpecies?           @relation("FishSpeciesHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children        FishSpecies[]          @relation("FishSpeciesHierarchy")
+  lureLinks       LureSpecies[]
+  scientificNameRecord SpeciesScientificName?
+  commonNames     SpeciesCommonName[]
+  aliases         SpeciesAlias[]
 
   @@index([parentId])
   @@index([deletedAt])
@@ -349,4 +361,74 @@ model ProductAlias {
   @@index([kind])
   @@index([deletedAt])
   @@map("product_aliases")
+}
+
+// ---------------------------------------------------------------------------
+// Canonical species identity (Sprint Foundation F002)
+// ---------------------------------------------------------------------------
+
+/// Canonical Latin scientific name — exactly one per fish species (007 §7.6).
+model SpeciesScientificName {
+  id              String    @id @default(uuid()) @db.Uuid
+  fishSpeciesId   String    @unique @map("fish_species_id") @db.Uuid
+  name            String    @db.VarChar(256)
+  nameNormalized  String    @unique @map("name_normalized") @db.VarChar(256)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  fishSpecies FishSpecies @relation(fields: [fishSpeciesId], references: [id], onDelete: Cascade)
+
+  @@index([deletedAt])
+  @@map("species_scientific_names")
+}
+
+/// Locale- and country-scoped common name for a fish species.
+model SpeciesCommonName {
+  id              String    @id @default(uuid()) @db.Uuid
+  fishSpeciesId   String    @map("fish_species_id") @db.Uuid
+  locale          String    @db.VarChar(8)
+  countryCode     String?   @map("country_code") @db.Char(2)
+  /// Uniqueness scope: ISO country code or literal `global` when countryCode is null.
+  countryScope    String    @default("global") @map("country_scope") @db.VarChar(8)
+  name            String    @db.VarChar(256)
+  nameNormalized  String    @map("name_normalized") @db.VarChar(256)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  fishSpecies FishSpecies @relation(fields: [fishSpeciesId], references: [id], onDelete: Cascade)
+
+  @@unique([fishSpeciesId, locale, countryScope, nameNormalized])
+  @@index([fishSpeciesId])
+  @@index([locale])
+  @@index([countryCode])
+  @@index([deletedAt])
+  @@map("species_common_names")
+}
+
+/// Alternate search term or synonym for a fish species (misspellings, regional slang).
+model SpeciesAlias {
+  id              String           @id @default(uuid()) @db.Uuid
+  fishSpeciesId   String           @map("fish_species_id") @db.Uuid
+  locale          String           @default("any") @db.VarChar(8)
+  countryCode     String?          @map("country_code") @db.Char(2)
+  /// Uniqueness scope: ISO country code or literal `global` when countryCode is null.
+  countryScope    String           @default("global") @map("country_scope") @db.VarChar(8)
+  alias           String           @db.VarChar(512)
+  aliasNormalized String           @map("alias_normalized") @db.VarChar(512)
+  kind            SpeciesAliasKind @default(SEARCH_TERM)
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime?        @map("deleted_at") @db.Timestamptz(6)
+
+  fishSpecies FishSpecies @relation(fields: [fishSpeciesId], references: [id], onDelete: Cascade)
+
+  @@unique([aliasNormalized, locale, countryScope])
+  @@index([fishSpeciesId])
+  @@index([locale])
+  @@index([countryCode])
+  @@index([kind])
+  @@index([deletedAt])
+  @@map("species_aliases")
 }
