@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Lure placeholder">
+  <rect width="400" height="300" fill="#f4f4f5"/>
+  <ellipse cx="200" cy="150" rx="120" ry="35" fill="#d4d4d8" transform="rotate(-5 200 150)"/>
+  <ellipse cx="200" cy="162" rx="95" ry="18" fill="#e4e4e7" transform="rotate(-5 200 162)"/>
+  <path d="M 95 150 Q 70 142 68 155 Q 72 168 95 162 Z" fill="#a1a1aa"/>
+  <text x="200" y="240" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#71717a">LureAtlas</text>
+</svg>

@@ -8,5 +8,79 @@
     "localeTr": "Türkçe",
     "localeEn": "English",
     "skipToContent": "Skip to content"
+  },
+  "LureDetail": {
+    "pageLandmark": "Lure detail reference page",
+    "breadcrumbLabel": "Breadcrumb",
+    "breadcrumbHome": "Home",
+    "breadcrumbLures": "LureAtlas",
+    "variantLabel": "Variant",
+    "manufacturerSource": "Manufacturer specification",
+    "verification": {
+      "unverified": "Unverified",
+      "partiallyVerified": "Partially verified",
+      "manufacturerVerified": "Manufacturer verified",
+      "moderatorVerified": "Moderator verified",
+      "expertEndorsed": "Expert endorsed",
+      "lastVerified": "Last verified"
+    },
+    "sections": {
+      "specifications": "Specifications",
+      "specificationsDescription": "Factory specifications with manufacturer provenance.",
+      "species": "Recommended species",
+      "speciesDescription": "Curated, marketing, and community-supported target species.",
+      "techniques": "Recommended techniques",
+      "techniquesDescription": "Fishing methods suited to this lure design.",
+      "trolling": "Trolling information",
+      "trollingDescription": "Manufacturer guidance for trolling setups.",
+      "community": "Community statistics",
+      "communityDescription": "Aggregated field evidence from approved contributions.",
+      "aiInsights": "AI insights",
+      "aiInsightsDescription": "AI-assisted summary with required citations.",
+      "related": "Related lures",
+      "relatedDescription": "Similar models for comparison.",
+      "sponsored": "Find retailers",
+      "sponsoredDescription": "Optional sponsored outbound links — user-initiated only.",
+      "history": "Change history",
+      "historyDescription": "Public timeline of meaningful catalog updates."
+    },
+    "specs": {
+      "length": "Length",
+      "weight": "Weight",
+      "divingDepth": "Diving depth",
+      "buoyancy": "Buoyancy",
+      "action": "Action"
+    },
+    "speciesKind": {
+      "curated": "Curated",
+      "marketing": "Marketing",
+      "community": "Community"
+    },
+    "trolling": {
+      "speed": "Trolling speed",
+      "speedUnit": "knots",
+      "leader": "Recommended leader",
+      "mainLine": "Recommended main line"
+    },
+    "community": {
+      "assertions": "Usage assertions",
+      "catchReports": "Verified catch reports",
+      "effectiveness": "Community effectiveness",
+      "bandLow": "Low",
+      "bandModerate": "Moderate",
+      "bandHigh": "High",
+      "bandInsufficient": "Insufficient data",
+      "topRegions": "Top regions",
+      "source": "Derived from community evidence — not manufacturer claims."
+    },
+    "ai": {
+      "assistedLabel": "AI-assisted summary",
+      "citations": "Sources",
+      "corpusDate": "Corpus snapshot"
+    },
+    "sponsored": {
+      "disclaimer": "Sponsored links do not affect discovery ranking. Purchase options appear only when you choose to view retailers.",
+      "findRetailers": "Find retailers"
+    }
   }
 }

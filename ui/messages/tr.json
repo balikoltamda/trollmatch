@@ -8,5 +8,79 @@
     "localeTr": "Türkçe",
     "localeEn": "English",
     "skipToContent": "İçeriğe atla"
+  },
+  "LureDetail": {
+    "pageLandmark": "Yem detay referans sayfası",
+    "breadcrumbLabel": "Konum",
+    "breadcrumbHome": "Ana sayfa",
+    "breadcrumbLures": "LureAtlas",
+    "variantLabel": "Varyant",
+    "manufacturerSource": "Üretici spesifikasyonu",
+    "verification": {
+      "unverified": "Doğrulanmamış",
+      "partiallyVerified": "Kısmen doğrulandı",
+      "manufacturerVerified": "Üretici doğrulandı",
+      "moderatorVerified": "Moderatör doğrulandı",
+      "expertEndorsed": "Uzman onaylı",
+      "lastVerified": "Son doğrulama"
+    },
+    "sections": {
+      "specifications": "Spesifikasyonlar",
+      "specificationsDescription": "Üretici kaynaklı fabrika spesifikasyonları.",
+      "species": "Önerilen türler",
+      "speciesDescription": "Küratörlü, pazarlama ve topluluk destekli hedef türler.",
+      "techniques": "Önerilen teknikler",
+      "techniquesDescription": "Bu yem tasarımına uygun balıkçılık yöntemleri.",
+      "trolling": "Trolling bilgisi",
+      "trollingDescription": "Trolling kurulumları için üretici rehberi.",
+      "community": "Topluluk istatistikleri",
+      "communityDescription": "Onaylı katkılardan türetilmiş saha kanıtları.",
+      "aiInsights": "AI öngörüleri",
+      "aiInsightsDescription": "Zorunlu atıflarla AI destekli özet.",
+      "related": "İlgili yemler",
+      "relatedDescription": "Karşılaştırma için benzer modeller.",
+      "sponsored": "Satıcı bul",
+      "sponsoredDescription": "İsteğe bağlı sponsorlu dış bağlantılar — yalnızca kullanıcı talebiyle.",
+      "history": "Değişiklik geçmişi",
+      "historyDescription": "Anlamlı katalog güncellemelerinin kamu zaman çizelgesi."
+    },
+    "specs": {
+      "length": "Uzunluk",
+      "weight": "Ağırlık",
+      "divingDepth": "Dalış derinliği",
+      "buoyancy": "Flotasyon",
+      "action": "Aksiyon"
+    },
+    "speciesKind": {
+      "curated": "Küratörlü",
+      "marketing": "Pazarlama",
+      "community": "Topluluk"
+    },
+    "trolling": {
+      "speed": "Trolling hızı",
+      "speedUnit": "knot",
+      "leader": "Önerilen leader",
+      "mainLine": "Önerilen ana misina"
+    },
+    "community": {
+      "assertions": "Kullanım iddiaları",
+      "catchReports": "Doğrulanmış av raporları",
+      "effectiveness": "Topluluk etkinliği",
+      "bandLow": "Düşük",
+      "bandModerate": "Orta",
+      "bandHigh": "Yüksek",
+      "bandInsufficient": "Yetersiz veri",
+      "topRegions": "Öne çıkan bölgeler",
+      "source": "Topluluk kanıtından türetilmiştir — üretici iddiası değildir."
+    },
+    "ai": {
+      "assistedLabel": "AI destekli özet",
+      "citations": "Kaynaklar",
+      "corpusDate": "Corpus anlık görüntüsü"
+    },
+    "sponsored": {
+      "disclaimer": "Sponsorlu bağlantılar keşif sıralamasını etkilemez. Satın alma seçenekleri yalnızca satıcıları görüntülemeyi seçtiğinizde gösterilir.",
+      "findRetailers": "Satıcı bul"
+    }
   }
 }
