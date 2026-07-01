@@ -15,11 +15,17 @@ ui/dist
 
 # Environment
 .env
-.env.*
+.env.local
+.env.*.local
 !.env.example
+!.env.development
+!.env.production
 ui/.env
-ui/.env.*
+ui/.env.local
+ui/.env.*.local
 !ui/.env.example
+!ui/.env.development
+!ui/.env.production
 
 # Prisma generated client (built in CI/Docker)
 ui/src/generated

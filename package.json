@@ -11,8 +11,13 @@
     "lint": "npm run lint --workspace=ui",
     "format": "npm run format --workspace=ui",
     "format:check": "npm run format:check --workspace=ui",
+    "db:up": "docker compose up postgres -d --wait",
+    "db:down": "docker compose stop postgres",
     "db:generate": "npm run db:generate --workspace=ui",
     "db:migrate": "npm run db:migrate --workspace=ui",
-    "db:push": "npm run db:push --workspace=ui"
+    "db:migrate:dev": "npm run db:migrate:dev --workspace=ui",
+    "db:push": "npm run db:push --workspace=ui",
+    "db:check": "npm run db:check --workspace=ui",
+    "db:status": "npm run db:status --workspace=ui"
   }
 }

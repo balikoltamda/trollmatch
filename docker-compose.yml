@@ -1,3 +1,5 @@
+name: trollmatch
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -23,6 +25,7 @@ services:
       start_period: 10s
 
   ui:
+    profiles: ["full"]
     build:
       context: .
       dockerfile: ui/Dockerfile
