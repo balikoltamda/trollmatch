@@ -82,5 +82,35 @@
       "disclaimer": "Sponsorlu bağlantılar keşif sıralamasını etkilemez. Satın alma seçenekleri yalnızca satıcıları görüntülemeyi seçtiğinizde gösterilir.",
       "findRetailers": "Satıcı bul"
     }
+  },
+  "AddLure": {
+    "pageLandmark": "Yem ekleme formu",
+    "eyebrow": "Katkı",
+    "title": "Yem ekle",
+    "description": "Kataloga yeni bir yem kaydı oluşturun. Bu sürüm yalnızca arayüz önizlemesidir — kaydetme henüz etkin değildir.",
+    "save": "Kaydet",
+    "saveDisabledHint": "Kaydetme, API entegrasyonu tamamlandığında etkinleştirilecek.",
+    "sections": {
+      "identity": "Yem kimliği",
+      "identityDescription": "Üretici, model, varyant ve renk bilgilerini seçin."
+    },
+    "fields": {
+      "imageTitle": "Görsel",
+      "imageDescription": "Görseli sürükleyip bırakın",
+      "imageHint": "Yalnızca arayüz önizlemesi — yükleme henüz etkin değil.",
+      "manufacturer": "Üretici",
+      "model": "Model",
+      "variant": "Varyant",
+      "color": "Renk",
+      "placeholder": "Ara veya seç…",
+      "emptyMessage": "Eşleşen sonuç yok"
+    },
+    "preview": {
+      "title": "Önizleme",
+      "emptyTitle": "Henüz seçim yok",
+      "emptyDescription": "Formu doldurdukça yem kartı burada görünecek.",
+      "imagePlaceholder": "Görsel önizlemesi",
+      "notSelected": "Seçilmedi"
+    }
   }
 }

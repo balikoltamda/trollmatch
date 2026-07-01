@@ -82,5 +82,35 @@
       "disclaimer": "Sponsored links do not affect discovery ranking. Purchase options appear only when you choose to view retailers.",
       "findRetailers": "Find retailers"
     }
+  },
+  "AddLure": {
+    "pageLandmark": "Add lure form",
+    "eyebrow": "Contribute",
+    "title": "Add lure",
+    "description": "Create a new lure catalog entry. This release is UI-only — saving is not enabled yet.",
+    "save": "Save",
+    "saveDisabledHint": "Saving will be enabled once API integration is complete.",
+    "sections": {
+      "identity": "Lure identity",
+      "identityDescription": "Select manufacturer, model, variant, and color."
+    },
+    "fields": {
+      "imageTitle": "Image",
+      "imageDescription": "Drag and drop an image",
+      "imageHint": "UI preview only — upload is not enabled yet.",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "variant": "Variant",
+      "color": "Color",
+      "placeholder": "Search or select…",
+      "emptyMessage": "No matching results"
+    },
+    "preview": {
+      "title": "Preview",
+      "emptyTitle": "Nothing selected yet",
+      "emptyDescription": "Your lure card will appear here as you fill in the form.",
+      "imagePlaceholder": "Image preview",
+      "notSelected": "Not selected"
+    }
   }
 }

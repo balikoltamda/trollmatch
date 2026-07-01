@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Refactor Sprint R001** — **Complete**
+**Sprint S003** — **Complete**
 
-UI source reorganized from `features/` to a modular layout: lure code under `src/modules/lure`, placeholder modules for species/technique/manufacturer, and cross-cutting `src/shared/` folders (db, ai, auth, seo, utils, types). Imports updated; behavior unchanged.
+First Add Lure page at `/[locale]/add-lure`: mobile-first layout, drag-and-drop image zone (UI only), cascading manufacturer/model/variant/color autocompletes with mock data, live preview card, disabled save button. No API, upload, or AI.
 
 ---
 
@@ -38,7 +38,8 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint 2.2** | `e03a121`, `d45c8fe` | Lure domain model doc, PostgreSQL dev wiring, env layout, `db:check` script, security fix for tracked env files |
 | **Sprint Foundation F001** | `149de4c` | Canonical product identity: `Color`, `ColorAlias`, `ProductAlias`; variant → color FK |
 | **Sprint Foundation F002** | `294a9f4` | Canonical species identity: `SpeciesScientificName`, `SpeciesCommonName`, `SpeciesAlias` |
-| **Refactor Sprint R001** | *(uncommitted)* | Move `src/features/lures` → `src/modules/lure`; add empty `species`, `technique`, `manufacturer` modules; scaffold `src/shared/{db,ai,auth,seo,utils,types}` |
+| **Refactor Sprint R001** | `d07f17d` | Move `src/features/lures` → `src/modules/lure`; add empty `species`, `technique`, `manufacturer` modules; scaffold `src/shared/{db,ai,auth,seo,utils,types}` |
+| **Sprint S003** | *(uncommitted)* | Add Lure page (`/[locale]/add-lure`) — form UI with mock autocompletes, image drop zone, preview card, disabled save |
 
 ---
 
@@ -54,22 +55,23 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `294a9f4` |
-| **Message** | Sprint Foundation - Canonical Species Identity |
-| **Date** | 2026-07-01 16:43:28 +0300 |
+| **Hash** | `d07f17d` |
+| **Message** | refactor(core): modular project structure |
+| **Date** | 2026-06-30 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint 3 — Platform kernel OR LureAtlas catalog ingestion** (product owner to prioritize)
+**Sprint 4 — Platform kernel OR catalog ingestion** (product owner to prioritize)
 
 Recommended sequence per `005_BACKLOG.md`:
 
 1. **Phase A remainder (P0):** BL-003–BL-011 — migrations CI proof, platform user/claims/outbox tables, taxonomy seeds (500 species, core techniques)
 2. **Phase B start:** BL-020–BL-026 — complete LureAtlas schema alignment with `007`, Knowledge Claims, ingestion pipeline
+3. **Wire Add Lure form** — connect S003 UI to API when catalog write path exists
 
-Parallel UI track (when API exists): wire lure detail page to real data (BL-042).
+Parallel UI track: wire lure detail page to real data (BL-042).
 
 ---
 
@@ -127,7 +129,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
 | Path | Status | Notes |
 |------|--------|-------|
-| `modules/lure/` | **Active** | Lure detail components, services, repositories, types, mock data (was `features/lures/`) |
+| `modules/lure/` | **Active** | Lure detail + Add Lure form (`components/add-lure/`), services, repositories, types, mock data |
 | `modules/species/` | **Placeholder** | Empty — future SpeciesCompass module |
 | `modules/technique/` | **Placeholder** | Empty — future TechniqueLibrary module |
 | `modules/manufacturer/` | **Placeholder** | Empty — future manufacturer module |
@@ -159,8 +161,9 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 | App shell, header, footer, locale switcher | Done |
 | Home route (empty) | Done |
 | Lure detail page | Done — **mock data only** |
+| Add Lure page | Done — **UI only** (`/[locale]/add-lure`); save disabled, mock autocompletes |
 | Browse / search / compare | Not started |
-| Auth / contributor flows | Not started |
+| Auth / contributor flows | Not started (Add Lure UI precedes auth gate) |
 
 ### API & integrations
 
@@ -189,7 +192,7 @@ Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 |------|----------|
 | G1 — Trustworthy lure reference | Early — schema + 1 mock UI page; 0 curated records |
 | G2 — Bilingual experience | UI i18n framework done; content mostly mock |
-| G3 — Community contribution | Not started |
+| G3 — Community contribution | Early — Add Lure form UI (no submit yet) |
 | G4 — Data provenance | Documented; not in runtime |
 | G5 — Modular foundation | Partial — `ui/src/modules/` layout in place; api/root shared/database pending |
 
