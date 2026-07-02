@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Sprint S015 — DUEL Mapper** — **Complete**
+**Sprint S016 — Platform Canonical Validator** — **Complete**
 
-`ui/src/modules/import/providers/duel/duel-mapper.ts` — maps `DuelParsedProduct` → `CanonicalLureImport` with normalized length, weight, diving depth, buoyancy, technique tags, colors, images, and product codes. Parser delegates mapping; no Prisma, UI, or import framework changes.
+`ui/src/modules/import/validators/canonical-lure-validator.ts` — validates `CanonicalLureImport` records (required manufacturer, model name, variants, length, weight, lure type, buoyancy, images; optional diving depth, technique, colors, UV, glow, trolling speed, product code). Returns errors, warnings, and normalized result. No database, UI, Prisma, parser, or mapper changes.
 
 ---
 
@@ -51,7 +51,8 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint S012** | `9bb48a8` | `docs/connectors/DUEL_FETCHER_REPORT.md` — snapshot field verification |
 | **Sprint S013** | `d96e48d` | DUEL HTML parser — snapshots → `CanonicalLureImport`; `npm run import:duel:parse` |
 | **Sprint S014** | `248319c` | Manufacturer lifecycle schema + `docs/domain/MANUFACTURER_LIFECYCLE.md` — policy only, no runtime logic |
-| **Sprint S015** | *(uncommitted)* | DUEL mapper — parsed product → normalized `CanonicalLureImport`; `duel-mapper.ts` |
+| **Sprint S015** | `9f2c161` | DUEL mapper — parsed product → normalized `CanonicalLureImport`; `duel-mapper.ts` |
+| **Sprint S016** | *(uncommitted)* | Platform canonical validator — `canonical-lure-validator.ts`; errors, warnings, normalized result |
 
 \* S010 spec landed in repo with S011 fetcher commit `c4f04dd` (combined push).
 
@@ -69,19 +70,19 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `248319c` |
-| **Message** | feat(domain): manufacturer lifecycle model |
+| **Hash** | `9f2c161` |
+| **Message** | feat(import): duel mapper |
 | **Date** | 2026-07-02 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint S016 — DUEL provider wiring or lifecycle reconciler** (product owner to prioritize)
+**Sprint S017 — DUEL provider wiring or lifecycle reconciler** (product owner to prioritize)
 
 Recommended sequence:
 
-1. **Wire DUEL parser + mapper to `ManufacturerImportProvider`** — validate + optional persist for `pid=1332`
+1. **Wire DUEL parser + mapper + validator to `ManufacturerImportProvider`** — validate + optional persist for `pid=1332`
 2. **`IngestionBatch` table + batch completion hook** — per `MANUFACTURER_LIFECYCLE.md` §9
 3. **Lifecycle reconciler job** — observed-key set → `ACTIVE` / `MISSING` / `DISCONTINUED` transitions
 4. **JP snapshot fetch** — JAN/UPC rows from `detail.php` (per fetcher report)
@@ -131,6 +132,7 @@ Recommended sequence:
 | Manufacturer feed lifecycle on `lure_models`; importers never delete catalog rows | S014 | Active — schema + `docs/domain/MANUFACTURER_LIFECYCLE.md`; reconciler not implemented |
 | `ManufacturerProductStatus` separate from editorial `ContentLifecycleState` | S014 | Active — `ACTIVE` / `MISSING` / `DISCONTINUED` / `UNKNOWN` |
 | DUEL mapper normalizes parse output to `CanonicalLureImport` | S015 | Active — `duel-mapper.ts`; parser delegates; no persistence |
+| Platform canonical validator enforces publish requirements on DTO | S016 | Active — `canonical-lure-validator.ts`; errors + warnings + normalized result |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
