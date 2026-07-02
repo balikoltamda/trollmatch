@@ -1,11 +1,11 @@
-import { mockLureRepository } from "@/modules/lure/repositories/mock-lure-repository";
+import { prismaLureRepository } from "@/modules/lure/repositories/prisma-lure-repository";
 import type { LureRepository } from "@/modules/lure/repositories/lure-repository";
 import type {
   LureDetail,
   LureDetailParams,
 } from "@/modules/lure/types/lure-detail";
 
-const defaultRepository: LureRepository = mockLureRepository;
+const defaultRepository: LureRepository = prismaLureRepository;
 
 export async function getLureDetail(
   params: LureDetailParams,

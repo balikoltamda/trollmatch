@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Sprint S008 — Manufacturer Registry** — **Complete**
+**Sprint S009 — Prisma lure repository** — **Complete**
 
-Declarative manufacturer registry at `manufacturer-registry/` — YAML configs for Halco, Rapala, Yo-Zuri, Maria, Shimano (sources, connectors, trust scores). Configuration only; no importer code.
+Lure detail page reads catalog data from PostgreSQL via `PrismaLureRepository`. Mock-only sections (trolling, community stats, AI insights, etc.) isolated in `lure-detail-enrichment.ts` behind the repository boundary.
 
 ---
 
@@ -21,9 +21,9 @@ Declarative manufacturer registry at `manufacturer-registry/` — YAML configs f
 
 **Phase 1 — Platform Foundation** (roadmap §4, `009_ROADMAP.md`)
 
-Partially complete: monorepo shell, UI app, PostgreSQL schema slice, Docker Compose, domain documentation. Not started: full platform kernel (users, claims, outbox), auth, taxonomy seeds, API server.
+Partially complete: monorepo shell, UI app, PostgreSQL schema slice, Docker Compose, domain documentation, DB-backed lure detail. Not started: full platform kernel (users, claims, outbox), auth, taxonomy seeds, API server.
 
-Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalog tables, lure detail UI with mock data, domain model docs).
+Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalog tables, lure detail UI, domain model docs, end-to-end import).
 
 ---
 
@@ -44,7 +44,8 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint S005** | `679bdcd` | `CanonicalLureImport` DTO — canonical import contract for all manufacturer mappers |
 | **Sprint S006** | `b8d1576` | Demo importer — static JSON → `CanonicalLureImport`; `npm run import:demo` |
 | **Sprint S007** | `65e6302` | End-to-end import — JSON → canonical → Prisma (transactional, dedupe); `npm run import:run` |
-| **Sprint S008** | *(uncommitted)* | Manufacturer registry YAML configs (`manufacturer-registry/*.yaml`) |
+| **Sprint S008** | `20777cc` | Manufacturer registry YAML configs (`manufacturer-registry/*.yaml`) |
+| **Sprint S009** | *(uncommitted)* | `PrismaLureRepository` — lure detail reads from PostgreSQL; enrichment data isolated for non-catalog UI sections |
 
 ---
 
@@ -60,22 +61,21 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `65e6302` |
-| **Message** | feat(import): first end-to-end import |
+| **Hash** | `20777cc` |
+| **Message** | feat(import): manufacturer registry |
 | **Date** | 2026-06-30 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint S009 — First real manufacturer importer** (product owner to prioritize)
+**Sprint S010 — First real manufacturer importer** (product owner to prioritize)
 
 Recommended sequence:
 
 1. **Halco provider** — wire `manufacturer-registry/halco.yaml` → static feed → `CanonicalLureImport`
 2. **Ingestion Batch record** — audit trail per 007 §15.1
-3. **Wire lure detail page** — read imported Halco Laser Pro from DB (BL-042)
-4. **Phase A remainder (P0):** BL-003–BL-011 — platform kernel tables, taxonomy seeds
+3. **Phase A remainder (P0):** BL-003–BL-011 — platform kernel tables, taxonomy seeds
 
 ---
 
@@ -83,7 +83,7 @@ Recommended sequence:
 
 | Blocker | Impact | Mitigation |
 |---------|--------|------------|
-| **`api/` not initialized** | No REST layer; UI uses mock repository only | BL-001; Fastify scaffold per `008_TECH_STACK.md` |
+| **`api/` not initialized** | No REST layer; UI reads DB via repository in Next.js server components | BL-001; Fastify scaffold per `008_TECH_STACK.md` |
 | **Root `shared/` empty** | Monorepo-level Zod types not yet extracted | BL-001; `ui/src/shared/` scaffolded in R001 |
 | **Platform kernel tables missing** | No Knowledge Claim, Provenance, User, Outbox | BL-004–BL-009 |
 | **No taxonomy seed data** | Catalog and filters cannot be populated | BL-010, BL-011 |
@@ -114,6 +114,7 @@ Recommended sequence:
 | `CanonicalLureImport` as universal mapper target | S005 | Active |
 | Demo importer proves parse → validate → canonical map pipeline | S006 | Active |
 | Manufacturer registry YAML drives future connector selection | S008 | Active — config only |
+| Lure detail reads catalog from PostgreSQL via `PrismaLureRepository` | S009 | Active — enrichment for non-schema UI sections |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
@@ -181,7 +182,7 @@ These are frozen.
 | Path | Status | Notes |
 |------|--------|-------|
 | `docs/` | **Rich** | Charter, architecture, backlog, domain model, UI specs |
-| `ui/` | **Active** | Next.js 15, App Router, i18n, modular `src/modules/`, `src/shared/`, lure detail (mock), Prisma client |
+| `ui/` | **Active** | Next.js 15, App Router, i18n, modular `src/modules/`, `src/shared/`, lure detail (PostgreSQL), Prisma client |
 | `api/` | **Empty** | Planned Fastify REST + workers |
 | `shared/` (repo root) | **Empty** | Planned monorepo-wide Zod schemas + domain types |
 | `database/` | **Empty** | Migrations live in `ui/prisma/` today |
@@ -194,7 +195,7 @@ These are frozen.
 | Path | Status | Notes |
 |------|--------|-------|
 | `modules/import/` | **Active** | Framework + canonical DTO + demo provider + `persistence/` Prisma adapter |
-| `modules/lure/` | **Active** | Lure detail + Add Lure form (`components/add-lure/`), services, repositories, types, mock data |
+| `modules/lure/` | **Active** | Lure detail (DB-backed) + Add Lure form (`components/add-lure/`), services, repositories, types, enrichment data |
 | `modules/species/` | **Placeholder** | Empty — future SpeciesCompass module |
 | `modules/technique/` | **Placeholder** | Empty — future TechniqueLibrary module |
 | `modules/manufacturer/` | **Placeholder** | Empty — future manufacturer module |
@@ -225,7 +226,7 @@ These are frozen.
 |------------|--------|
 | App shell, header, footer, locale switcher | Done |
 | Home route (empty) | Done |
-| Lure detail page | Done — **mock data only** |
+| Lure detail page | Done — **PostgreSQL via `PrismaLureRepository`** (run `npm run import:run` first; slug `laser-pro-190-dd`) |
 | Add Lure page | Done — **UI only** (`/[locale]/add-lure`); save disabled, mock autocompletes |
 | Import pipeline | Done — `import:demo` (dry run JSON); `import:run` (persist to Postgres) |
 | Browse / search / compare | Not started |
@@ -256,8 +257,8 @@ These are frozen.
 
 | Goal | Progress |
 |------|----------|
-| G1 — Trustworthy lure reference | Early — end-to-end import to Postgres proven; lure detail still mock |
-| G2 — Bilingual experience | UI i18n framework done; content mostly mock |
+| G1 — Trustworthy lure reference | Early — end-to-end import + DB-backed lure detail for imported catalog |
+| G2 — Bilingual experience | UI i18n framework done; catalog fields bilingual in DB; enrichment/mock sections for non-schema UI |
 | G3 — Community contribution | Early — Add Lure form UI (no submit yet) |
 | G4 — Data provenance | Documented; not in runtime |
 | G5 — Modular foundation | Partial — `ui/src/modules/` layout in place; api/root shared/database pending |
