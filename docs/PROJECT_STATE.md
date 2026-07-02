@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Sprint S011 — DUEL Fetcher** — **Complete**
+**Sprint S013 — DUEL HTML Parser** — **Complete**
 
-Raw HTML snapshot fetcher at `ui/src/modules/import/providers/duel/` — downloads one product page and one category page from `duel.co.jp`, saves under `research/manufacturers/duel/snapshots/{timestamp}/`. No parsing, mapping, validation, or import.
+Cheerio-based parser at `ui/src/modules/import/providers/duel/duel-parser.ts` — reads HTML snapshots, outputs `CanonicalLureImport`. CLI: `npm run import:duel:parse`. No persistence or Prisma writes.
 
 ---
 
@@ -46,8 +46,12 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint S007** | `65e6302` | End-to-end import — JSON → canonical → Prisma (transactional, dedupe); `npm run import:run` |
 | **Sprint S008** | `20777cc` | Manufacturer registry YAML configs (`manufacturer-registry/*.yaml`) |
 | **Sprint S009** | `233edf1` | `PrismaLureRepository` — lure detail reads from PostgreSQL; enrichment data isolated for non-catalog UI sections |
-| **Sprint S010** | *(uncommitted)* | `docs/connectors/DUEL_CONNECTOR.md` — DUEL manufacturer connector specification (no implementation) |
-| **Sprint S011** | *(uncommitted)* | DUEL fetcher — raw HTML snapshots to `research/manufacturers/duel/snapshots/`; `npm run import:duel:fetch` |
+| **Sprint S010** | `9bb48a8`* | `docs/connectors/DUEL_CONNECTOR.md` — DUEL manufacturer connector specification |
+| **Sprint S011** | `c4f04dd` | DUEL fetcher — raw HTML snapshots; `npm run import:duel:fetch` |
+| **Sprint S012** | `9bb48a8` | `docs/connectors/DUEL_FETCHER_REPORT.md` — snapshot field verification |
+| **Sprint S013** | *(uncommitted)* | DUEL HTML parser — snapshots → `CanonicalLureImport`; `npm run import:duel:parse` |
+
+\* S010 spec landed in repo with S011 fetcher commit `c4f04dd` (combined push).
 
 ---
 
@@ -63,23 +67,23 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `233edf1` |
-| **Message** | feat(repository): prisma lure repository |
+| **Hash** | `9bb48a8` |
+| **Message** | docs(import): duel fetcher verification |
 | **Date** | 2026-07-02 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint S012 — DUEL HTML parser or Halco provider** (product owner to prioritize)
+**Sprint S014 — DUEL import pipeline or Halco provider** (product owner to prioritize)
 
 Recommended sequence:
 
-1. **DUEL parser** — parse saved snapshots → structured JSON evidence (no import yet)
-2. **Add `manufacturer-registry/duel.yaml`** — wire registry entry from S010 spec
-3. **Halco provider** — wire `manufacturer-registry/halco.yaml` → static feed → `CanonicalLureImport`
-4. **Ingestion Batch record** — audit trail per 007 §15.1
-5. **Phase A remainder (P0):** BL-003–BL-011 — platform kernel tables, taxonomy seeds
+1. **Wire DUEL parser to `ManufacturerImportProvider`** — validate + optional persist for `pid=1332`
+2. **JP snapshot fetch** — JAN/UPC rows from `detail.php` (per fetcher report)
+3. **Add `manufacturer-registry/duel.yaml`**
+4. **Halco provider** — static feed → `CanonicalLureImport`
+5. **Ingestion Batch record** — audit trail per 007 §15.1
 
 ---
 
@@ -120,7 +124,8 @@ Recommended sequence:
 | Manufacturer registry YAML drives future connector selection | S008 | Active — config only |
 | Lure detail reads catalog from PostgreSQL via `PrismaLureRepository` | S009 | Active — enrichment for non-schema UI sections |
 | DUEL connector spec drives future `duel` provider | S010 | Active — `docs/connectors/DUEL_CONNECTOR.md`; no code |
-| DUEL fetcher saves raw HTML snapshots only | S011 | Active — `import:duel:fetch`; no parser yet |
+| DUEL fetcher saves raw HTML snapshots only | S011 | Active — `import:duel:fetch` |
+| DUEL parser maps snapshots → `CanonicalLureImport` | S013 | Active — `import:duel:parse`; no persistence |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
@@ -200,7 +205,7 @@ These are frozen.
 
 | Path | Status | Notes |
 |------|--------|-------|
-| `modules/import/` | **Active** | Framework + canonical DTO + demo provider + `persistence/` + DUEL fetcher |
+| `modules/import/` | **Active** | Framework + demo provider + persistence + DUEL fetcher/parser |
 | `modules/lure/` | **Active** | Lure detail (DB-backed) + Add Lure form (`components/add-lure/`), services, repositories, types, enrichment data |
 | `modules/species/` | **Placeholder** | Empty — future SpeciesCompass module |
 | `modules/technique/` | **Placeholder** | Empty — future TechniqueLibrary module |
@@ -234,7 +239,7 @@ These are frozen.
 | Home route (empty) | Done |
 | Lure detail page | Done — **PostgreSQL via `PrismaLureRepository`** (run `npm run import:run` first; slug `laser-pro-190-dd`) |
 | Add Lure page | Done — **UI only** (`/[locale]/add-lure`); save disabled, mock autocompletes |
-| Import pipeline | Done — `import:demo` (dry run JSON); `import:run` (persist to Postgres) |
+| Import pipeline | Done — `import:demo`; `import:run` (persist); `import:duel:fetch` + `import:duel:parse` (DUEL snapshots → canonical JSON, no DB) |
 | Browse / search / compare | Not started |
 | Auth / contributor flows | Not started (Add Lure UI precedes auth gate) |
 
