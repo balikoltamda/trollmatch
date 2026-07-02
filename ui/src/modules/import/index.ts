@@ -15,3 +15,5 @@ export * from "./validators";
 export * from "./mappers";
 export * from "./jobs";
 export * from "./providers";
+export * from "./registry";
+export * from "./persistence";
