@@ -51,7 +51,7 @@ trollmatch/
   package.json         # npm workspaces root
 ```
 
-**Package manager:** npm workspaces (pnpm acceptable via ADR amendment if team prefers).
+**Package manager:** npm workspaces (pnpm acceptable via ADR amendment if team prefers). See `012_CROSS_PLATFORM_DEPENDENCIES.md` for lockfile regeneration on Windows → Linux deploys.
 
 ---
 

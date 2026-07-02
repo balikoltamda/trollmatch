@@ -1,6 +1,15 @@
 {
   "name": "trollmatch",
   "private": true,
+  "os": [
+    "linux",
+    "darwin",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
   "workspaces": [
     "ui"
   ],
