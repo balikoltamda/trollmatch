@@ -3,17 +3,6 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as cheerio from "cheerio";
 import type {
-  CanonicalBuoyancy,
-  CanonicalColor,
-  CanonicalDivingDepth,
-  CanonicalHookConfiguration,
-  CanonicalImage,
-  CanonicalLureImport,
-  CanonicalLureVariant,
-  CanonicalLocalizedText,
-  CanonicalTag,
-} from "../../core/canonical-lure";
-import type {
   DuelParsedBreadcrumb,
   DuelParsedCategory,
   DuelParsedColor,
@@ -22,11 +11,10 @@ import type {
   DuelParserOptions,
   DuelParserResult,
 } from "./parser.types";
+import { mapDuelProductToCanonical } from "./duel-mapper";
 import {
   DUEL_DEFAULT_CATEGORY_SOURCE_URL,
   DUEL_DEFAULT_PRODUCT_SOURCE_URL,
-  DUEL_PARSER_PROVIDER_CODE,
-  DUEL_PARSER_SCHEMA_VERSION,
   DUEL_SITE_ORIGIN,
   DUEL_SNAPSHOT_CATEGORY_FILENAME,
   DUEL_SNAPSHOT_PRODUCT_FILENAME,
@@ -41,19 +29,6 @@ const DEFAULT_SNAPSHOT_ROOT = join(
   "duel",
   "snapshots",
 );
-
-function slugify(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function localized(en: string): CanonicalLocalizedText {
-  const trimmed = en.trim();
-  return trimmed ? { en: trimmed, default: trimmed } : {};
-}
 
 function resolveAbsoluteUrl(url: string | undefined): string | undefined {
   if (!url?.trim()) {
@@ -79,15 +54,6 @@ function extractPidFromUrl(url: string): string | undefined {
   try {
     const parsed = new URL(url);
     return parsed.searchParams.get("pid") ?? undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-function extractCategoryIdFromUrl(url: string): string | undefined {
-  try {
-    const parsed = new URL(url);
-    return parsed.searchParams.get("category") ?? undefined;
   } catch {
     return undefined;
   }
@@ -434,235 +400,6 @@ export function parseDuelCategoryHtml(
     categoryName,
     breadcrumbs,
     products,
-  };
-}
-
-function buildBuoyancy(typeLabel: string): CanonicalBuoyancy | undefined {
-  const normalized = typeLabel.trim().toLowerCase();
-  if (!normalized) {
-    return undefined;
-  }
-
-  return {
-    slug: normalized.replace(/\s+/g, "-"),
-    manufacturerTerm: typeLabel.trim(),
-    label: localized(typeLabel.trim()),
-  };
-}
-
-function buildDivingDepthFromSpec(row: DuelParsedSpecRow): CanonicalDivingDepth | undefined {
-  if (row.divingDepthCm === undefined) {
-    return undefined;
-  }
-
-  const meters = row.divingDepthCm / 100;
-
-  return {
-    minMeters: meters,
-    maxMeters: meters,
-    manufacturerLabel: localized(row.rangeLabel ?? ""),
-  };
-}
-
-function buildHookConfig(row: DuelParsedSpecRow): CanonicalHookConfiguration | undefined {
-  if (!row.hook && !row.ring) {
-    return undefined;
-  }
-
-  return {
-    hookSize: row.hook,
-    configuration: row.ring ? `Ring ${row.ring}` : undefined,
-    factoryDefault: true,
-  };
-}
-
-function toCanonicalColor(color: DuelParsedColor): CanonicalColor {
-  const aliases = color.tags.map((tag) => ({
-    kind: "marketing_name",
-    value: tag,
-    locale: "en",
-  }));
-
-  return {
-    code: color.code,
-    name: localized(color.name || color.code),
-    aliases: aliases.length > 0 ? aliases : undefined,
-  };
-}
-
-function buildCategoryTags(categories: string[]): CanonicalTag[] {
-  return categories.map((category) => ({
-    kind: "search",
-    value: slugify(category),
-    locale: "en" as const,
-  }));
-}
-
-/** Map intermediate parse result to {@link CanonicalLureImport}. */
-export function mapDuelProductToCanonical(
-  product: DuelParsedProduct,
-  category?: DuelParsedCategory,
-): CanonicalLureImport {
-  const modelSlug = slugify(product.productName);
-  const productLineSlug = slugify(product.productLineName || product.categories.at(-1) || "duel");
-
-  const modelImages: CanonicalImage[] = [
-    ...product.heroImageUrls.map((url, index) => ({
-      url,
-      role: (index === 0 ? "hero" : "gallery") as CanonicalImage["role"],
-      sortOrder: index,
-    })),
-    ...product.featureImageUrls.map((url, index) => ({
-      url,
-      role: "technical_diagram" as const,
-      sortOrder: product.heroImageUrls.length + index,
-    })),
-  ];
-
-  const modelTags: CanonicalTag[] = [
-    { kind: "marketing", value: product.brand, locale: "en" },
-    ...buildCategoryTags(product.categories),
-    ...product.features.map((feature) => ({
-      kind: "feature" as const,
-      value: feature.title,
-      locale: "en" as const,
-    })),
-  ];
-
-  if (category) {
-    modelTags.push({
-      kind: "search",
-      value: `category:${slugify(category.categoryName)}`,
-      locale: "en",
-    });
-  }
-
-  const specRows = product.specRows.length > 0 ? product.specRows : [{} as DuelParsedSpecRow];
-  const colors = product.colors.length > 0 ? product.colors : [{ code: "default", name: "Default", tags: [] }];
-
-  const variants: CanonicalLureVariant[] = [];
-
-  for (const spec of specRows) {
-    for (const color of colors) {
-      const variantSlug = slugify(
-        `${color.code}-${spec.lengthMm ?? (spec.sizeLabel || "std")}`,
-      );
-      const skuPrefix = spec.catalogNumberPrefix.replace(/-+$/, "");
-      const manufacturerSku =
-        skuPrefix && color.code ? `${skuPrefix}${color.code}` : undefined;
-
-      const janEntry = product.janSku.find(
-        (entry) =>
-          entry.colorCode?.toUpperCase() === color.code.toUpperCase() ||
-          entry.catalogNumber.startsWith(skuPrefix),
-      );
-
-      const variantImages: CanonicalImage[] = [];
-      if (color.imageUrl) {
-        variantImages.push({
-          url: color.imageUrl,
-          role: "product",
-          colorCode: color.code,
-          alt: localized(color.name),
-        });
-      }
-
-      const hook = buildHookConfig(spec);
-
-      variants.push({
-        slug: variantSlug,
-        name: localized(
-          [spec.sizeLabel, color.name].filter(Boolean).join(" · ") || product.productName,
-        ),
-        sku: manufacturerSku,
-        colors: [toCanonicalColor(color)],
-        sizes: spec.lengthMm ? [{ lengthMm: spec.lengthMm, label: localized(spec.sizeLabel) }] : undefined,
-        weights: spec.weightG ? [{ weightG: spec.weightG }] : undefined,
-        divingDepth: buildDivingDepthFromSpec(spec),
-        buoyancy: spec.type ? buildBuoyancy(spec.type) : undefined,
-        hooks: hook ? [hook] : undefined,
-        images: variantImages.length > 0 ? variantImages : undefined,
-        externalIdentifiers: [
-          ...(manufacturerSku
-            ? [{ scheme: "manufacturer_sku" as const, value: manufacturerSku }]
-            : []),
-          ...(janEntry
-            ? [{ scheme: (janEntry.value.length === 12 ? "upc" : "ean") as "upc" | "ean", value: janEntry.value }]
-            : []),
-        ],
-        tags: color.tags.map((tag) => ({
-          kind: "marketing" as const,
-          value: tag,
-          locale: "en" as const,
-        })),
-      });
-    }
-  }
-
-  const primarySpec = product.specRows[0];
-
-  return {
-    recordKey: `duel:pid:${product.pid}`,
-    manufacturer: {
-      slug: "duel",
-      name: localized(product.manufacturerName),
-      countryCode: "JP",
-      website: DUEL_SITE_ORIGIN,
-    },
-    productLine: {
-      slug: productLineSlug,
-      name: localized(product.productLineName || category?.categoryName || "DUEL"),
-    },
-    model: {
-      slug: modelSlug,
-      name: localized(product.productName),
-      modelCode: product.productCodes[0]?.replace(/-+$/, "") || undefined,
-      description: localized(product.description),
-      formFactorTerm: product.productLineName || undefined,
-      sizes: product.specRows
-        .filter((row) => row.lengthMm)
-        .map((row) => ({ lengthMm: row.lengthMm, label: localized(row.sizeLabel) })),
-      weights: product.specRows
-        .filter((row) => row.weightG)
-        .map((row) => ({ weightG: row.weightG })),
-      divingDepth: primarySpec ? buildDivingDepthFromSpec(primarySpec) : undefined,
-      buoyancy: primarySpec?.type ? buildBuoyancy(primarySpec.type) : undefined,
-      hooks: product.specRows
-        .map((row) => buildHookConfig(row))
-        .filter((hook): hook is CanonicalHookConfiguration => Boolean(hook)),
-      images: modelImages,
-      tags: modelTags,
-      externalIdentifiers: product.productCodes[0]
-        ? [{ scheme: "manufacturer_sku", value: product.productCodes[0] }]
-        : undefined,
-    },
-    variants,
-    source: {
-      url: product.sourceUrl,
-      type: "website_scrape",
-      documentTitle: product.productName,
-      retrievedAt: new Date().toISOString(),
-    },
-    metadata: {
-      providerCode: DUEL_PARSER_PROVIDER_CODE,
-      providerSchemaVersion: DUEL_PARSER_SCHEMA_VERSION,
-      idempotencyKey: `duel:pid:${product.pid}`,
-      sourceRecordId: product.pid,
-      extras: {
-        brand: product.brand,
-        locale: product.locale,
-        breadcrumbs: product.breadcrumbs,
-        categories: product.categories,
-        categoryId: extractCategoryIdFromUrl(category?.sourceUrl ?? ""),
-        availableSizes: product.availableSizes,
-        availableColors: product.availableColors,
-        specifications: product.specRows,
-        featureBlocks: product.features,
-        categoryListing: category?.products ?? [],
-        janSkuMissing: product.janSku.length === 0,
-      },
-    },
-    importedAt: new Date().toISOString(),
   };
 }
 

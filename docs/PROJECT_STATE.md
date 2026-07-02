@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Sprint S014 — Manufacturer Product Lifecycle (Design)** — **Complete**
+**Sprint S015 — DUEL Mapper** — **Complete**
 
-Extended `ui/prisma/schema.prisma` with `ManufacturerProductStatus` enum and lifecycle columns on `lure_models` (`firstSeenAt`, `lastSeenAt`, `lastImportedAt`, `missingImportCount`, `manufacturerStatus`). Migration `20250702120000_manufacturer_product_lifecycle`. Domain policy: `docs/domain/MANUFACTURER_LIFECYCLE.md`. No import framework, UI, repository, or route changes; lifecycle runtime logic deferred to S015+.
+`ui/src/modules/import/providers/duel/duel-mapper.ts` — maps `DuelParsedProduct` → `CanonicalLureImport` with normalized length, weight, diving depth, buoyancy, technique tags, colors, images, and product codes. Parser delegates mapping; no Prisma, UI, or import framework changes.
 
 ---
 
@@ -50,7 +50,8 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint S011** | `c4f04dd` | DUEL fetcher — raw HTML snapshots; `npm run import:duel:fetch` |
 | **Sprint S012** | `9bb48a8` | `docs/connectors/DUEL_FETCHER_REPORT.md` — snapshot field verification |
 | **Sprint S013** | `d96e48d` | DUEL HTML parser — snapshots → `CanonicalLureImport`; `npm run import:duel:parse` |
-| **Sprint S014** | *(uncommitted)* | Manufacturer lifecycle schema + `docs/domain/MANUFACTURER_LIFECYCLE.md` — policy only, no runtime logic |
+| **Sprint S014** | `248319c` | Manufacturer lifecycle schema + `docs/domain/MANUFACTURER_LIFECYCLE.md` — policy only, no runtime logic |
+| **Sprint S015** | *(uncommitted)* | DUEL mapper — parsed product → normalized `CanonicalLureImport`; `duel-mapper.ts` |
 
 \* S010 spec landed in repo with S011 fetcher commit `c4f04dd` (combined push).
 
@@ -68,21 +69,21 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `d96e48d` |
-| **Message** | feat(import): duel html parser |
+| **Hash** | `248319c` |
+| **Message** | feat(domain): manufacturer lifecycle model |
 | **Date** | 2026-07-02 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint S015 — Lifecycle reconciler or DUEL persist** (product owner to prioritize)
+**Sprint S016 — DUEL provider wiring or lifecycle reconciler** (product owner to prioritize)
 
 Recommended sequence:
 
-1. **`IngestionBatch` table + batch completion hook** — per `MANUFACTURER_LIFECYCLE.md` §9
-2. **Lifecycle reconciler job** — observed-key set → `ACTIVE` / `MISSING` / `DISCONTINUED` transitions
-3. **Wire DUEL parser to `ManufacturerImportProvider`** — validate + optional persist for `pid=1332`
+1. **Wire DUEL parser + mapper to `ManufacturerImportProvider`** — validate + optional persist for `pid=1332`
+2. **`IngestionBatch` table + batch completion hook** — per `MANUFACTURER_LIFECYCLE.md` §9
+3. **Lifecycle reconciler job** — observed-key set → `ACTIVE` / `MISSING` / `DISCONTINUED` transitions
 4. **JP snapshot fetch** — JAN/UPC rows from `detail.php` (per fetcher report)
 5. **Add `manufacturer-registry/duel.yaml`**
 
@@ -129,6 +130,7 @@ Recommended sequence:
 | DUEL parser maps snapshots → `CanonicalLureImport` | S013 | Active — `import:duel:parse`; no persistence |
 | Manufacturer feed lifecycle on `lure_models`; importers never delete catalog rows | S014 | Active — schema + `docs/domain/MANUFACTURER_LIFECYCLE.md`; reconciler not implemented |
 | `ManufacturerProductStatus` separate from editorial `ContentLifecycleState` | S014 | Active — `ACTIVE` / `MISSING` / `DISCONTINUED` / `UNKNOWN` |
+| DUEL mapper normalizes parse output to `CanonicalLureImport` | S015 | Active — `duel-mapper.ts`; parser delegates; no persistence |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
@@ -208,7 +210,7 @@ These are frozen.
 
 | Path | Status | Notes |
 |------|--------|-------|
-| `modules/import/` | **Active** | Framework + demo provider + persistence + DUEL fetcher/parser |
+| `modules/import/` | **Active** | Framework + demo provider + persistence + DUEL fetcher/parser/mapper |
 | `modules/lure/` | **Active** | Lure detail (DB-backed) + Add Lure form (`components/add-lure/`), services, repositories, types, enrichment data |
 | `modules/species/` | **Placeholder** | Empty — future SpeciesCompass module |
 | `modules/technique/` | **Placeholder** | Empty — future TechniqueLibrary module |
@@ -243,7 +245,7 @@ These are frozen.
 | Home route (empty) | Done |
 | Lure detail page | Done — **PostgreSQL via `PrismaLureRepository`** (run `npm run import:run` first; slug `laser-pro-190-dd`) |
 | Add Lure page | Done — **UI only** (`/[locale]/add-lure`); save disabled, mock autocompletes |
-| Import pipeline | Done — `import:demo`; `import:run` (persist); `import:duel:fetch` + `import:duel:parse` (DUEL snapshots → canonical JSON, no DB) |
+| Import pipeline | Done — `import:demo`; `import:run` (persist); `import:duel:fetch` + `import:duel:parse` (DUEL snapshots → canonical JSON via mapper, no DB) |
 | Browse / search / compare | Not started |
 | Auth / contributor flows | Not started (Add Lure UI precedes auth gate) |
 
