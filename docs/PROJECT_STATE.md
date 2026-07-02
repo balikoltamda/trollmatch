@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Sprint S016 — Platform Canonical Validator** — **Complete**
+**Sprint S017 — First Real DUEL Import** — **Complete**
 
-`ui/src/modules/import/validators/canonical-lure-validator.ts` — validates `CanonicalLureImport` records (required manufacturer, model name, variants, length, weight, lure type, buoyancy, images; optional diving depth, technique, colors, UV, glow, trolling speed, product code). Returns errors, warnings, and normalized result. No database, UI, Prisma, parser, or mapper changes.
+End-to-end DUEL catalog import: `duel-import-runner.ts` + `duel-persister.ts` (UPSERT + lifecycle). CLI: `npm run import:duel:run`. Pipeline: fetch → parse → map → validate → upsert. 20+ products from live DUEL English listings; continues on validation errors. Report: `research/manufacturers/duel/import-report.md`.
 
 ---
 
@@ -52,7 +52,8 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint S013** | `d96e48d` | DUEL HTML parser — snapshots → `CanonicalLureImport`; `npm run import:duel:parse` |
 | **Sprint S014** | `248319c` | Manufacturer lifecycle schema + `docs/domain/MANUFACTURER_LIFECYCLE.md` — policy only, no runtime logic |
 | **Sprint S015** | `9f2c161` | DUEL mapper — parsed product → normalized `CanonicalLureImport`; `duel-mapper.ts` |
-| **Sprint S016** | *(uncommitted)* | Platform canonical validator — `canonical-lure-validator.ts`; errors, warnings, normalized result |
+| **Sprint S016** | `9192d83` | Platform canonical validator — `canonical-lure-validator.ts`; errors, warnings, normalized result |
+| **Sprint S017** | *(uncommitted)* | First real DUEL import — fetch/parse/map/validate/upsert; `import:duel:run`; import report |
 
 \* S010 spec landed in repo with S011 fetcher commit `c4f04dd` (combined push).
 
@@ -70,23 +71,23 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `9f2c161` |
-| **Message** | feat(import): duel mapper |
+| **Hash** | `9192d83` |
+| **Message** | feat(import): canonical validator |
 | **Date** | 2026-07-02 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint S017 — DUEL provider wiring or lifecycle reconciler** (product owner to prioritize)
+**Sprint S018 — Lifecycle reconciler or DUEL batch expansion** (product owner to prioritize)
 
 Recommended sequence:
 
-1. **Wire DUEL parser + mapper + validator to `ManufacturerImportProvider`** — validate + optional persist for `pid=1332`
+1. **Lifecycle reconciler job** — observed-key set → `ACTIVE` / `MISSING` / `DISCONTINUED` transitions
 2. **`IngestionBatch` table + batch completion hook** — per `MANUFACTURER_LIFECYCLE.md` §9
-3. **Lifecycle reconciler job** — observed-key set → `ACTIVE` / `MISSING` / `DISCONTINUED` transitions
-4. **JP snapshot fetch** — JAN/UPC rows from `detail.php` (per fetcher report)
-5. **Add `manufacturer-registry/duel.yaml`**
+3. **JP snapshot fetch** — JAN/UPC rows from `detail.php` (per fetcher report)
+4. **Add `manufacturer-registry/duel.yaml`**
+5. **Expand DUEL category crawl** — additional English/Japanese listing pages
 
 ---
 
@@ -133,6 +134,7 @@ Recommended sequence:
 | `ManufacturerProductStatus` separate from editorial `ContentLifecycleState` | S014 | Active — `ACTIVE` / `MISSING` / `DISCONTINUED` / `UNKNOWN` |
 | DUEL mapper normalizes parse output to `CanonicalLureImport` | S015 | Active — `duel-mapper.ts`; parser delegates; no persistence |
 | Platform canonical validator enforces publish requirements on DTO | S016 | Active — `canonical-lure-validator.ts`; errors + warnings + normalized result |
+| First real DUEL import via `import:duel:run` (UPSERT + lifecycle, no deletes) | S017 | Active — `duel-import-runner.ts`, `duel-persister.ts`; report in `research/manufacturers/duel/` |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
@@ -204,7 +206,7 @@ These are frozen.
 | `api/` | **Empty** | Planned Fastify REST + workers |
 | `shared/` (repo root) | **Empty** | Planned monorepo-wide Zod schemas + domain types |
 | `database/` | **Empty** | Migrations live in `ui/prisma/` today |
-| `research/` | **Active** | DUEL HTML snapshots under `manufacturers/duel/snapshots/` (S011 fetcher) |
+| `research/` | **Active** | DUEL HTML snapshots + `manufacturers/duel/import-report.md` (S017 import) |
 | `manufacturer-registry/` | **Active** | Declarative YAML configs per manufacturer (S008) |
 | `docker-compose.yml` | **Active** | PostgreSQL 16; UI service under `full` profile |
 
@@ -212,7 +214,7 @@ These are frozen.
 
 | Path | Status | Notes |
 |------|--------|-------|
-| `modules/import/` | **Active** | Framework + demo provider + persistence + DUEL fetcher/parser/mapper |
+| `modules/import/` | **Active** | Framework + demo provider + persistence + DUEL fetcher/parser/mapper/validator/import runner |
 | `modules/lure/` | **Active** | Lure detail (DB-backed) + Add Lure form (`components/add-lure/`), services, repositories, types, enrichment data |
 | `modules/species/` | **Placeholder** | Empty — future SpeciesCompass module |
 | `modules/technique/` | **Placeholder** | Empty — future TechniqueLibrary module |
@@ -247,7 +249,7 @@ These are frozen.
 | Home route (empty) | Done |
 | Lure detail page | Done — **PostgreSQL via `PrismaLureRepository`** (run `npm run import:run` first; slug `laser-pro-190-dd`) |
 | Add Lure page | Done — **UI only** (`/[locale]/add-lure`); save disabled, mock autocompletes |
-| Import pipeline | Done — `import:demo`; `import:run` (persist); `import:duel:fetch` + `import:duel:parse` (DUEL snapshots → canonical JSON via mapper, no DB) |
+| Import pipeline | Done — `import:demo`; `import:run` (persist); `import:duel:fetch` + `import:duel:parse`; **`import:duel:run`** (live DUEL catalog UPSERT + report) |
 | Browse / search / compare | Not started |
 | Auth / contributor flows | Not started (Add Lure UI precedes auth gate) |
 

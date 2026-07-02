@@ -19,6 +19,7 @@
     "import:demo": "tsx src/modules/import/providers/demo/demo-importer.ts",
     "import:duel:fetch": "tsx src/modules/import/providers/duel/duel-fetcher.ts",
     "import:duel:parse": "tsx src/modules/import/providers/duel/duel-parser.ts",
+    "import:duel:run": "tsx scripts/run-duel-import.ts",
     "import:run": "tsx scripts/run-import.ts",
     "postinstall": "prisma generate"
   },
