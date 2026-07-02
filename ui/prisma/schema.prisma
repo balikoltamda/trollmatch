@@ -64,6 +64,16 @@ enum SpeciesAliasKind {
   @@map("species_alias_kind")
 }
 
+/// Manufacturer feed presence — distinct from editorial ContentLifecycleState (Sprint S014).
+enum ManufacturerProductStatus {
+  ACTIVE
+  MISSING
+  DISCONTINUED
+  UNKNOWN
+
+  @@map("manufacturer_product_status")
+}
+
 // ---------------------------------------------------------------------------
 // LureAtlas catalog core (Sprint 2.1 — not the final long-horizon model)
 // ---------------------------------------------------------------------------
@@ -125,6 +135,16 @@ model LureModel {
   shortDescriptionEn String?              @map("short_description_en") @db.Text
   shortDescriptionTr String?              @map("short_description_tr") @db.Text
   lifecycleState    ContentLifecycleState @default(DRAFT) @map("lifecycle_state")
+  /// First observation in a manufacturer import feed (S014).
+  firstSeenAt        DateTime?              @map("first_seen_at") @db.Timestamptz(6)
+  /// Most recent observation in a manufacturer import feed (S014).
+  lastSeenAt         DateTime?              @map("last_seen_at") @db.Timestamptz(6)
+  /// Most recent successful catalog import touch (S014).
+  lastImportedAt     DateTime?              @map("last_imported_at") @db.Timestamptz(6)
+  /// Consecutive import batches where product was absent from feed (S014).
+  missingImportCount Int                    @default(0) @map("missing_import_count")
+  /// Manufacturer feed presence; never implies row deletion (S014).
+  manufacturerStatus ManufacturerProductStatus @default(UNKNOWN) @map("manufacturer_status")
   createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt         DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt         DateTime?             @map("deleted_at") @db.Timestamptz(6)
@@ -140,6 +160,7 @@ model LureModel {
   @@index([manufacturerId])
   @@index([productLineId])
   @@index([lifecycleState])
+  @@index([manufacturerStatus])
   @@index([deletedAt])
   @@map("lure_models")
 }

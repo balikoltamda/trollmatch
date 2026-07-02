@@ -11,9 +11,9 @@
 
 ## Current Sprint
 
-**Sprint S013 — DUEL HTML Parser** — **Complete**
+**Sprint S014 — Manufacturer Product Lifecycle (Design)** — **Complete**
 
-Cheerio-based parser at `ui/src/modules/import/providers/duel/duel-parser.ts` — reads HTML snapshots, outputs `CanonicalLureImport`. CLI: `npm run import:duel:parse`. No persistence or Prisma writes.
+Extended `ui/prisma/schema.prisma` with `ManufacturerProductStatus` enum and lifecycle columns on `lure_models` (`firstSeenAt`, `lastSeenAt`, `lastImportedAt`, `missingImportCount`, `manufacturerStatus`). Migration `20250702120000_manufacturer_product_lifecycle`. Domain policy: `docs/domain/MANUFACTURER_LIFECYCLE.md`. No import framework, UI, repository, or route changes; lifecycle runtime logic deferred to S015+.
 
 ---
 
@@ -49,7 +49,8 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint S010** | `9bb48a8`* | `docs/connectors/DUEL_CONNECTOR.md` — DUEL manufacturer connector specification |
 | **Sprint S011** | `c4f04dd` | DUEL fetcher — raw HTML snapshots; `npm run import:duel:fetch` |
 | **Sprint S012** | `9bb48a8` | `docs/connectors/DUEL_FETCHER_REPORT.md` — snapshot field verification |
-| **Sprint S013** | *(uncommitted)* | DUEL HTML parser — snapshots → `CanonicalLureImport`; `npm run import:duel:parse` |
+| **Sprint S013** | `d96e48d` | DUEL HTML parser — snapshots → `CanonicalLureImport`; `npm run import:duel:parse` |
+| **Sprint S014** | *(uncommitted)* | Manufacturer lifecycle schema + `docs/domain/MANUFACTURER_LIFECYCLE.md` — policy only, no runtime logic |
 
 \* S010 spec landed in repo with S011 fetcher commit `c4f04dd` (combined push).
 
@@ -67,23 +68,23 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `9bb48a8` |
-| **Message** | docs(import): duel fetcher verification |
+| **Hash** | `d96e48d` |
+| **Message** | feat(import): duel html parser |
 | **Date** | 2026-07-02 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint S014 — DUEL import pipeline or Halco provider** (product owner to prioritize)
+**Sprint S015 — Lifecycle reconciler or DUEL persist** (product owner to prioritize)
 
 Recommended sequence:
 
-1. **Wire DUEL parser to `ManufacturerImportProvider`** — validate + optional persist for `pid=1332`
-2. **JP snapshot fetch** — JAN/UPC rows from `detail.php` (per fetcher report)
-3. **Add `manufacturer-registry/duel.yaml`**
-4. **Halco provider** — static feed → `CanonicalLureImport`
-5. **Ingestion Batch record** — audit trail per 007 §15.1
+1. **`IngestionBatch` table + batch completion hook** — per `MANUFACTURER_LIFECYCLE.md` §9
+2. **Lifecycle reconciler job** — observed-key set → `ACTIVE` / `MISSING` / `DISCONTINUED` transitions
+3. **Wire DUEL parser to `ManufacturerImportProvider`** — validate + optional persist for `pid=1332`
+4. **JP snapshot fetch** — JAN/UPC rows from `detail.php` (per fetcher report)
+5. **Add `manufacturer-registry/duel.yaml`**
 
 ---
 
@@ -126,6 +127,8 @@ Recommended sequence:
 | DUEL connector spec drives future `duel` provider | S010 | Active — `docs/connectors/DUEL_CONNECTOR.md`; no code |
 | DUEL fetcher saves raw HTML snapshots only | S011 | Active — `import:duel:fetch` |
 | DUEL parser maps snapshots → `CanonicalLureImport` | S013 | Active — `import:duel:parse`; no persistence |
+| Manufacturer feed lifecycle on `lure_models`; importers never delete catalog rows | S014 | Active — schema + `docs/domain/MANUFACTURER_LIFECYCLE.md`; reconciler not implemented |
+| `ManufacturerProductStatus` separate from editorial `ContentLifecycleState` | S014 | Active — `ACTIVE` / `MISSING` / `DISCONTINUED` / `UNKNOWN` |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
@@ -138,7 +141,7 @@ The following architecture decisions are **frozen** until Milestone 1 is complet
 | Area | Frozen scope | Current implementation |
 |------|--------------|------------------------|
 | **Folder structure** | Monorepo layout; `ui/src/modules/*`, `ui/src/shared/*`, `ui/src/app/*` | R001 — `modules/lure`, `modules/import`, placeholder `species` / `technique` / `manufacturer` |
-| **Prisma core schema** | LureAtlas catalog tables in `ui/prisma/schema.prisma` (Manufacturer → Variant, Color, aliases, species identity) | Sprint 2.1, F001, F002 — migrations through `20250701130000_canonical_species_identity` |
+| **Prisma core schema** | LureAtlas catalog tables in `ui/prisma/schema.prisma` (Manufacturer → Variant, Color, aliases, species identity, manufacturer lifecycle on `lure_models`) | Sprint 2.1, F001, F002, S014 — migrations through `20250702120000_manufacturer_product_lifecycle` |
 | **Canonical Identity** | Color + ProductAlias + ColorAlias; SpeciesScientificName + CommonName + Alias | F001, F002 — variant requires `colorId`; no duplicate identity models |
 | **Import Framework** | `ManufacturerImportProvider` pipeline: parse → validate → map → `CanonicalLureImport` → persistence | S004–S007 — `modules/import/{core,parsers,validators,mappers,jobs,providers,persistence}` |
 | **Module naming** | Domain modules under `ui/src/modules/` (`lure`, `import`, `species`, `technique`, `manufacturer`); no return to `features/` | R001, S004 |
@@ -192,7 +195,7 @@ These are frozen.
 
 | Path | Status | Notes |
 |------|--------|-------|
-| `docs/` | **Rich** | Charter, architecture, backlog, domain model, UI specs, connector specs |
+| `docs/` | **Rich** | Charter, architecture, backlog, domain model, manufacturer lifecycle policy, UI specs, connector specs |
 | `ui/` | **Active** | Next.js 15, App Router, i18n, modular `src/modules/`, `src/shared/`, lure detail (PostgreSQL), Prisma client |
 | `api/` | **Empty** | Planned Fastify REST + workers |
 | `shared/` (repo root) | **Empty** | Planned monorepo-wide Zod schemas + domain types |
@@ -223,11 +226,12 @@ These are frozen.
 
 ### Database (Prisma / PostgreSQL)
 
-**Applied migrations (3):**
+**Applied migrations (4):**
 
 1. `20250630140000_lure_atlas_core` — catalog core  
 2. `20250701120000_canonical_product_identity` — Color, ProductAlias, ColorAlias  
 3. `20250701130000_canonical_species_identity` — SpeciesScientificName, SpeciesCommonName, SpeciesAlias  
+4. `20250702120000_manufacturer_product_lifecycle` — `ManufacturerProductStatus` + lifecycle columns on `lure_models` (S014)  
 
 **Not yet in schema:** Platform User, Knowledge Claim, Provenance Attribution, Verification Event, Localized Text rows, Slug Registry, Outbox, Meilisearch sync, Usage Assertion, Catch Report, Moderation Case (per `007` long-horizon model).
 
@@ -285,6 +289,7 @@ These are frozen.
 | `docs/009_ROADMAP.md` | Phase timeline |
 | `docs/007_DATABASE_VISION.md` | Long-horizon data model |
 | `docs/domain/LURE_DOMAIN_MODEL.md` | Lure business domain |
+| `docs/domain/MANUFACTURER_LIFECYCLE.md` | Manufacturer feed lifecycle policy (S014) |
 | `docs/004_DECISIONS.md` | ADRs |
 | `docs/connectors/DUEL_CONNECTOR.md` | DUEL manufacturer connector specification |
 
