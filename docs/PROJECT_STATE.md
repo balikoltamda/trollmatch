@@ -4,16 +4,16 @@
 **Project (internal):** TrollMatch  
 **Platform (public):** Balık Oltamda Guide  
 **Purpose:** Single source of truth for project progress  
-**Last updated:** 2026-06-30  
+**Last updated:** 2026-07-02  
 **Maintainer:** Update this file at the end of every sprint or significant milestone.
 
 ---
 
 ## Current Sprint
 
-**Sprint S009 — Prisma lure repository** — **Complete**
+**Sprint S011 — DUEL Fetcher** — **Complete**
 
-Lure detail page reads catalog data from PostgreSQL via `PrismaLureRepository`. Mock-only sections (trolling, community stats, AI insights, etc.) isolated in `lure-detail-enrichment.ts` behind the repository boundary.
+Raw HTML snapshot fetcher at `ui/src/modules/import/providers/duel/` — downloads one product page and one category page from `duel.co.jp`, saves under `research/manufacturers/duel/snapshots/{timestamp}/`. No parsing, mapping, validation, or import.
 
 ---
 
@@ -45,7 +45,9 @@ Early **Phase 2 / Phase B** work has started ahead of schedule (LureAtlas catalo
 | **Sprint S006** | `b8d1576` | Demo importer — static JSON → `CanonicalLureImport`; `npm run import:demo` |
 | **Sprint S007** | `65e6302` | End-to-end import — JSON → canonical → Prisma (transactional, dedupe); `npm run import:run` |
 | **Sprint S008** | `20777cc` | Manufacturer registry YAML configs (`manufacturer-registry/*.yaml`) |
-| **Sprint S009** | *(uncommitted)* | `PrismaLureRepository` — lure detail reads from PostgreSQL; enrichment data isolated for non-catalog UI sections |
+| **Sprint S009** | `233edf1` | `PrismaLureRepository` — lure detail reads from PostgreSQL; enrichment data isolated for non-catalog UI sections |
+| **Sprint S010** | *(uncommitted)* | `docs/connectors/DUEL_CONNECTOR.md` — DUEL manufacturer connector specification (no implementation) |
+| **Sprint S011** | *(uncommitted)* | DUEL fetcher — raw HTML snapshots to `research/manufacturers/duel/snapshots/`; `npm run import:duel:fetch` |
 
 ---
 
@@ -61,21 +63,23 @@ Remote: `https://github.com/balikoltamda/trollmatch.git`
 
 | Field | Value |
 |-------|-------|
-| **Hash** | `20777cc` |
-| **Message** | feat(import): manufacturer registry |
-| **Date** | 2026-06-30 |
+| **Hash** | `233edf1` |
+| **Message** | feat(repository): prisma lure repository |
+| **Date** | 2026-07-02 |
 
 ---
 
 ## Next Planned Sprint
 
-**Sprint S010 — First real manufacturer importer** (product owner to prioritize)
+**Sprint S012 — DUEL HTML parser or Halco provider** (product owner to prioritize)
 
 Recommended sequence:
 
-1. **Halco provider** — wire `manufacturer-registry/halco.yaml` → static feed → `CanonicalLureImport`
-2. **Ingestion Batch record** — audit trail per 007 §15.1
-3. **Phase A remainder (P0):** BL-003–BL-011 — platform kernel tables, taxonomy seeds
+1. **DUEL parser** — parse saved snapshots → structured JSON evidence (no import yet)
+2. **Add `manufacturer-registry/duel.yaml`** — wire registry entry from S010 spec
+3. **Halco provider** — wire `manufacturer-registry/halco.yaml` → static feed → `CanonicalLureImport`
+4. **Ingestion Batch record** — audit trail per 007 §15.1
+5. **Phase A remainder (P0):** BL-003–BL-011 — platform kernel tables, taxonomy seeds
 
 ---
 
@@ -115,6 +119,8 @@ Recommended sequence:
 | Demo importer proves parse → validate → canonical map pipeline | S006 | Active |
 | Manufacturer registry YAML drives future connector selection | S008 | Active — config only |
 | Lure detail reads catalog from PostgreSQL via `PrismaLureRepository` | S009 | Active — enrichment for non-schema UI sections |
+| DUEL connector spec drives future `duel` provider | S010 | Active — `docs/connectors/DUEL_CONNECTOR.md`; no code |
+| DUEL fetcher saves raw HTML snapshots only | S011 | Active — `import:duel:fetch`; no parser yet |
 
 Full ADR list: `docs/004_DECISIONS.md` (ADR-001 through ADR-015).
 
@@ -181,12 +187,12 @@ These are frozen.
 
 | Path | Status | Notes |
 |------|--------|-------|
-| `docs/` | **Rich** | Charter, architecture, backlog, domain model, UI specs |
+| `docs/` | **Rich** | Charter, architecture, backlog, domain model, UI specs, connector specs |
 | `ui/` | **Active** | Next.js 15, App Router, i18n, modular `src/modules/`, `src/shared/`, lure detail (PostgreSQL), Prisma client |
 | `api/` | **Empty** | Planned Fastify REST + workers |
 | `shared/` (repo root) | **Empty** | Planned monorepo-wide Zod schemas + domain types |
 | `database/` | **Empty** | Migrations live in `ui/prisma/` today |
-| `research/` | **Placeholder** | Evidence pipeline not wired; registry points to `research/manufacturers/` |
+| `research/` | **Active** | DUEL HTML snapshots under `manufacturers/duel/snapshots/` (S011 fetcher) |
 | `manufacturer-registry/` | **Active** | Declarative YAML configs per manufacturer (S008) |
 | `docker-compose.yml` | **Active** | PostgreSQL 16; UI service under `full` profile |
 
@@ -194,7 +200,7 @@ These are frozen.
 
 | Path | Status | Notes |
 |------|--------|-------|
-| `modules/import/` | **Active** | Framework + canonical DTO + demo provider + `persistence/` Prisma adapter |
+| `modules/import/` | **Active** | Framework + canonical DTO + demo provider + `persistence/` + DUEL fetcher |
 | `modules/lure/` | **Active** | Lure detail (DB-backed) + Add Lure form (`components/add-lure/`), services, repositories, types, enrichment data |
 | `modules/species/` | **Placeholder** | Empty — future SpeciesCompass module |
 | `modules/technique/` | **Placeholder** | Empty — future TechniqueLibrary module |
@@ -275,6 +281,7 @@ These are frozen.
 | `docs/007_DATABASE_VISION.md` | Long-horizon data model |
 | `docs/domain/LURE_DOMAIN_MODEL.md` | Lure business domain |
 | `docs/004_DECISIONS.md` | ADRs |
+| `docs/connectors/DUEL_CONNECTOR.md` | DUEL manufacturer connector specification |
 
 ---
 
