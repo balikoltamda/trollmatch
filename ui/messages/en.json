@@ -2,21 +2,22 @@
   "Layout": {
     "siteName": "Balık Oltamda Guide",
     "moduleName": "LureAtlas",
-    "tagline": "Fishing knowledge platform",
+    "tagline": "Lure notes from anglers, for anglers",
     "brandName": "TrollMatch",
-    "brandTagline": "Global lure intelligence",
+    "brandPromise": "We bring together what is written on the box and what happens on the water.",
+    "brandTagline": "Box specs · water notes",
     "navHome": "Home",
     "navLures": "LureAtlas",
-    "navContribute": "Contribute",
+    "navContribute": "Add a lure",
     "navLabel": "Main navigation",
     "searchPlaceholder": "Search lures…",
-    "searchAria": "Search lure catalog",
+    "searchAria": "Search lures",
     "footer": "© Balık Oltamda. All rights reserved.",
-    "footerTagline": "A precision catalog for manufacturer lure knowledge and field compatibility.",
+    "footerTagline": "We bring together what is written on the box and what happens on the water.",
     "footerExplore": "Explore",
-    "footerDeveloperLabel": "Founding organization",
-    "footerDeveloperAria": "Balık Oltamda — founding organization (opens in new tab)",
-    "footerDevelopedBy": "Developed and maintained by Balık Oltamda",
+    "footerDeveloperLabel": "Balık Oltamda",
+    "footerDeveloperAria": "Balık Oltamda — opens in new tab",
+    "footerDevelopedBy": "Built and maintained by the Balık Oltamda team.",
     "footerCopyright": "© 2026 TrollMatch",
     "footerRights": "All rights reserved.",
     "localeTr": "Türkçe",
@@ -25,78 +26,79 @@
   },
   "Home": {
     "meta": {
-      "title": "TrollMatch — Global lure intelligence",
-      "description": "Explore manufacturer-verified lure catalogs, target species, and fishing techniques in one premium knowledge platform."
+      "title": "TrollMatch — Lure guide for the Aegean & Eastern Mediterranean",
+      "description": "What the box says and what anglers report from the water — lures, species, and notes for Turkey, Cyprus, and the Eastern Mediterranean."
     },
     "hero": {
-      "eyebrow": "LureAtlas · Manufacturer catalog",
-      "title": "Know every lure.",
-      "titleAccent": "Fish with precision.",
-      "description": "TrollMatch unifies factory specifications, import pipelines, and field compatibility into a single source of truth for serious anglers.",
-      "searchPlaceholder": "Search by model, manufacturer, or species…",
-      "searchAria": "Search the lure catalog",
-      "ctaPrimary": "Contribute a lure",
-      "ctaSecondary": "Explore catalog"
+      "eyebrow": "LureAtlas · Aegean & Eastern Mediterranean",
+      "regionScope": "Turkey · Northern Cyprus · Aegean Sea",
+      "title": "What's on the box.",
+      "titleAccent": "What happens on the water.",
+      "description": "We bring together what is written on the box and what happens on the water. Starting with the fish and methods common around Turkey and Cyprus.",
+      "searchPlaceholder": "Search by model, brand, or species…",
+      "searchAria": "Search lures",
+      "ctaPrimary": "Add a lure",
+      "ctaSecondary": "Browse lures"
     },
     "species": {
-      "title": "Featured species",
-      "description": "Target species with the strongest lure compatibility data in the catalog."
+      "title": "Commonly fished here",
+      "description": "Lüfer, levrek, palamut, and çipura — species people target most in these waters. We list which lures have been tried and reported."
     },
     "collections": {
-      "title": "Featured collections",
-      "description": "Curated lure families grouped by technique and water column.",
+      "title": "Grouped by how people fish here",
+      "description": "Bosphorus runs, Aegean shore casting, and Mediterranean trolling — lures people use for each.",
       "lureCount": "lures"
     },
     "manufacturers": {
-      "title": "Featured manufacturers",
-      "description": "Global hard-bait brands connected through the production import registry.",
-      "importing": "Importing",
-      "models": "{count} models catalogued"
+      "title": "Brands we follow",
+      "description": "Hard-bait makers whose box specs and listings we keep on file — plus a few still being added.",
+      "importing": "On the way",
+      "models": "{count} lures listed"
     },
     "latest": {
-      "title": "Latest imported lures",
-      "description": "Recently synced models from active manufacturer pipelines.",
-      "verified": "Verified"
+      "title": "Recently added",
+      "description": "New models from manufacturer pages we've updated.",
+      "verified": "Checked"
     },
     "statistics": {
-      "title": "Platform statistics",
-      "description": "Live indicators from the TrollMatch catalog and import infrastructure."
+      "title": "By the numbers",
+      "description": "What's in the guide right now — no more, no less."
     }
   },
   "LureDetail": {
-    "pageLandmark": "Lure detail reference page",
-    "breadcrumbLabel": "Breadcrumb",
+    "pageLandmark": "Lure detail",
+    "breadcrumbLabel": "You are here",
     "breadcrumbHome": "Home",
     "breadcrumbLures": "LureAtlas",
-    "variantLabel": "Variant",
-    "manufacturerSource": "Manufacturer specification",
+    "variantLabel": "Colour",
+    "manufacturerSource": "On the box",
     "verification": {
-      "unverified": "Unverified",
-      "partiallyVerified": "Partially verified",
-      "manufacturerVerified": "Manufacturer verified",
-      "moderatorVerified": "Moderator verified",
-      "expertEndorsed": "Expert endorsed",
-      "lastVerified": "Last verified"
+      "unverified": "Not checked yet",
+      "partiallyVerified": "Partly checked",
+      "manufacturerVerified": "Matches manufacturer info",
+      "moderatorVerified": "Checked by our team",
+      "expertEndorsed": "Backed by an experienced angler",
+      "lastVerified": "Last checked"
     },
     "sections": {
-      "specifications": "Specifications",
-      "specificationsDescription": "Factory specifications with manufacturer provenance.",
-      "species": "Recommended species",
-      "speciesDescription": "Curated, marketing, and community-supported target species.",
-      "techniques": "Recommended techniques",
-      "techniquesDescription": "Fishing methods suited to this lure design.",
-      "trolling": "Trolling information",
-      "trollingDescription": "Manufacturer guidance for trolling setups.",
-      "community": "Community statistics",
-      "communityDescription": "Aggregated field evidence from approved contributions.",
-      "aiInsights": "AI insights",
-      "aiInsightsDescription": "AI-assisted summary with required citations.",
-      "related": "Related lures",
-      "relatedDescription": "Similar models for comparison.",
+      "specifications": "On the box",
+      "specificationsDescription": "Length, weight, dive depth, and the rest — as the manufacturer lists them.",
+      "species": "Target species",
+      "speciesDescription": "What the box suggests, what anglers aim for, and what people have reported.",
+      "techniques": "How people fish it",
+      "techniquesDescription": "Methods that match this lure's shape and action — from specs and field notes.",
+      "trolling": "Trolling notes",
+      "trollingDescription": "Speed, leader, and line — as the manufacturer suggests.",
+      "community": "On the water",
+      "communityDescription": "What anglers have reported back — where, when, and how it went for them.",
+      "aiInsights": "At a glance",
+      "aiInsightsDescription": "A short read pulling together box specs and reported field notes, with sources linked.",
+      "related": "Similar lures",
+      "relatedDescription": "Other models worth comparing side by side.",
       "sponsored": "Find retailers",
-      "sponsoredDescription": "Optional sponsored outbound links — user-initiated only.",
-      "history": "Change history",
-      "historyDescription": "Public timeline of meaningful catalog updates."
+      "sponsoredDescription": "Shop links if you want them — only when you ask.",
+      "history": "What's changed",
+      "historyDescription": "Updates to this lure's box specs or field notes over time."
     },
     "specs": {
       "length": "Length",
@@ -104,68 +106,68 @@
       "divingDepth": "Diving depth",
       "buoyancy": "Buoyancy",
       "action": "Action",
-      "bodyType": "Body type",
+      "bodyType": "Body",
       "coatingType": "Coating"
     },
     "speciesKind": {
-      "curated": "Curated",
-      "marketing": "Marketing",
-      "community": "Community"
+      "curated": "Our note",
+      "marketing": "On the box",
+      "community": "Anglers report"
     },
     "trolling": {
       "speed": "Trolling speed",
       "speedUnit": "knots",
-      "leader": "Recommended leader",
-      "mainLine": "Recommended main line"
+      "leader": "Suggested leader",
+      "mainLine": "Suggested main line"
     },
     "community": {
-      "assertions": "Usage assertions",
-      "catchReports": "Verified catch reports",
-      "effectiveness": "Community effectiveness",
-      "bandLow": "Low",
-      "bandModerate": "Moderate",
-      "bandHigh": "High",
-      "bandInsufficient": "Insufficient data",
-      "topRegions": "Top regions",
-      "source": "Derived from community evidence — not manufacturer claims."
+      "assertions": "Field notes",
+      "catchReports": "Reported catches",
+      "effectiveness": "What people report",
+      "bandLow": "Few positive reports",
+      "bandModerate": "Mixed reports",
+      "bandHigh": "Mostly positive reports",
+      "bandInsufficient": "Not enough reports yet",
+      "topRegions": "Where people fish it",
+      "source": "From angler reports — not what's printed on the box."
     },
     "ai": {
-      "assistedLabel": "AI-assisted summary",
+      "assistedLabel": "At a glance",
       "citations": "Sources",
-      "corpusDate": "Corpus snapshot"
+      "corpusDate": "Notes from"
     },
     "sponsored": {
-      "disclaimer": "Sponsored links do not affect discovery ranking. Purchase options appear only when you choose to view retailers.",
+      "disclaimer": "Shop links don't change how lures are listed. Retailers only show when you choose to look.",
       "findRetailers": "Find retailers"
     }
   },
   "AddLure": {
-    "pageLandmark": "Add lure form",
-    "eyebrow": "Contribute",
-    "title": "Add lure",
-    "description": "Create a new lure catalog entry. This release is UI-only — saving is not enabled yet.",
+    "pageLandmark": "Add a lure",
+    "eyebrow": "Share what you know",
+    "title": "Add a lure",
+    "description": "Know a lure worth listing? Add the box details and anything you've seen on the water. Saving isn't available yet — preview only for now.",
     "save": "Save",
-    "saveDisabledHint": "Saving will be enabled once API integration is complete.",
+    "saveDisabledHint": "Saving will be available soon.",
     "sections": {
-      "identity": "Lure identity",
-      "identityDescription": "Select manufacturer, model, variant, and color."
+      "identity": "Lure details",
+      "identityDescription": "Brand, model, and colour."
     },
     "fields": {
-      "imageTitle": "Image",
-      "imageDescription": "Drag and drop an image",
-      "imageHint": "UI preview only — upload is not enabled yet.",
-      "manufacturer": "Manufacturer",
+      "imageTitle": "Photo",
+      "imageDescription": "Drag and drop a photo",
+      "imageHint": "Preview only — uploads aren't available yet.",
+      "manufacturer": "Brand",
       "model": "Model",
       "variant": "Variant",
-      "color": "Color",
+      "color": "Colour",
       "placeholder": "Search or select…",
-      "emptyMessage": "No matching results"
+      "emptyMessage": "No matches"
     },
     "preview": {
       "title": "Preview",
       "emptyTitle": "Nothing selected yet",
-      "emptyDescription": "Your lure card will appear here as you fill in the form.",
-      "imagePlaceholder": "Image preview",
+      "emptyDescription": "Your lure card will show up here as you fill in the form.",
+      "imagePlaceholder": "Photo preview",
       "notSelected": "Not selected"
     }
   }

@@ -55,6 +55,9 @@ export async function HomeView({ locale }: HomeViewProps) {
             <p className="text-ocean text-sm font-medium tracking-[0.2em] uppercase">
               {t("hero.eyebrow")}
             </p>
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              {t("hero.regionScope")}
+            </p>
             <h1 className="text-foreground text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl lg:leading-[1.08]">
               {t("hero.title")}
               <span className="text-gradient-ocean block sm:inline sm:pl-3">

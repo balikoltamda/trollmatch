@@ -48,7 +48,7 @@ export async function generateMetadata({
       default: t("brandName"),
       template: `%s · ${t("brandName")}`,
     },
-    description: t("brandTagline"),
+    description: t("brandPromise"),
     alternates: {
       languages: {
         tr: "/tr",

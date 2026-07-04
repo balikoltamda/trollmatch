@@ -1,3 +1,13 @@
+/** Default regional lens for homepage curation until global scale. */
+export const DEFAULT_HOME_REGION = {
+  id: "eastern-mediterranean",
+  label: { en: "Aegean & Eastern Mediterranean", tr: "Ege & Doğu Akdeniz" },
+  scope: {
+    en: "Turkey · Northern Cyprus · Aegean Sea",
+    tr: "Türkiye · Kıbrıs · Ege",
+  },
+} as const;
+
 export type HomeSpecies = {
   id: string;
   name: { en: string; tr: string };
@@ -40,60 +50,72 @@ export type HomeStatistic = {
 
 export const HOME_SPECIES: HomeSpecies[] = [
   {
-    id: "yellowfin-tuna",
-    name: { en: "Yellowfin tuna", tr: "Sarıkanat ton balığı" },
-    habitat: { en: "Pelagic · offshore", tr: "Pelagik · açık deniz" },
-    lureCount: 128,
-  },
-  {
-    id: "striped-bass",
-    name: { en: "Striped bass", tr: "Çizgili levrek" },
-    habitat: { en: "Inshore · surf", tr: "Kıyı · sörf" },
-    lureCount: 94,
-  },
-  {
     id: "bluefish",
     name: { en: "Bluefish", tr: "Lüfer" },
-    habitat: { en: "Coastal · current", tr: "Kıyı · akıntı" },
-    lureCount: 76,
+    habitat: {
+      en: "Bosphorus · Marmara · strait runs",
+      tr: "Boğaz · Marmara · göç zamanı",
+    },
+    lureCount: 86,
   },
   {
-    id: "wahoo",
-    name: { en: "Wahoo", tr: "Wahoo" },
-    habitat: { en: "Tropical · high speed", tr: "Tropikal · yüksek hız" },
-    lureCount: 52,
+    id: "european-seabass",
+    name: { en: "European seabass", tr: "Levrek" },
+    habitat: {
+      en: "Aegean bays · rocky shore",
+      tr: "Ege koyları · kayalık",
+    },
+    lureCount: 112,
+  },
+  {
+    id: "bonito",
+    name: { en: "Atlantic bonito", tr: "Palamut" },
+    habitat: {
+      en: "Autumn migration · offshore trolling",
+      tr: "Sonbahar göçü · açık trolling",
+    },
+    lureCount: 74,
+  },
+  {
+    id: "gilthead-seabream",
+    name: { en: "Gilthead seabream", tr: "Çipura" },
+    habitat: {
+      en: "Eastern Mediterranean · inshore",
+      tr: "Doğu Akdeniz · kıyı",
+    },
+    lureCount: 68,
   },
 ];
 
 export const HOME_COLLECTIONS: HomeCollection[] = [
   {
-    id: "offshore-trolling",
-    title: { en: "Offshore trolling", tr: "Açık deniz trolling" },
+    id: "bosphorus-bluefish",
+    title: { en: "Strait bluefish run", tr: "Boğaz lüferi" },
     description: {
-      en: "Deep-diving hard baits for pelagic predators.",
-      tr: "Pelagik avcılar için derin dalar sert yemler.",
+      en: "Metals and slim minnows for Bosphorus and Marmara current lines.",
+      tr: "Boğaz ve Marmara akıntısına metal ve ince minnow — lüfer için.",
     },
-    lureCount: 214,
+    lureCount: 94,
     accent: "ocean",
   },
   {
-    id: "shore-jigging",
-    title: { en: "Shore jigging", tr: "Kıyı jigging" },
+    id: "aegean-shore",
+    title: { en: "Aegean shore casting", tr: "Ege kıyısı spin" },
     description: {
-      en: "Metal and minnow profiles for active coastlines.",
-      tr: "Aktif kıyı hatları için metal ve minnow profilleri.",
+      en: "Jigs, spoons, and minnows for levrek and çipura from the rocks.",
+      tr: "Kayalıktan levrek, çipura — jig, kaşık, minnow.",
     },
-    lureCount: 167,
+    lureCount: 128,
     accent: "turquoise",
   },
   {
-    id: "topwater",
-    title: { en: "Topwater arsenal", tr: "Yüzey yem koleksiyonu" },
+    id: "med-topwater-trolling",
+    title: { en: "Topwater & trolling", tr: "Yüzey ve trolling" },
     description: {
-      en: "Poppers and stickbaits for surface strikes.",
-      tr: "Yüzey saldırıları için popper ve stickbait.",
+      en: "Stickbaits and diving minnows for palamut and offshore passes.",
+      tr: "Palamut ve açık geçişler — stickbait, dalar minnow.",
     },
-    lureCount: 143,
+    lureCount: 103,
     accent: "navy",
   },
 ];
@@ -113,8 +135,8 @@ export const HOME_LURES: HomeLure[] = [
     manufacturer: { en: "Halco", tr: "Halco" },
     modelName: { en: "Laser Pro 190 DD", tr: "Laser Pro 190 DD" },
     formFactor: {
-      en: "Deep-diving minnow · offshore trolling",
-      tr: "Derin dalar minnow · offshore trolling",
+      en: "Deep-diving minnow · palamut trolling",
+      tr: "Derin dalar · palamut trolling",
     },
     imageSrc: "/lures/halco-laser-pro-190-dd.svg",
     verified: true,
@@ -124,8 +146,8 @@ export const HOME_LURES: HomeLure[] = [
     manufacturer: { en: "DUEL", tr: "DUEL" },
     modelName: { en: "Hardcore Minnow 120F", tr: "Hardcore Minnow 120F" },
     formFactor: {
-      en: "Floating minnow · casting",
-      tr: "Yüzen minnow · casting",
+      en: "Floating minnow · lüfer & levrek casting",
+      tr: "Yüzen minnow · lüfer, levrek spin",
     },
     imageSrc: "/lures/placeholder.svg",
     verified: false,
@@ -135,8 +157,8 @@ export const HOME_LURES: HomeLure[] = [
     manufacturer: { en: "DUEL", tr: "DUEL" },
     modelName: { en: "Surface Pencil 140", tr: "Surface Pencil 140" },
     formFactor: {
-      en: "Stickbait · topwater",
-      tr: "Stickbait · topwater",
+      en: "Stickbait · palamut & lüfer topwater",
+      tr: "Stickbait · palamut, lüfer yüzey",
     },
     imageSrc: "/lures/placeholder.svg",
     verified: false,
@@ -146,8 +168,8 @@ export const HOME_LURES: HomeLure[] = [
     manufacturer: { en: "DUEL", tr: "DUEL" },
     modelName: { en: "Deep Diver 160", tr: "Deep Diver 160" },
     formFactor: {
-      en: "Crankbait · trolling",
-      tr: "Crankbait · trolling",
+      en: "Crankbait · Aegean shore trolling",
+      tr: "Crankbait · Ege kıyısı trolling",
     },
     imageSrc: "/lures/placeholder.svg",
     verified: false,
@@ -157,41 +179,41 @@ export const HOME_LURES: HomeLure[] = [
 export const HOME_STATISTICS: HomeStatistic[] = [
   {
     id: "lures",
-    label: { en: "Catalogued lures", tr: "Kataloglanan yemler" },
+    label: { en: "Lures in the guide", tr: "Kayıtlı yemler" },
     value: "1,240+",
     hint: {
-      en: "Manufacturer-verified models across active importers.",
-      tr: "Aktif içe aktarıcılar genelinde üretici doğrulamalı modeller.",
+      en: "Box specs we've logged from manufacturers.",
+      tr: "Üreticilerin kutusunda yazan bilgiler.",
     },
     accent: "ocean",
   },
   {
     id: "manufacturers",
-    label: { en: "Manufacturers", tr: "Üreticiler" },
+    label: { en: "Brands", tr: "Markalar" },
     value: "7",
     hint: {
-      en: "Global hard-bait brands in the import registry.",
-      tr: "İçe aktarma kayıt defterindeki global sert yem markaları.",
+      en: "Hard-bait makers — box specs on file, more being added.",
+      tr: "Kutu bilgilerini tuttuğumuz sert yem markaları — yenileri ekleniyor.",
     },
     accent: "turquoise",
   },
   {
     id: "species",
-    label: { en: "Target species", tr: "Hedef türler" },
+    label: { en: "Target species", tr: "Avlanan türler" },
     value: "180+",
     hint: {
-      en: "Curated compatibility links from factory and field data.",
-      tr: "Fabrika ve saha verisinden küratörlü uyumluluk bağlantıları.",
+      en: "Species linked to lures — from box labels and angler reports.",
+      tr: "Yemlere bağlı türler — kutu etiketleri ve balıkçı bildirimleri.",
     },
     accent: "navy",
   },
   {
     id: "imports",
-    label: { en: "Weekly imports", tr: "Haftalık içe aktarma" },
+    label: { en: "Weekly updates", tr: "Haftalık yenilik" },
     value: "12",
     hint: {
-      en: "Incremental catalog syncs with full audit reports.",
-      tr: "Tam denetim raporlarıyla artımlı katalog senkronları.",
+      en: "New box listings added from manufacturer pages.",
+      tr: "Üretici sitelerinden eklenen yeni kutu listeleri.",
     },
     accent: "coral",
   },
