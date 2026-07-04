@@ -15,7 +15,6 @@ type ManufacturerCardProps = {
 export function ManufacturerCard({
   name,
   country,
-  productCount: _productCount,
   status = "active",
   statusLabel,
   productLabel,
