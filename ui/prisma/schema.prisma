@@ -74,6 +74,36 @@ enum ManufacturerProductStatus {
   @@map("manufacturer_product_status")
 }
 
+/// Editorial confidence for Balık Oltamda field notes (Studio).
+enum EditorNoteConfidence {
+  LOW
+  MEDIUM
+  HIGH
+
+  @@map("editor_note_confidence")
+}
+
+/// Import batch lifecycle for Studio Import Center.
+enum ImportBatchStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+
+  @@map("import_batch_status")
+}
+
+/// Audit action categories for catalog change history.
+enum CatalogAuditAction {
+  IMPORT_BATCH
+  IMPORT_CREATE
+  IMPORT_UPDATE
+  EDITOR_CANONICAL
+  EDITOR_NOTES
+  LIFECYCLE_CHANGE
+
+  @@map("catalog_audit_action")
+}
+
 // ---------------------------------------------------------------------------
 // LureAtlas catalog core (Sprint 2.1 — not the final long-horizon model)
 // ---------------------------------------------------------------------------
@@ -95,6 +125,7 @@ model Manufacturer {
   lureModels    LureModel[]
   productAliases ProductAlias[]
   colorAliases  ColorAlias[]
+  importBatches ImportBatch[]
 
   @@index([deletedAt])
   @@map("manufacturers")
@@ -172,6 +203,8 @@ model LureModel {
   lureTechniques   LureTechnique[]
   lureSpeciesLinks LureSpecies[]
   aliases          ProductAlias[]
+  editorNote       LureEditorNote?
+  auditEntries     CatalogAuditEntry[]
 
   @@index([manufacturerId])
   @@index([productLineId])
@@ -468,4 +501,92 @@ model SpeciesAlias {
   @@index([kind])
   @@index([deletedAt])
   @@map("species_aliases")
+}
+
+// ---------------------------------------------------------------------------
+// Balık Oltamda Studio (Sprint 6 — editorial layer, import audit)
+// ---------------------------------------------------------------------------
+
+/// Balık Oltamda editorial notes — never overwritten by manufacturer imports.
+model LureEditorNote {
+  id                    String               @id @default(uuid()) @db.Uuid
+  lureModelId           String               @unique @map("lure_model_id") @db.Uuid
+  shortRecommendationEn String?              @map("short_recommendation_en") @db.Text
+  shortRecommendationTr String?              @map("short_recommendation_tr") @db.Text
+  longRecommendationEn  String?              @map("long_recommendation_en") @db.Text
+  longRecommendationTr  String?              @map("long_recommendation_tr") @db.Text
+  mediterraneanNotesEn  String?              @map("mediterranean_notes_en") @db.Text
+  mediterraneanNotesTr  String?              @map("mediterranean_notes_tr") @db.Text
+  aegeanNotesEn         String?              @map("aegean_notes_en") @db.Text
+  aegeanNotesTr         String?              @map("aegean_notes_tr") @db.Text
+  northernCyprusNotesEn String?              @map("northern_cyprus_notes_en") @db.Text
+  northernCyprusNotesTr String?              @map("northern_cyprus_notes_tr") @db.Text
+  seasonalityEn         String?              @map("seasonality_en") @db.Text
+  seasonalityTr         String?              @map("seasonality_tr") @db.Text
+  recommendedRetrieveEn String?              @map("recommended_retrieve_en") @db.Text
+  recommendedRetrieveTr String?              @map("recommended_retrieve_tr") @db.Text
+  warningsEn            String?              @map("warnings_en") @db.Text
+  warningsTr            String?              @map("warnings_tr") @db.Text
+  bestColorsEn          String?              @map("best_colors_en") @db.Text
+  bestColorsTr          String?              @map("best_colors_tr") @db.Text
+  confidence            EditorNoteConfidence @default(MEDIUM)
+  /// Internal staff notes — never exposed on the public site.
+  internalNotes         String?              @map("internal_notes") @db.Text
+  createdAt             DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  lureModel LureModel @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+
+  @@map("lure_editor_notes")
+}
+
+/// Manufacturer import run — powers Studio Import Center and audit trail.
+model ImportBatch {
+  id                 String            @id @default(uuid()) @db.Uuid
+  manufacturerId     String?           @map("manufacturer_id") @db.Uuid
+  manufacturerCode   String            @map("manufacturer_code") @db.VarChar(64)
+  displayName        String            @map("display_name") @db.VarChar(128)
+  status             ImportBatchStatus @default(RUNNING)
+  startedAt          DateTime          @map("started_at") @db.Timestamptz(6)
+  completedAt        DateTime?         @map("completed_at") @db.Timestamptz(6)
+  durationMs         Int?              @map("duration_ms")
+  productsProcessed  Int               @default(0) @map("products_processed")
+  createdCount       Int               @default(0) @map("created_count")
+  updatedCount       Int               @default(0) @map("updated_count")
+  skippedCount       Int               @default(0) @map("skipped_count")
+  removedCount       Int               @default(0) @map("removed_count")
+  missingCount       Int               @default(0) @map("missing_count")
+  warningCount       Int               @default(0) @map("warning_count")
+  errorCount         Int               @default(0) @map("error_count")
+  reportPath         String?           @map("report_path") @db.VarChar(1024)
+  reportJson         Json?             @map("report_json")
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  manufacturer Manufacturer? @relation(fields: [manufacturerId], references: [id], onDelete: SetNull)
+
+  @@index([manufacturerCode])
+  @@index([manufacturerId])
+  @@index([startedAt(sort: Desc)])
+  @@index([status])
+  @@map("import_batches")
+}
+
+/// Append-only catalog change log for Studio history views.
+model CatalogAuditEntry {
+  id          String             @id @default(uuid()) @db.Uuid
+  lureModelId String?            @map("lure_model_id") @db.Uuid
+  entityType  String             @map("entity_type") @db.VarChar(64)
+  entityId    String             @map("entity_id") @db.Uuid
+  action      CatalogAuditAction @map("action")
+  actor       String             @default("local-admin") @db.VarChar(128)
+  summary     String             @db.VarChar(512)
+  metadata    Json?
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  lureModel LureModel? @relation(fields: [lureModelId], references: [id], onDelete: SetNull)
+
+  @@index([lureModelId, createdAt(sort: Desc)])
+  @@index([action])
+  @@index([createdAt(sort: Desc)])
+  @@map("catalog_audit_entries")
 }

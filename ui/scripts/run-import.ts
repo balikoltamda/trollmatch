@@ -8,7 +8,8 @@ import {
   manufacturerRegistry,
   parseManufacturerCliFlags,
 } from "../src/modules/import/registry/registered-importers";
-import { printImportReport } from "../src/modules/import/reporting/import-report";
+import { buildImportReport, printImportReport } from "../src/modules/import/reporting/import-report";
+import { persistImportBatch } from "../src/modules/studio/data/import-batch";
 
 loadEnv({ cwd: resolve(import.meta.dirname, "..") });
 
@@ -94,22 +95,31 @@ async function main(): Promise<void> {
       });
 
       printImportSummary(result.summary);
-      printImportReport({
+
+      const report = buildImportReport({
         manufacturer: result.manufacturer,
         displayName: result.displayName,
-        startedAt: result.startedAt,
-        completedAt: result.completedAt,
-        durationMs: result.durationMs,
+        startedAt: new Date(result.startedAt),
+        completedAt: new Date(result.completedAt),
         productsProcessed: result.productsProcessed,
-        created: result.summary.created.length,
-        updated: result.summary.updated.length,
-        skipped: result.summary.skipped.length,
-        removed: result.summary.removed?.length ?? 0,
-        warnings: result.summary.warnings,
-        errors: result.summary.errors,
         summary: result.summary,
-        reportPath: result.reportPath,
+        warnings: result.summary.warnings,
       });
+
+      const reportPath =
+        result.reportPath ??
+        (await (async () => {
+          const { writeImportReport } = await import(
+            "../src/modules/import/reporting/import-report"
+          );
+          return writeImportReport(report, resolve(import.meta.dirname, "..", ".."));
+        })());
+
+      report.reportPath = reportPath;
+
+      await persistImportBatch(prisma, result, { ...report, reportPath });
+
+      printImportReport({ ...report, reportPath });
 
       if (!result.success) {
         hadFailure = true;
