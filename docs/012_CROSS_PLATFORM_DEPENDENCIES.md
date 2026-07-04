@@ -18,3 +18,9 @@ When dependencies change:
 4. Commit the regenerated `package-lock.json`
 
 Do not regenerate the lockfile over an existing `node_modules` tree.
+
+Verify the lockfile before committing:
+
+```bash
+npm run verify:lockfile
+```

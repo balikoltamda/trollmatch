@@ -13,11 +13,21 @@
   "workspaces": [
     "ui"
   ],
+  "packageManager": "npm@11.16.0",
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": ">=11.6.4",
+      "onFail": "warn"
+    }
+  },
   "scripts": {
     "dev": "npm run dev --workspace=ui",
     "build": "npm run build --workspace=ui",
     "start": "npm run start --workspace=ui",
     "lint": "npm run lint --workspace=ui",
+    "typecheck": "npm run typecheck --workspace=ui",
+    "verify:lockfile": "node scripts/verify-lockfile-native-bindings.mjs",
     "format": "npm run format --workspace=ui",
     "format:check": "npm run format:check --workspace=ui",
     "db:up": "docker compose up postgres -d --wait",

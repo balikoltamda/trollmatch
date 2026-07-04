@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Verify lockfile native bindings
+        run: npm run verify:lockfile
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Linux native bindings installed
+        run: |
+          npm ls @swc/core-linux-x64-gnu
+          npm ls @parcel/watcher-linux-x64-glibc
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: postgresql://trollmatch:trollmatch@localhost:5432/trollmatch
