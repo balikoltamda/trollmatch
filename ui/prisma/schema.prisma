@@ -106,8 +106,47 @@ enum CatalogAuditAction {
   PUBLISH
   UNPUBLISH
   BULK_ACTION
+  SUGGESTION_APPROVE
+  SUGGESTION_REJECT
+  SUGGESTION_CORRECT
+  SUGGESTION_MERGE
 
   @@map("catalog_audit_action")
+}
+
+/// Provenance of a catalog suggestion awaiting editorial verification.
+enum SuggestionSource {
+  IMPORTER
+  AI_ENRICHMENT
+  COMMUNITY_REPORT
+  AI_SUMMARY
+  EDITOR
+
+  @@map("suggestion_source")
+}
+
+/// Lifecycle of a verification suggestion.
+enum SuggestionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  MERGED
+  SUPERSEDED
+
+  @@map("suggestion_status")
+}
+
+/// What kind of catalog change a suggestion proposes.
+enum SuggestionKind {
+  FIELD_VALUE
+  SPECIES_LINK
+  TECHNIQUE_LINK
+  EDITOR_NOTE
+  IMAGE_COVER
+  SUMMARY
+  MERGE_CANDIDATE
+
+  @@map("suggestion_kind")
 }
 
 /// Pending importer field changes — editors accept or reject before reverting.
@@ -221,6 +260,7 @@ model LureModel {
   editorNote          LureEditorNote?
   auditEntries        CatalogAuditEntry[]
   importFieldChanges  ImportFieldChange[]
+  catalogSuggestions  CatalogSuggestion[]
 
   @@index([manufacturerId])
   @@index([productLineId])
@@ -613,13 +653,42 @@ model ImportFieldChange {
   createdAt      DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
   resolvedAt     DateTime?               @map("resolved_at") @db.Timestamptz(6)
 
-  lureModel   LureModel    @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
-  importBatch ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  lureModel   LureModel           @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+  importBatch ImportBatch?        @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  suggestion  CatalogSuggestion?
 
   @@index([lureModelId, status])
   @@index([importBatchId])
   @@index([createdAt(sort: Desc)])
   @@map("import_field_changes")
+}
+
+/// Editorial verification suggestion — approve, reject, correct, or merge instead of typing.
+model CatalogSuggestion {
+  id                  String               @id @default(uuid()) @db.Uuid
+  lureModelId         String               @map("lure_model_id") @db.Uuid
+  kind                SuggestionKind       @default(FIELD_VALUE)
+  fieldKey            String?              @map("field_key") @db.VarChar(64)
+  fieldLabel          String               @map("field_label") @db.VarChar(128)
+  currentValue        String?              @map("current_value") @db.Text
+  suggestedValue      String?              @map("suggested_value") @db.Text
+  confidence          EditorNoteConfidence @default(MEDIUM)
+  source              SuggestionSource
+  reasoning           String?              @db.Text
+  provenance          Json?
+  status              SuggestionStatus     @default(PENDING)
+  importFieldChangeId String?              @unique @map("import_field_change_id") @db.Uuid
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  resolvedAt          DateTime?            @map("resolved_at") @db.Timestamptz(6)
+  resolvedBy          String?              @map("resolved_by") @db.VarChar(128)
+
+  lureModel         LureModel          @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+  importFieldChange ImportFieldChange? @relation(fields: [importFieldChangeId], references: [id], onDelete: SetNull)
+
+  @@index([lureModelId, status])
+  @@index([source, status])
+  @@index([createdAt(sort: Desc)])
+  @@map("catalog_suggestions")
 }
 
 /// Append-only catalog change log for Studio history views.

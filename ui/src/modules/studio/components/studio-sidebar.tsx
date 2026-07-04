@@ -18,16 +18,15 @@ import { cn } from "@/lib/utils";
 import type { StudioNavItem } from "@/modules/studio/types";
 
 const NAV_ITEMS: StudioNavItem[] = [
-  { href: "/studio", label: "Dashboard", icon: "dashboard" },
-  { href: "/studio/review", label: "Review Queue", icon: "review" },
+  { href: "/studio", label: "Attention", icon: "dashboard" },
+  { href: "/studio/review", label: "Verify", icon: "review" },
+  { href: "/studio/community", label: "Community", icon: "community" },
   { href: "/studio/import", label: "Import Center", icon: "import" },
   { href: "/studio/products", label: "Products", icon: "products" },
   { href: "/studio/manufacturers", label: "Manufacturers", icon: "manufacturers" },
   { href: "/studio/species", label: "Fish Species", icon: "species" },
   { href: "/studio/techniques", label: "Techniques", icon: "techniques" },
-  { href: "/studio/community", label: "Community", icon: "community" },
   { href: "/studio/media", label: "Media Library", icon: "media" },
-  { href: "/studio/notes", label: "Editor Notes", icon: "notes" },
   { href: "/studio/settings", label: "Settings", icon: "settings" },
 ];
 
@@ -58,7 +57,7 @@ export function StudioSidebar({ currentPath }: StudioSidebarProps) {
             Balık Oltamda Studio
           </span>
           <span className="text-muted-foreground mt-0.5 block text-xs">
-            TrollMatch CMS
+            Editorial verification
           </span>
         </Link>
       </div>

@@ -141,3 +141,42 @@ Last import, product counts, needs review, published, missing, import history wi
 
 Human-readable report sections from `import_batches.report_json`.
 
+---
+
+## Sprint 6.2 — Verification-first Studio
+
+### Philosophy
+
+Balık Oltamda **validates** content; it does not write most of it. Editors approve, reject, correct, or merge — they should not type thousands of products.
+
+### Pipeline
+
+```
+Manufacturer → Importer → AI enrichment → Community reports → AI summary
+  → Editorial verification → Published
+```
+
+### `catalog_suggestions`
+
+Every pending change is a suggestion with **confidence**, **source**, **reasoning**, and **provenance**:
+
+| Source | Origin |
+|--------|--------|
+| `IMPORTER` | Synced from `import_field_changes` |
+| `AI_ENRICHMENT` | Gap-filling from completeness + catalog context |
+| `COMMUNITY_REPORT` | Angler effectiveness data (mock enrichment today) |
+| `AI_SUMMARY` | RAG-style field note drafts |
+
+Actions: `SUGGESTION_APPROVE`, `SUGGESTION_REJECT`, `SUGGESTION_CORRECT`, `SUGGESTION_MERGE` in audit log.
+
+### Attention inbox (`/studio`)
+
+Dashboard answers one question: **What requires my attention today?** No stat cards — only actionable verification items sorted by urgency.
+
+### Product editor
+
+Default tab is **Verify** (suggestion cards). **Manual override** collapses canonical + editor notes for exceptions only.
+
+Migration: `20250704200000_studio_verification_suggestions`
+
+

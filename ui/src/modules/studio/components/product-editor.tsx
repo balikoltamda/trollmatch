@@ -14,7 +14,9 @@ import {
 import { CompletenessBar } from "@/modules/studio/components/completeness-bar";
 import { EditorialStatusBadge } from "@/modules/studio/components/editorial-status-badge";
 import { ImageReviewPanel } from "@/modules/studio/components/image-review-panel";
-import { ImportDiffPanel } from "@/modules/studio/components/import-diff-panel";
+import { SOURCE_LABELS } from "@/modules/studio/lib/suggestion-labels";
+import { VerificationPanel } from "@/modules/studio/components/verification-panel";
+import type { VerificationSuggestion } from "@/modules/studio/components/verification-panel";
 import {
   StudioField,
   StudioInput,
@@ -26,13 +28,11 @@ import type { ProductEditorData } from "@/modules/studio/types";
 import { cn } from "@/lib/utils";
 
 const TABS = [
+  "Verify",
   "General",
   "Manufacturer",
-  "Canonical",
-  "Editor Notes",
-  "Import Changes",
+  "Manual override",
   "Images",
-  "Community",
   "History",
 ] as const;
 
@@ -49,7 +49,7 @@ export function ProductEditor({
   techniqueOptions,
   speciesOptions,
 }: ProductEditorProps) {
-  const [tab, setTab] = useState<Tab>("General");
+  const [tab, setTab] = useState<Tab>("Verify");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -191,6 +191,22 @@ export function ProductEditor({
         </p>
       ) : null}
 
+      {tab === "Verify" && (
+        <VerificationPanel
+          lureModelId={product.id}
+          productName={product.nameEn}
+          suggestions={
+            product.pendingSuggestions.map(
+              (s) =>
+                ({
+                  ...s,
+                  source: s.source in SOURCE_LABELS ? s.source : "AI_ENRICHMENT",
+                }) as VerificationSuggestion,
+            )
+          }
+        />
+      )}
+
       {tab === "General" && (
         <div className="grid gap-4 md:grid-cols-2">
           <ReadOnlyField label="Slug" value={product.slug} />
@@ -240,8 +256,14 @@ export function ProductEditor({
         </div>
       )}
 
-      {tab === "Canonical" && (
-        <div className="space-y-6">
+      {tab === "Manual override" && (
+        <div className="space-y-8">
+          <p className="text-muted-foreground text-sm">
+            Manual entry is the exception — use only when suggestions cannot
+            cover a correction.
+          </p>
+          <section>
+            <h3 className="mb-4 text-sm font-semibold">Canonical fields</h3>
           <div className="grid gap-4 md:grid-cols-2">
             <StudioField label="Name (EN)">
               <StudioInput
@@ -415,12 +437,11 @@ export function ProductEditor({
           >
             Save canonical data
           </button>
-        </div>
-      )}
+          </section>
 
-      {tab === "Editor Notes" && (
-        <div className="space-y-6">
-          <p className="text-muted-foreground text-sm">
+          <section>
+            <h3 className="mb-4 text-sm font-semibold">Editor notes</h3>
+          <p className="text-muted-foreground mb-4 text-sm">
             Balık Oltamda editorial layer — never overwritten by imports.
           </p>
           <div className="grid gap-4 md:grid-cols-2">
@@ -652,25 +673,12 @@ export function ProductEditor({
           >
             Save editor notes
           </button>
+          </section>
         </div>
-      )}
-
-      {tab === "Import Changes" && (
-        <ImportDiffPanel
-          lureModelId={product.id}
-          diffs={product.pendingImportDiffs}
-        />
       )}
 
       {tab === "Images" && (
         <ImageReviewPanel lureModelId={product.id} images={product.images} />
-      )}
-
-      {tab === "Community" && (
-        <p className="text-muted-foreground text-sm">
-          Community reports are read-only in this sprint. Moderation tools come
-          later.
-        </p>
       )}
 
       {tab === "History" && (

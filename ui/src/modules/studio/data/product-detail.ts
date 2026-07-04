@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { listProductSuggestions } from "@/modules/studio/data/attention-inbox";
 import {
   computeCompleteness,
   editorNoteHasMeaningfulContent,
@@ -118,6 +119,8 @@ export async function getProductEditorData(
 
   if (!model) return null;
 
+  const suggestions = await listProductSuggestions(id);
+
   const hasCover = model.images.some((img) => img.role === "HERO");
   const moderatorSpecies = model.lureSpeciesLinks.filter(
     (l) => l.associationKind === "MODERATOR_CURATED",
@@ -213,6 +216,21 @@ export async function getProductEditorData(
       newValue: diff.newValue,
       status: diff.status,
       createdAt: diff.createdAt,
+    })),
+    pendingSuggestions: suggestions.map((s) => ({
+      id: s.id,
+      kind: s.kind,
+      fieldLabel: s.fieldLabel,
+      fieldKey: s.fieldKey,
+      currentValue: s.currentValue,
+      suggestedValue: s.suggestedValue,
+      confidence: s.confidence,
+      source: s.source,
+      reasoning: s.reasoning,
+      provenance:
+        s.provenance && typeof s.provenance === "object"
+          ? (s.provenance as Record<string, unknown>)
+          : null,
     })),
     completeness: {
       score: completeness.score,

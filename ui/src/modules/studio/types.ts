@@ -137,6 +137,7 @@ export type ProductEditorData = {
     createdAt: Date;
   }[];
   pendingImportDiffs: ImportFieldChangeRow[];
+  pendingSuggestions: VerificationSuggestionRow[];
   completeness: {
     score: number;
     missing: string[];
@@ -151,6 +152,19 @@ export type ImportFieldChangeRow = {
   newValue: string | null;
   status: string;
   createdAt: Date;
+};
+
+export type VerificationSuggestionRow = {
+  id: string;
+  kind: string;
+  fieldLabel: string;
+  fieldKey: string | null;
+  currentValue: string | null;
+  suggestedValue: string | null;
+  confidence: EditorNoteConfidence;
+  source: string;
+  reasoning: string | null;
+  provenance: Record<string, unknown> | null;
 };
 
 export type EditorNoteForm = {

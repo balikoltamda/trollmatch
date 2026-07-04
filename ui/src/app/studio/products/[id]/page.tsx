@@ -32,14 +32,14 @@ export default async function StudioProductEditorPage({ params }: PageProps) {
   return (
     <>
       <StudioPageHeader
-        title="Product editor"
-        description="On the box (read-only) · canonical (editable) · editor notes (Balık Oltamda)."
+        title={product.nameEn}
+        description="Verify suggestions first — manual override only when needed."
         actions={
           <Link
-            href="/studio/products"
+            href="/studio"
             className={buttonVariants({ size: "sm", variant: "outline" })}
           >
-            Back to products
+            Attention inbox
           </Link>
         }
       />
