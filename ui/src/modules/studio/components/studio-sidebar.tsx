@@ -57,7 +57,7 @@ export function StudioSidebar({ currentPath }: StudioSidebarProps) {
             Balık Oltamda Studio
           </span>
           <span className="text-muted-foreground mt-0.5 block text-xs">
-            Editorial verification
+            Trust is the product
           </span>
         </Link>
       </div>

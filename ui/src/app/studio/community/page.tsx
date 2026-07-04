@@ -11,6 +11,12 @@ import { ensureAttentionSuggestions } from "@/modules/studio/lib/suggestion-gene
 
 export const dynamic = "force-dynamic";
 
+const CONFIDENCE_TONE = {
+  HIGH: "ocean",
+  MEDIUM: "muted",
+  LOW: "coral",
+} as const;
+
 export default async function StudioCommunityPage() {
   await ensureAttentionSuggestions(40);
   const suggestions = await listCommunitySuggestions(50);
@@ -18,8 +24,8 @@ export default async function StudioCommunityPage() {
   return (
     <>
       <StudioPageHeader
-        title="Community reports"
-        description="Angler catch data and effectiveness claims — verify before they become canonical."
+        title="Community consensus"
+        description="Angler catch reports and effectiveness claims — verify evidence before they earn trust on the public site."
       />
       <StudioPageBody>
         {suggestions.length === 0 ? (
@@ -45,20 +51,41 @@ export default async function StudioCommunityPage() {
                       {s.lureModel.manufacturer.nameEn}
                     </p>
                   </div>
-                  <Badge variant="muted">{SOURCE_LABELS.COMMUNITY_REPORT}</Badge>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="muted">{SOURCE_LABELS.COMMUNITY_REPORT}</Badge>
+                    <Badge
+                      variant={
+                        CONFIDENCE_TONE[s.confidence as keyof typeof CONFIDENCE_TONE] ??
+                        "muted"
+                      }
+                    >
+                      {s.confidence} confidence
+                    </Badge>
+                  </div>
                 </div>
                 <p className="mt-2 text-sm font-medium">{s.fieldLabel}</p>
                 <p className="text-muted-foreground mt-1 text-sm">
                   Suggested: {s.suggestedValue ?? "—"}
                 </p>
                 {s.reasoning ? (
-                  <p className="text-muted-foreground mt-2 text-xs">{s.reasoning}</p>
+                  <p className="text-muted-foreground mt-2 text-xs">
+                    <span className="text-foreground font-medium">Evidence: </span>
+                    {s.reasoning}
+                  </p>
+                ) : null}
+                {s.provenance && typeof s.provenance === "object" ? (
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    <span className="text-foreground font-medium">Provenance: </span>
+                    {Object.entries(s.provenance as Record<string, unknown>)
+                      .map(([k, v]) => `${k}=${String(v)}`)
+                      .join(" · ")}
+                  </p>
                 ) : null}
                 <Link
                   href={`/studio/products/${s.lureModel.id}`}
                   className={buttonVariants({ size: "sm", className: "mt-3" })}
                 >
-                  Verify
+                  Verify & build trust
                 </Link>
               </li>
             ))}

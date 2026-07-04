@@ -179,4 +179,33 @@ Default tab is **Verify** (suggestion cards). **Manual override** collapses cano
 
 Migration: `20250704200000_studio_verification_suggestions`
 
+---
+
+## Sprint 6.3 — Trust is the product
+
+### Philosophy
+
+Do not optimize for editing. Optimize for **confidence**. Every screen should answer: **Why should I trust this information?**
+
+Show provenance, evidence, confidence, community consensus, and editorial verification.
+
+### Trust module (`ui/src/modules/trust/`)
+
+- `TrustProfile` — layered trust signals for Studio (editorial, import, community, suggestions)
+- `PublicTrustSummary` — consumer-facing summary on lure detail pages
+- `computeTrustScore` / `derivePublicVerificationStatus` — derived from lifecycle, editor notes, imports, pending suggestions, publish audit
+- `TrustSummary` / `TrustScorePill` — shared UI components
+
+### Public lure pages
+
+**Why trust this?** section (`LureTrustSummary`) after hero: verification status, last verified, confidence, provenance layers, community consensus.
+
+### Studio
+
+- Sidebar tagline: *Trust is the product*
+- Dashboard reframed around trust question (attention inbox carries trust score + provenance)
+- Products table: **Trust** column (replaces Completeness)
+- Product editor: **Trust** tab first (before Verify)
+- Community page: confidence, evidence, provenance on suggestions
+- Suggestion resolve revalidates public lure pages (`/tr/lures/[slug]`, `/en/lures/[slug]`)
 

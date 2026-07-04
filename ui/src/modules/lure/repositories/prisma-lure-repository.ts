@@ -8,6 +8,11 @@ import {
 } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getLureDetailEnrichment } from "@/modules/lure/data/lure-detail-enrichment";
+import {
+  buildPublicTrustSummary,
+  deriveLastVerifiedAt,
+  derivePublicVerificationStatus,
+} from "@/modules/trust/lib/compute-product-trust";
 import type { LureRepository } from "@/modules/lure/repositories/lure-repository";
 import type {
   LocalizedString,
@@ -21,6 +26,11 @@ import type {
 const PLACEHOLDER_IMAGE = "/lures/placeholder.svg";
 
 type LureModelRecord = LureModel & {
+  lifecycleState: LureModel["lifecycleState"];
+  editorNote: {
+    confidence: import("@/generated/prisma/client").EditorNoteConfidence;
+    updatedAt: Date;
+  } | null;
   manufacturer: {
     nameEn: string;
     nameTr: string;
@@ -273,7 +283,10 @@ function resolveActiveVariant(
   );
 }
 
-function mapRecordToLureDetail(record: LureModelRecord): LureDetail {
+function mapRecordToLureDetail(
+  record: LureModelRecord,
+  trustContext: { pendingSuggestions: number; publishedAt: Date | null },
+): LureDetail {
   const enrichment = getLureDetailEnrichment(record.slug, record.updatedAt);
   const variants = record.variants.map((variant) =>
     mapVariant(variant, record.images),
@@ -294,6 +307,30 @@ function mapRecordToLureDetail(record: LureModelRecord): LureDetail {
   );
   const dbDivingDepth = mapDbDivingDepth(record);
 
+  const verificationStatus = derivePublicVerificationStatus({
+    lifecycleState: record.lifecycleState,
+    editorConfidence: record.editorNote?.confidence ?? null,
+    lastImportedAt: record.lastImportedAt,
+    pendingSuggestions: trustContext.pendingSuggestions,
+  });
+
+  const lastVerifiedAt = deriveLastVerifiedAt({
+    lifecycleState: record.lifecycleState,
+    publishedAt: trustContext.publishedAt,
+    lastImportedAt: record.lastImportedAt,
+    editorNoteUpdatedAt: record.editorNote?.updatedAt ?? null,
+  });
+
+  const trust = buildPublicTrustSummary({
+    slug: record.slug,
+    lifecycleState: record.lifecycleState,
+    lastImportedAt: record.lastImportedAt,
+    editorConfidence: record.editorNote?.confidence ?? null,
+    pendingSuggestions: trustContext.pendingSuggestions,
+    manufacturerName: record.manufacturer.nameEn,
+    publishedAt: trustContext.publishedAt,
+  });
+
   return {
     slug: record.slug,
     manufacturer: toLocalized(
@@ -313,8 +350,8 @@ function mapRecordToLureDetail(record: LureModelRecord): LureDetail {
       record.shortDescriptionEn ?? "",
       record.shortDescriptionTr ?? "",
     ),
-    verificationStatus: enrichment.verificationStatus,
-    lastVerifiedAt: enrichment.lastVerifiedAt,
+    verificationStatus,
+    lastVerifiedAt,
     defaultVariantId,
     variants,
     specifications: {
@@ -351,6 +388,7 @@ function mapRecordToLureDetail(record: LureModelRecord): LureDetail {
     relatedLures: enrichment.relatedLures,
     sponsoredLinks: enrichment.sponsoredLinks,
     changeHistory: enrichment.changeHistory,
+    trust,
   };
 }
 
@@ -393,7 +431,27 @@ const lureModelInclude = {
     where: { deletedAt: null },
     include: { technique: true },
   },
+  editorNote: {
+    select: { confidence: true, updatedAt: true },
+  },
 } satisfies Prisma.LureModelInclude;
+
+async function loadTrustContext(lureModelId: string) {
+  const [pendingSuggestions, publishedEntry] = await Promise.all([
+    prisma.catalogSuggestion.count({
+      where: { lureModelId, status: "PENDING" },
+    }),
+    prisma.catalogAuditEntry.findFirst({
+      where: { lureModelId, action: "PUBLISH" },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    }),
+  ]);
+  return {
+    pendingSuggestions,
+    publishedAt: publishedEntry?.createdAt ?? null,
+  };
+}
 
 async function findLureModelBySlug(
   slug: string,
@@ -414,7 +472,8 @@ export const prismaLureRepository: LureRepository = {
         return null;
       }
 
-      const lure = mapRecordToLureDetail(record);
+      const trustContext = await loadTrustContext(record.id);
+      const lure = mapRecordToLureDetail(record, trustContext);
       const activeVariant = resolveActiveVariant(lure, variantId);
 
       return {

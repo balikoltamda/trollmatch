@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { bulkProductAction } from "@/modules/studio/actions/bulk-actions";
-import { CompletenessBar } from "@/modules/studio/components/completeness-bar";
+import { TrustScorePill } from "@/modules/trust/components/trust-summary";
 import { EditorialStatusBadge } from "@/modules/studio/components/editorial-status-badge";
 import {
   StudioTable,
@@ -171,7 +171,7 @@ export function ProductsTable({
             </StudioTh>
             <StudioTh>Product</StudioTh>
             <StudioTh>Manufacturer</StudioTh>
-            <StudioTh>Completeness</StudioTh>
+            <StudioTh>Trust</StudioTh>
             <StudioTh>State</StudioTh>
             <StudioTh>Feed</StudioTh>
           </tr>
@@ -204,12 +204,8 @@ export function ProductsTable({
                   <p className="text-muted-foreground text-xs">{row.slug}</p>
                 </StudioTd>
                 <StudioTd>{row.manufacturerName}</StudioTd>
-                <StudioTd className="min-w-40">
-                  <CompletenessBar
-                    score={row.completenessScore}
-                    missing={row.completenessMissing}
-                    compact
-                  />
+                <StudioTd>
+                  <TrustScorePill score={row.trustScore} />
                 </StudioTd>
                 <StudioTd>
                   <EditorialStatusBadge state={row.lifecycleState} />

@@ -5,6 +5,8 @@ import type {
 } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { ensureAttentionSuggestions } from "@/modules/studio/lib/suggestion-generator";
+import { computeTrustScore } from "@/modules/trust/lib/derive-verification";
+import { LURE_DETAIL_ENRICHMENTS } from "@/modules/lure/data/lure-detail-enrichment";
 
 export type AttentionItem = {
   id: string;
@@ -27,6 +29,7 @@ export type AttentionItem = {
     kind: string;
   } | null;
   publishReady: boolean;
+  trustScore: number;
 };
 
 const SOURCE_PRIORITY: Record<SuggestionSource, number> = {
@@ -74,7 +77,10 @@ export async function getAttentionInbox(limit = 50): Promise<AttentionItem[]> {
         slug: true,
         nameEn: true,
         lifecycleState: true,
+        lastImportedAt: true,
+        manufacturerStatus: true,
         manufacturer: { select: { nameEn: true } },
+        editorNote: { select: { confidence: true } },
       },
     }),
     prisma.catalogSuggestion.findMany({
@@ -101,6 +107,20 @@ export async function getAttentionInbox(limit = 50): Promise<AttentionItem[]> {
       const top = sorted[0];
       if (!top) return null;
 
+      const community =
+        LURE_DETAIL_ENRICHMENTS[product.slug]?.communityStatistics
+          .verifiedCatchReportCount ?? 0;
+
+      const trustScore = computeTrustScore({
+        lifecycleState: product.lifecycleState,
+        editorConfidence: product.editorNote?.confidence ?? null,
+        lastImportedAt: product.lastImportedAt,
+        pendingSuggestions: group._count.id,
+        hasEditorNote: product.editorNote !== null,
+        communityCatchReports: community,
+        manufacturerActive: product.manufacturerStatus === "ACTIVE",
+      });
+
       const item: AttentionItem = {
         id: `attention-${product.id}`,
         productId: product.id,
@@ -125,6 +145,7 @@ export async function getAttentionInbox(limit = 50): Promise<AttentionItem[]> {
           kind: top.kind,
         },
         publishReady: false,
+        trustScore,
       };
       return item;
     })
@@ -157,7 +178,10 @@ async function listPublishReadyWithoutSuggestions(
       slug: true,
       nameEn: true,
       lifecycleState: true,
+      lastImportedAt: true,
+      manufacturerStatus: true,
       manufacturer: { select: { nameEn: true } },
+      editorNote: { select: { confidence: true } },
     },
   });
 
@@ -172,6 +196,17 @@ async function listPublishReadyWithoutSuggestions(
     pendingCount: 0,
     topSuggestion: null,
     publishReady: true,
+    trustScore: computeTrustScore({
+      lifecycleState: product.lifecycleState,
+      editorConfidence: product.editorNote?.confidence ?? null,
+      lastImportedAt: product.lastImportedAt,
+      pendingSuggestions: 0,
+      hasEditorNote: product.editorNote !== null,
+      communityCatchReports:
+        LURE_DETAIL_ENRICHMENTS[product.slug]?.communityStatistics
+          .verifiedCatchReportCount ?? 0,
+      manufacturerActive: product.manufacturerStatus === "ACTIVE",
+    }),
   }));
 }
 

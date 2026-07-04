@@ -5,6 +5,7 @@ import { useTransition } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { publishProduct } from "@/modules/studio/actions/product-actions";
+import { TrustScorePill } from "@/modules/trust/components/trust-summary";
 import { SOURCE_LABELS } from "@/modules/studio/lib/suggestion-labels";
 import type { AttentionItem } from "@/modules/studio/data/attention-inbox";
 import { EditorialStatusBadge } from "@/modules/studio/components/editorial-status-badge";
@@ -64,6 +65,7 @@ export function AttentionInbox({ items }: AttentionInboxProps) {
                     {item.pendingCount} to verify
                   </Badge>
                 )}
+                <TrustScorePill score={item.trustScore} />
               </div>
               <p className="text-muted-foreground mt-1 text-sm">
                 {item.manufacturerName} · {item.productSlug}
@@ -95,6 +97,15 @@ export function AttentionInbox({ items }: AttentionInboxProps) {
                   {item.topSuggestion.reasoning ? (
                     <p className="text-muted-foreground mt-2 text-xs">
                       {item.topSuggestion.reasoning}
+                    </p>
+                  ) : null}
+                  {item.topSuggestion.provenance &&
+                  Object.keys(item.topSuggestion.provenance).length > 0 ? (
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      Provenance:{" "}
+                      {Object.entries(item.topSuggestion.provenance)
+                        .map(([k, v]) => `${k}=${String(v)}`)
+                        .join(" · ")}
                     </p>
                   ) : null}
                 </div>

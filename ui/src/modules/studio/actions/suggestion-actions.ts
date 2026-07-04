@@ -30,6 +30,7 @@ async function applySuggestionValue(
     kind: string;
     fieldKey: string | null;
     suggestedValue: string | null;
+    source?: string;
   },
   value: string,
 ): Promise<void> {
@@ -69,11 +70,15 @@ async function applySuggestionValue(
         select: { id: true },
       });
       if (species) {
+        const associationKind =
+          suggestion.source === "COMMUNITY_REPORT"
+            ? "COMMUNITY_EFFECTIVENESS"
+            : "MODERATOR_CURATED";
         await tx.lureSpecies.create({
           data: {
             lureModelId,
             fishSpeciesId: species.id,
-            associationKind: "MODERATOR_CURATED",
+            associationKind,
           },
         });
       }
@@ -136,12 +141,24 @@ async function resolveLinkedImportDiff(
   });
 }
 
-function revalidateStudio(lureModelId: string) {
+function revalidateStudio(lureModelId: string, slug?: string) {
   revalidatePath("/studio");
   revalidatePath("/studio/review");
   revalidatePath("/studio/community");
   revalidatePath(`/studio/products/${lureModelId}`);
   revalidatePath("/studio/products");
+  if (slug) {
+    revalidatePath(`/tr/lures/${slug}`);
+    revalidatePath(`/en/lures/${slug}`);
+  }
+}
+
+async function revalidateForProduct(lureModelId: string) {
+  const model = await prisma.lureModel.findUnique({
+    where: { id: lureModelId },
+    select: { slug: true },
+  });
+  revalidateStudio(lureModelId, model?.slug);
 }
 
 export async function approveSuggestion(
@@ -188,7 +205,7 @@ export async function approveSuggestion(
       summary: `Approved suggestion: ${suggestion.fieldLabel}`,
     });
 
-    revalidateStudio(suggestion.lureModelId);
+    revalidateForProduct(suggestion.lureModelId);
     return { ok: true };
   } catch (error) {
     return {
@@ -233,7 +250,7 @@ export async function rejectSuggestion(
       summary: `Rejected suggestion: ${suggestion.fieldLabel}`,
     });
 
-    revalidateStudio(suggestion.lureModelId);
+    revalidateForProduct(suggestion.lureModelId);
     return { ok: true };
   } catch (error) {
     return {
@@ -293,7 +310,7 @@ export async function correctSuggestion(
       metadata: { correctedValue: trimmed },
     });
 
-    revalidateStudio(suggestion.lureModelId);
+    revalidateForProduct(suggestion.lureModelId);
     return { ok: true };
   } catch (error) {
     return {
@@ -365,7 +382,7 @@ export async function mergeSuggestions(
       metadata: { mergedIds: allIds, mergedValue: trimmed },
     });
 
-    revalidateStudio(lureModelId);
+    revalidateForProduct(lureModelId);
     return { ok: true };
   } catch (error) {
     return {

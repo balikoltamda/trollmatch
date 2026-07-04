@@ -56,6 +56,7 @@ export type ProductListRow = {
   imageUrl: string | null;
   completenessScore: number;
   completenessMissing: string[];
+  trustScore: number;
 };
 
 export type ProductListFilters = {
@@ -138,6 +139,7 @@ export type ProductEditorData = {
   }[];
   pendingImportDiffs: ImportFieldChangeRow[];
   pendingSuggestions: VerificationSuggestionRow[];
+  trustProfile: import("@/modules/trust/types").TrustProfile | null;
   completeness: {
     score: number;
     missing: string[];

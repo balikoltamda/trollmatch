@@ -13,8 +13,8 @@ export default async function StudioReviewPage() {
   return (
     <>
       <StudioPageHeader
-        title="Verification queue"
-        description="Same attention inbox — every item is a suggestion to approve, reject, correct, or merge."
+        title="Editorial verification"
+        description="Approve evidence-backed suggestions to raise trust scores. Reject anything that does not hold up on the water."
       />
       <StudioPageBody>
         <AttentionInbox items={items} />

@@ -225,6 +225,29 @@ const HALCO_LASER_PRO: LureDetail = {
       actor: { tr: "İçerik editörü", en: "Content editor" },
     },
   ],
+  trust: {
+    score: 88,
+    answer:
+      "Published after editorial verification — box specs plus field-tested notes.",
+    manufacturerImportedAt: "2025-11-14T09:00:00.000Z",
+    editorConfidence: "HIGH",
+    published: true,
+    communityConsensus: {
+      assertions: 47,
+      catchReports: 23,
+      effectivenessBand: "high",
+      summary: "23 verified catch reports · 47 usage assertions · effectiveness: high",
+    },
+    evidence: [
+      "Imported from Halco feed",
+      "Editorially verified and published",
+      "23 verified catch reports",
+    ],
+    provenance: [
+      { label: "Manufacturer", value: "Halco" },
+      { label: "Published", value: "11/14/2025" },
+    ],
+  },
 };
 
 export const MOCK_LURES: Record<string, LureDetail> = {

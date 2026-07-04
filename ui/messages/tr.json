@@ -80,6 +80,16 @@
       "expertEndorsed": "Deneyimli balıkçı onaylı",
       "lastVerified": "Son kontrol"
     },
+    "trust": {
+      "title": "Buna neden güvenmeliyim?",
+      "description": "Kaynak, kanıt, topluluk görüşü ve editoryal doğrulama — tek yerde.",
+      "editorialVerified": "Editoryal doğrulandı",
+      "notPublished": "Henüz yayınlanmadı",
+      "editorConfidence": "Editör güveni",
+      "communityConsensus": "Topluluk görüşü",
+      "evidence": "Kanıt",
+      "provenance": "Kaynak"
+    },
     "sections": {
       "specifications": "Kutuda yazan",
       "specificationsDescription": "Boy, ağırlık, dalış derinliği — üreticinin listelediği özellikler.",

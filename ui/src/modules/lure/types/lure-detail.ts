@@ -98,6 +98,7 @@ export type LureDetail = {
   relatedLures: RelatedLure[];
   sponsoredLinks: SponsoredLink[];
   changeHistory: ChangeHistoryEntry[];
+  trust: import("@/modules/trust/types").PublicTrustSummary;
 };
 
 export type LureDetailParams = {

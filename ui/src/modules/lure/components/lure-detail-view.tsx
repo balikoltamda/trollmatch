@@ -1,4 +1,5 @@
 import { LureHero } from "@/modules/lure/components/sections/lure-hero";
+import { LureTrustSummary } from "@/modules/lure/components/sections/lure-trust-summary";
 import { LureSpecifications } from "@/modules/lure/components/sections/lure-specifications";
 import { LureRecommendedSpecies } from "@/modules/lure/components/sections/lure-recommended-species";
 import { LureRecommendedTechniques } from "@/modules/lure/components/sections/lure-recommended-techniques";
@@ -28,6 +29,7 @@ export async function LureDetailView({
   return (
     <article className="flex flex-col gap-6 sm:gap-8">
       <LureHero lure={lure} activeVariant={activeVariant} locale={locale} />
+      <LureTrustSummary trust={lure.trust} locale={locale} />
       <LureSpecifications lure={lure} locale={locale} />
       <LureRecommendedSpecies species={lure.recommendedSpecies} locale={locale} />
       <LureRecommendedTechniques

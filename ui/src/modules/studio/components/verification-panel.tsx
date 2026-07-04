@@ -77,7 +77,7 @@ export function VerificationPanel({
       <div className="border-border/60 bg-muted/20 rounded-xl border px-6 py-8 text-center">
         <p className="font-medium">Nothing to verify on {productName}</p>
         <p className="text-muted-foreground mt-2 text-sm">
-          All suggestions resolved. Mark Ready or Publish when you are satisfied.
+          All suggestions resolved. Trust score is ready — publish when confident.
         </p>
       </div>
     );

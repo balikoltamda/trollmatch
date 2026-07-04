@@ -80,6 +80,16 @@
       "expertEndorsed": "Backed by an experienced angler",
       "lastVerified": "Last checked"
     },
+    "trust": {
+      "title": "Why trust this?",
+      "description": "Provenance, evidence, community consensus, and editorial verification — in one place.",
+      "editorialVerified": "Editorially verified",
+      "notPublished": "Not yet published",
+      "editorConfidence": "Editor confidence",
+      "communityConsensus": "Community consensus",
+      "evidence": "Evidence",
+      "provenance": "Provenance"
+    },
     "sections": {
       "specifications": "On the box",
       "specificationsDescription": "Length, weight, dive depth, and the rest — as the manufacturer lists them.",

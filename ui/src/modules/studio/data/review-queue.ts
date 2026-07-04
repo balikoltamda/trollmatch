@@ -5,6 +5,7 @@ import {
   editorNoteHasMeaningfulContent,
   type CompletenessResult,
 } from "@/modules/studio/lib/completeness";
+import { computeTrustScore } from "@/modules/trust/lib/derive-verification";
 import type { ProductListRow } from "@/modules/studio/types";
 
 const REVIEW_QUEUE_SELECT = {
@@ -19,11 +20,13 @@ const REVIEW_QUEUE_SELECT = {
   divingDepthMaxM: true,
   lifecycleState: true,
   manufacturerStatus: true,
+  lastImportedAt: true,
   updatedAt: true,
   manufacturer: { select: { nameEn: true, slug: true } },
   editorNote: {
     select: {
       id: true,
+      confidence: true,
       shortRecommendationEn: true,
       shortRecommendationTr: true,
       currentRecommendationEn: true,
@@ -45,6 +48,7 @@ const REVIEW_QUEUE_SELECT = {
   _count: {
     select: {
       images: { where: { deletedAt: null } },
+      catalogSuggestions: { where: { status: "PENDING" } },
     },
   },
 } satisfies Prisma.LureModelSelect;
@@ -88,6 +92,15 @@ function mapReviewRow(row: ReviewQueueRaw): ReviewQueueRow {
     imageUrl: row.images[0]?.url ?? null,
     completenessScore: completeness.score,
     completenessMissing: completeness.missing,
+    trustScore: computeTrustScore({
+      lifecycleState: row.lifecycleState,
+      editorConfidence: row.editorNote?.confidence ?? null,
+      lastImportedAt: row.lastImportedAt,
+      pendingSuggestions: row._count.catalogSuggestions,
+      hasEditorNote: row.editorNote !== null,
+      communityCatchReports: 0,
+      manufacturerActive: row.manufacturerStatus === "ACTIVE",
+    }),
     completeness,
   };
 }

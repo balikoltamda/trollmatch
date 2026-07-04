@@ -75,7 +75,7 @@ export default async function StudioProductsPage({ searchParams }: PageProps) {
     <>
       <StudioPageHeader
         title="Products"
-        description="Power search by model, code, slug, fish, technique, or manufacturer."
+        description="Trust scores reflect provenance, editorial verification, and community evidence — open a product to see why."
       />
       <StudioPageBody>
         <form className="mb-6 grid gap-3 md:grid-cols-6" method="get">

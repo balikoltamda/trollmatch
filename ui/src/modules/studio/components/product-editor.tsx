@@ -15,6 +15,7 @@ import { CompletenessBar } from "@/modules/studio/components/completeness-bar";
 import { EditorialStatusBadge } from "@/modules/studio/components/editorial-status-badge";
 import { ImageReviewPanel } from "@/modules/studio/components/image-review-panel";
 import { SOURCE_LABELS } from "@/modules/studio/lib/suggestion-labels";
+import { TrustSummary } from "@/modules/trust/components/trust-summary";
 import { VerificationPanel } from "@/modules/studio/components/verification-panel";
 import type { VerificationSuggestion } from "@/modules/studio/components/verification-panel";
 import {
@@ -28,6 +29,7 @@ import type { ProductEditorData } from "@/modules/studio/types";
 import { cn } from "@/lib/utils";
 
 const TABS = [
+  "Trust",
   "Verify",
   "General",
   "Manufacturer",
@@ -49,7 +51,7 @@ export function ProductEditor({
   techniqueOptions,
   speciesOptions,
 }: ProductEditorProps) {
-  const [tab, setTab] = useState<Tab>("Verify");
+  const [tab, setTab] = useState<Tab>("Trust");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -188,6 +190,14 @@ export function ProductEditor({
       {message ? (
         <p className="text-muted-foreground rounded-lg bg-muted/50 px-3 py-2 text-sm">
           {message}
+        </p>
+      ) : null}
+
+      {tab === "Trust" && product.trustProfile ? (
+        <TrustSummary profile={product.trustProfile} />
+      ) : tab === "Trust" ? (
+        <p className="text-muted-foreground text-sm">
+          Trust profile unavailable for this product.
         </p>
       ) : null}
 

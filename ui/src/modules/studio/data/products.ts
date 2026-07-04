@@ -5,6 +5,7 @@ import {
   editorNoteHasMeaningfulContent,
 } from "@/modules/studio/lib/completeness";
 import { EDITORIAL_STATUS_OPTIONS } from "@/modules/studio/lib/editorial";
+import { computeTrustScore } from "@/modules/trust/lib/derive-verification";
 import type { ProductListFilters, ProductListRow } from "@/modules/studio/types";
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -21,11 +22,13 @@ const LIST_SELECT = {
   divingDepthMaxM: true,
   lifecycleState: true,
   manufacturerStatus: true,
+  lastImportedAt: true,
   updatedAt: true,
   manufacturer: { select: { nameEn: true, slug: true } },
   editorNote: {
     select: {
       id: true,
+      confidence: true,
       shortRecommendationEn: true,
       shortRecommendationTr: true,
       currentRecommendationEn: true,
@@ -46,7 +49,10 @@ const LIST_SELECT = {
     select: { id: true },
   },
   _count: {
-    select: { images: { where: { deletedAt: null } } },
+    select: {
+      images: { where: { deletedAt: null } },
+      catalogSuggestions: { where: { status: "PENDING" } },
+    },
   },
 } satisfies Prisma.LureModelSelect;
 
@@ -68,6 +74,16 @@ function mapListRow(row: ListRowRaw): ProductListRow {
     editorNoteHasContent: editorNoteHasMeaningfulContent(row.editorNote),
   });
 
+  const trustScore = computeTrustScore({
+    lifecycleState: row.lifecycleState,
+    editorConfidence: row.editorNote?.confidence ?? null,
+    lastImportedAt: row.lastImportedAt,
+    pendingSuggestions: row._count.catalogSuggestions,
+    hasEditorNote: row.editorNote !== null,
+    communityCatchReports: 0,
+    manufacturerActive: row.manufacturerStatus === "ACTIVE",
+  });
+
   return {
     id: row.id,
     slug: row.slug,
@@ -83,6 +99,7 @@ function mapListRow(row: ListRowRaw): ProductListRow {
     imageUrl: row.images[0]?.url ?? null,
     completenessScore: completeness.score,
     completenessMissing: completeness.missing,
+    trustScore,
   };
 }
 

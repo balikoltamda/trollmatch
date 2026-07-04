@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import type { DashboardStats, ProductListRow } from "@/modules/studio/types";
+import { computeTrustScore } from "@/modules/trust/lib/derive-verification";
 import { countReviewQueue } from "@/modules/studio/data/review-queue";
 import {
   computeCompleteness,
   editorNoteHasMeaningfulContent,
 } from "@/modules/studio/lib/completeness";
+import type { DashboardStats, ProductListRow } from "@/modules/studio/types";
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const [
@@ -87,11 +88,13 @@ export async function getLatestEditedProducts(
       divingDepthMaxM: true,
       lifecycleState: true,
       manufacturerStatus: true,
+      lastImportedAt: true,
       updatedAt: true,
       manufacturer: { select: { nameEn: true, slug: true } },
       editorNote: {
         select: {
           id: true,
+          confidence: true,
           shortRecommendationEn: true,
           shortRecommendationTr: true,
           currentRecommendationEn: true,
@@ -112,7 +115,10 @@ export async function getLatestEditedProducts(
         select: { id: true },
       },
       _count: {
-        select: { images: { where: { deletedAt: null } } },
+        select: {
+          images: { where: { deletedAt: null } },
+          catalogSuggestions: { where: { status: "PENDING" } },
+        },
       },
     },
   });
@@ -148,6 +154,15 @@ export async function getLatestEditedProducts(
       imageUrl: row.images[0]?.url ?? null,
       completenessScore: completeness.score,
       completenessMissing: completeness.missing,
+      trustScore: computeTrustScore({
+        lifecycleState: row.lifecycleState,
+        editorConfidence: row.editorNote?.confidence ?? null,
+        lastImportedAt: row.lastImportedAt,
+        pendingSuggestions: row._count.catalogSuggestions,
+        hasEditorNote: row.editorNote !== null,
+        communityCatchReports: 0,
+        manufacturerActive: row.manufacturerStatus === "ACTIVE",
+      }),
     };
   });
 }

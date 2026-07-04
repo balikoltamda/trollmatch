@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { listProductSuggestions } from "@/modules/studio/data/attention-inbox";
+import { computeProductTrustProfile } from "@/modules/trust/lib/compute-product-trust";
 import {
   computeCompleteness,
   editorNoteHasMeaningfulContent,
@@ -120,6 +121,7 @@ export async function getProductEditorData(
   if (!model) return null;
 
   const suggestions = await listProductSuggestions(id);
+  const trustProfile = await computeProductTrustProfile(id);
 
   const hasCover = model.images.some((img) => img.role === "HERO");
   const moderatorSpecies = model.lureSpeciesLinks.filter(
@@ -232,6 +234,7 @@ export async function getProductEditorData(
           ? (s.provenance as Record<string, unknown>)
           : null,
     })),
+    trustProfile,
     completeness: {
       score: completeness.score,
       missing: completeness.missing,
