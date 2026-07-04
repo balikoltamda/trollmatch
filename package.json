@@ -27,6 +27,7 @@
     "start": "npm run start --workspace=ui",
     "lint": "npm run lint --workspace=ui",
     "typecheck": "npm run typecheck --workspace=ui",
+    "verify": "npm run lint && npm run typecheck && npm run build",
     "verify:lockfile": "node scripts/verify-lockfile-native-bindings.mjs",
     "format": "npm run format --workspace=ui",
     "format:check": "npm run format:check --workspace=ui",
