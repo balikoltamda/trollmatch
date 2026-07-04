@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { AppMain } from "@/components/layout/app-shell";
 import { AddLureForm } from "@/modules/lure/components/add-lure/add-lure-form";
 import { routing, type AppLocale } from "@/i18n/routing";
 
@@ -48,7 +49,8 @@ export default async function AddLurePage({ params }: AddLurePageProps) {
   const t = await getTranslations("AddLure");
 
   return (
-    <div className="space-y-6">
+    <AppMain>
+      <div className="space-y-6">
       <header className="space-y-2">
         <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase sm:text-sm">
           {t("eyebrow")}
@@ -86,6 +88,7 @@ export default async function AddLurePage({ params }: AddLurePageProps) {
       />
 
       <p className="text-muted-foreground sr-only">{t("pageLandmark")}</p>
-    </div>
+      </div>
+    </AppMain>
   );
 }

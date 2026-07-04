@@ -45,10 +45,10 @@ export async function generateMetadata({
 
   return {
     title: {
-      default: t("siteName"),
-      template: `%s · ${t("siteName")}`,
+      default: t("brandName"),
+      template: `%s · ${t("brandName")}`,
     },
-    description: t("tagline"),
+    description: t("brandTagline"),
     alternates: {
       languages: {
         tr: "/tr",

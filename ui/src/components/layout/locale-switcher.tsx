@@ -13,7 +13,7 @@ export function LocaleSwitcher() {
 
   return (
     <div
-      className="flex items-center gap-1"
+      className="border-border/80 bg-surface-muted/60 flex items-center gap-0.5 rounded-xl border p-1"
       role="group"
       aria-label={locale === "tr" ? "Dil seçimi" : "Language selection"}
     >

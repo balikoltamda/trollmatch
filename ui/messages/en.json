@@ -3,11 +3,65 @@
     "siteName": "Balık Oltamda Guide",
     "moduleName": "LureAtlas",
     "tagline": "Fishing knowledge platform",
+    "brandName": "TrollMatch",
+    "brandTagline": "Global lure intelligence",
     "navHome": "Home",
+    "navLures": "LureAtlas",
+    "navContribute": "Contribute",
+    "navLabel": "Main navigation",
+    "searchPlaceholder": "Search lures…",
+    "searchAria": "Search lure catalog",
     "footer": "© Balık Oltamda. All rights reserved.",
+    "footerTagline": "A precision catalog for manufacturer lure knowledge and field compatibility.",
+    "footerExplore": "Explore",
+    "footerPlatform": "Platform",
+    "footerTrust": "Trust",
+    "footerDevelopedBy": "TrollMatch is developed by Balık Oltamda.",
+    "footerCopyright": "© 2026 TrollMatch",
+    "footerRights": "All rights reserved.",
     "localeTr": "Türkçe",
     "localeEn": "English",
     "skipToContent": "Skip to content"
+  },
+  "Home": {
+    "meta": {
+      "title": "TrollMatch — Global lure intelligence",
+      "description": "Explore manufacturer-verified lure catalogs, target species, and fishing techniques in one premium knowledge platform."
+    },
+    "hero": {
+      "eyebrow": "LureAtlas · Manufacturer catalog",
+      "title": "Know every lure.",
+      "titleAccent": "Fish with precision.",
+      "description": "TrollMatch unifies factory specifications, import pipelines, and field compatibility into a single source of truth for serious anglers.",
+      "searchPlaceholder": "Search by model, manufacturer, or species…",
+      "searchAria": "Search the lure catalog",
+      "ctaPrimary": "Contribute a lure",
+      "ctaSecondary": "Explore catalog"
+    },
+    "species": {
+      "title": "Featured species",
+      "description": "Target species with the strongest lure compatibility data in the catalog."
+    },
+    "collections": {
+      "title": "Featured collections",
+      "description": "Curated lure families grouped by technique and water column.",
+      "lureCount": "lures"
+    },
+    "manufacturers": {
+      "title": "Featured manufacturers",
+      "description": "Global hard-bait brands connected through the production import registry.",
+      "importing": "Importing",
+      "models": "{count} models catalogued"
+    },
+    "latest": {
+      "title": "Latest imported lures",
+      "description": "Recently synced models from active manufacturer pipelines.",
+      "verified": "Verified"
+    },
+    "statistics": {
+      "title": "Platform statistics",
+      "description": "Live indicators from the TrollMatch catalog and import infrastructure."
+    }
   },
   "LureDetail": {
     "pageLandmark": "Lure detail reference page",

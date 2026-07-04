@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { Container } from "@/components/ui/container";
 
 type AppShellProps = {
   children: ReactNode;
@@ -17,13 +18,18 @@ export function AppShell({ children, skipLabel }: AppShellProps) {
         {skipLabel}
       </a>
       <SiteHeader />
-      <main
-        id="main-content"
-        className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 py-6 sm:px-6 sm:py-8"
-      >
+      <main id="main-content" className="flex-1">
         {children}
       </main>
       <SiteFooter />
     </div>
+  );
+}
+
+export function AppMain({ children }: { children: ReactNode }) {
+  return (
+    <Container size="wide" className="py-8 sm:py-10 lg:py-12">
+      {children}
+    </Container>
   );
 }

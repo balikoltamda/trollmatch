@@ -3,11 +3,65 @@
     "siteName": "Balık Oltamda Guide",
     "moduleName": "LureAtlas",
     "tagline": "Balıkçılık bilgi platformu",
+    "brandName": "TrollMatch",
+    "brandTagline": "Küresel yem istihbaratı",
     "navHome": "Ana sayfa",
+    "navLures": "LureAtlas",
+    "navContribute": "Katkıda bulun",
+    "navLabel": "Ana menü",
+    "searchPlaceholder": "Yem ara…",
+    "searchAria": "Yem kataloğunda ara",
     "footer": "© Balık Oltamda. Tüm hakları saklıdır.",
+    "footerTagline": "Üretici yem bilgisi ve saha uyumluluğu için hassas bir katalog.",
+    "footerExplore": "Keşfet",
+    "footerPlatform": "Platform",
+    "footerTrust": "Güven",
+    "footerDevelopedBy": "TrollMatch, Balık Oltamda tarafından geliştirilmiştir.",
+    "footerCopyright": "© 2026 TrollMatch",
+    "footerRights": "Tüm hakları saklıdır.",
     "localeTr": "Türkçe",
     "localeEn": "English",
     "skipToContent": "İçeriğe atla"
+  },
+  "Home": {
+    "meta": {
+      "title": "TrollMatch — Küresel yem istihbaratı",
+      "description": "Üretici doğrulamalı yem kataloglarını, hedef türleri ve balıkçılık tekniklerini tek bir premium bilgi platformunda keşfedin."
+    },
+    "hero": {
+      "eyebrow": "LureAtlas · Üretici kataloğu",
+      "title": "Her yemi bil.",
+      "titleAccent": "Hassasiyetle avla.",
+      "description": "TrollMatch; fabrika özelliklerini, içe aktarma hatlarını ve saha uyumluluğunu ciddi balıkçılar için tek bir doğruluk kaynağında birleştirir.",
+      "searchPlaceholder": "Model, üretici veya türe göre ara…",
+      "searchAria": "Yem kataloğunda ara",
+      "ctaPrimary": "Yem ekle",
+      "ctaSecondary": "Kataloğu keşfet"
+    },
+    "species": {
+      "title": "Öne çıkan türler",
+      "description": "Katalogda en güçlü yem uyumluluk verisine sahip hedef türler."
+    },
+    "collections": {
+      "title": "Öne çıkan koleksiyonlar",
+      "description": "Teknik ve su kolonuna göre gruplanmış küratörlü yem aileleri.",
+      "lureCount": "yem"
+    },
+    "manufacturers": {
+      "title": "Öne çıkan üreticiler",
+      "description": "Üretim içe aktarma kayıt defteri üzerinden bağlı küresel sert yem markaları.",
+      "importing": "İçe aktarılıyor",
+      "models": "{count} model kataloglandı"
+    },
+    "latest": {
+      "title": "Son içe aktarılan yemler",
+      "description": "Aktif üretici hatlarından son senkronize modeller.",
+      "verified": "Doğrulandı"
+    },
+    "statistics": {
+      "title": "Platform istatistikleri",
+      "description": "TrollMatch kataloğu ve içe aktarma altyapısından canlı göstergeler."
+    }
   },
   "LureDetail": {
     "pageLandmark": "Yem detay referans sayfası",

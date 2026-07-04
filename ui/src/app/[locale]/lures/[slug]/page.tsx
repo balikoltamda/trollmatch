@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { AppMain } from "@/components/layout/app-shell";
 import { LureDetailView } from "@/modules/lure/components/lure-detail-view";
 import {
   getLureDetail,
@@ -94,7 +95,7 @@ export default async function LureDetailPage({
   const t = await getTranslations("LureDetail");
 
   return (
-    <>
+    <AppMain>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -117,6 +118,6 @@ export default async function LureDetailPage({
         variantId={variant}
       />
       <p className="text-muted-foreground sr-only">{t("pageLandmark")}</p>
-    </>
+    </AppMain>
   );
 }
