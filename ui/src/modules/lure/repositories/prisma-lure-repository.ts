@@ -9,6 +9,9 @@ import {
 import { prisma } from "@/lib/prisma";
 import { getLureDetailEnrichment } from "@/modules/lure/data/lure-detail-enrichment";
 import {
+  PUBLIC_LURE_WHERE,
+} from "@/modules/discovery/lib/public-visibility";
+import {
   buildPublicTrustSummary,
   deriveLastVerifiedAt,
   derivePublicVerificationStatus,
@@ -457,7 +460,7 @@ async function findLureModelBySlug(
   slug: string,
 ): Promise<LureModelRecord | null> {
   const record = await prisma.lureModel.findFirst({
-    where: { slug, deletedAt: null },
+    where: { slug, ...PUBLIC_LURE_WHERE },
     include: lureModelInclude,
   });
 
@@ -492,7 +495,7 @@ export const prismaLureRepository: LureRepository = {
   async getAllSlugs() {
     try {
       const models = await prisma.lureModel.findMany({
-        where: { deletedAt: null },
+        where: PUBLIC_LURE_WHERE,
         select: { slug: true },
         orderBy: { slug: "asc" },
       });

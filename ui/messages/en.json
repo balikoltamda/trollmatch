@@ -7,6 +7,7 @@
     "brandPromise": "We bring together what is written on the box and what happens on the water.",
     "brandTagline": "Box specs · water notes",
     "navHome": "Home",
+    "navSpecies": "Fish",
     "navLures": "LureAtlas",
     "navContribute": "Add a lure",
     "navLabel": "Main navigation",
@@ -42,7 +43,8 @@
     },
     "species": {
       "title": "Commonly fished here",
-      "description": "Lüfer, levrek, palamut, and çipura — species people target most in these waters. We list which lures have been tried and reported."
+      "description": "Lüfer, levrek, palamut, and çipura — species people target most in these waters. We list which lures have been tried and reported.",
+      "viewAll": "All target species"
     },
     "collections": {
       "title": "Grouped by how people fish here",
@@ -64,6 +66,66 @@
       "title": "By the numbers",
       "description": "What's in the guide right now — no more, no less."
     }
+  },
+  "Discovery": {
+    "meta": {
+      "title": "Search lures",
+      "description": "Find lures by model, brand, species, or technique.",
+      "searchTitle": "Search: {query}"
+    },
+    "title": "Search lures",
+    "description": "Search by model, brand, species, or how people fish it.",
+    "searchTitle": "Results for “{query}”",
+    "searchDescription": "Lures matching your search across the catalog.",
+    "searchPlaceholder": "Search by model, brand, or species…",
+    "searchAria": "Search lures",
+    "emptyTitle": "No lures found",
+    "emptyDescription": "Try a different spelling, brand name, or fish species.",
+    "browseSpecies": "Browse by fish species",
+    "verified": "Checked",
+    "resultsCount": "{count, plural, =0 {No results} one {# lure} other {# lures}}",
+    "pagination": "Search results pages",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "Lures": {
+    "meta": {
+      "title": "Browse lures",
+      "description": "Every lure in the guide — box specs and field notes for the Aegean and Eastern Mediterranean."
+    },
+    "title": "Browse lures",
+    "description": "Every lure we've logged — from manufacturer box specs to angler field notes.",
+    "emptyTitle": "No lures listed yet",
+    "emptyDescription": "We're adding models from manufacturer pages. Check back soon or add one you know.",
+    "verified": "Checked",
+    "resultsCount": "{count, plural, =0 {No lures} one {# lure} other {# lures}}",
+    "pagination": "Lure list pages",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "Species": {
+    "meta": {
+      "title": "Target species",
+      "description": "Fish people target in Turkey, Cyprus, and the Eastern Mediterranean — and which lures are linked to each.",
+      "detailTitle": "{name} — lures & notes",
+      "detailDescription": "Lures linked to {name} — {count, plural, one {# model} other {# models}} in the guide."
+    },
+    "title": "Target species",
+    "description": "Fish people target in these waters — and which lures have box specs or field notes for each.",
+    "searchPlaceholder": "Search lures for a species…",
+    "searchAria": "Search lures",
+    "empty": "No species in the catalog yet.",
+    "lureCount": "{count, plural, one {# lure} other {# lures}}",
+    "footerHint": "Looking for a specific lure?",
+    "browseLures": "Browse all lures",
+    "breadcrumbLabel": "You are here",
+    "breadcrumbHome": "Home",
+    "breadcrumbSpecies": "Fish",
+    "detailDescription": "{count, plural, =0 {No lures linked yet} one {# lure linked} other {# lures linked}} — box specs and angler notes.",
+    "viewAllLures": "View all lures for this species",
+    "noLuresYet": "No lures linked to this species yet.",
+    "contributeLure": "Add a lure you use for this fish",
+    "verified": "Checked"
   },
   "LureDetail": {
     "pageLandmark": "Lure detail",

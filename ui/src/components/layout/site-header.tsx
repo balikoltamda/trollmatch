@@ -41,7 +41,10 @@ export async function SiteHeader() {
             <Link href="/" className={navLinkClass}>
               {t("navHome")}
             </Link>
-            <Link href="/lures/laser-pro-190-dd" className={navLinkClass}>
+            <Link href="/species" className={navLinkClass}>
+              {t("navSpecies")}
+            </Link>
+            <Link href="/lures" className={navLinkClass}>
               {t("navLures")}
             </Link>
             <Link href="/add-lure" className={navLinkClass}>

@@ -40,7 +40,13 @@ export async function SiteFooter() {
               {t("navHome")}
             </Link>
             <Link
-              href="/lures/laser-pro-190-dd"
+              href="/species"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {t("navSpecies")}
+            </Link>
+            <Link
+              href="/lures"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               {t("navLures")}

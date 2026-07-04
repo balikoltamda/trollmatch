@@ -17,10 +17,12 @@ import { Section } from "@/components/ui/section";
 import type { AppLocale } from "@/i18n/routing";
 import { HeroSearch } from "@/modules/home/components/hero-search";
 import {
+  COLLECTION_LINKS,
+  getHomeDiscoveryData,
+} from "@/modules/discovery/data/home-feed";
+import {
   HOME_COLLECTIONS,
-  HOME_LURES,
   HOME_MANUFACTURERS,
-  HOME_SPECIES,
   HOME_STATISTICS,
   pickLocalized,
 } from "@/modules/home/data/home-content";
@@ -32,12 +34,45 @@ const STAT_ICONS = {
   imports: RefreshCw,
 } as const;
 
+function formatStatValue(id: string, value: number, fromDatabase: boolean): string {
+  if (!fromDatabase) {
+    return HOME_STATISTICS.find((s) => s.id === id)?.value ?? String(value);
+  }
+  if (id === "imports") {
+    return HOME_STATISTICS.find((s) => s.id === "imports")?.value ?? "12";
+  }
+  return value.toLocaleString();
+}
+
 type HomeViewProps = {
   locale: AppLocale;
 };
 
 export async function HomeView({ locale }: HomeViewProps) {
   const t = await getTranslations("Home");
+  const discovery = await getHomeDiscoveryData();
+
+  const liveStats = HOME_STATISTICS.map((stat) => {
+    let value = stat.value;
+    if (discovery.fromDatabase) {
+      if (stat.id === "lures") {
+        value = formatStatValue("lures", discovery.stats.lureCount, true);
+      } else if (stat.id === "manufacturers") {
+        value = formatStatValue(
+          "manufacturers",
+          discovery.stats.manufacturerCount,
+          true,
+        );
+      } else if (stat.id === "species") {
+        value = formatStatValue(
+          "species",
+          discovery.stats.speciesCount,
+          true,
+        );
+      }
+    }
+    return { ...stat, value };
+  });
 
   return (
     <div className="-mx-4 sm:-mx-6">
@@ -81,7 +116,7 @@ export async function HomeView({ locale }: HomeViewProps) {
                 {t("hero.ctaPrimary")}
               </Link>
               <Link
-                href="/lures/laser-pro-190-dd"
+                href="/lures"
                 className={buttonVariants({ size: "lg", variant: "outline" })}
               >
                 {t("hero.ctaSecondary")}
@@ -93,20 +128,29 @@ export async function HomeView({ locale }: HomeViewProps) {
 
       <Section spacing="default">
         <Container>
-          <div className="mb-10 flex flex-col gap-3 sm:mb-12">
-            <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">
-              {t("species.title")}
-            </h2>
-            <p className="text-muted-foreground max-w-2xl text-base">
-              {t("species.description")}
-            </p>
+          <div className="mb-10 flex flex-col gap-3 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-3">
+              <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">
+                {t("species.title")}
+              </h2>
+              <p className="text-muted-foreground max-w-2xl text-base">
+                {t("species.description")}
+              </p>
+            </div>
+            <Link
+              href="/species"
+              className="text-ocean shrink-0 text-sm font-medium hover:underline"
+            >
+              {t("species.viewAll")}
+            </Link>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {HOME_SPECIES.map((species) => (
+            {discovery.species.map((species) => (
               <SpeciesCard
-                key={species.id}
+                key={species.slug}
+                slug={species.slug}
                 name={pickLocalized(species.name, locale)}
-                habitat={pickLocalized(species.habitat, locale)}
+                habitat={pickLocalized(species.subtitle, locale)}
                 lureCount={species.lureCount}
               />
             ))}
@@ -125,31 +169,42 @@ export async function HomeView({ locale }: HomeViewProps) {
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {HOME_COLLECTIONS.map((collection) => (
-              <Card key={collection.id} interactive className="h-full">
-                <CardContent className="flex h-full flex-col gap-4 p-6">
-                  <div
-                    className={
-                      collection.accent === "ocean"
-                        ? "bg-ocean/8 text-ocean w-fit rounded-full px-3 py-1 text-xs font-medium"
-                        : collection.accent === "turquoise"
-                          ? "bg-turquoise/12 text-[color-mix(in_oklch,var(--turquoise),var(--navy)_35%)] w-fit rounded-full px-3 py-1 text-xs font-medium"
-                          : "bg-navy/6 text-navy w-fit rounded-full px-3 py-1 text-xs font-medium"
-                    }
-                  >
-                    {collection.lureCount} {t("collections.lureCount")}
-                  </div>
-                  <div className="mt-auto space-y-2">
-                    <h3 className="text-foreground text-xl font-semibold">
-                      {pickLocalized(collection.title, locale)}
-                    </h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      {pickLocalized(collection.description, locale)}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {HOME_COLLECTIONS.map((collection) => {
+              const href = COLLECTION_LINKS[collection.id];
+              const card = (
+                <Card interactive className="h-full">
+                  <CardContent className="flex h-full flex-col gap-4 p-6">
+                    <div
+                      className={
+                        collection.accent === "ocean"
+                          ? "bg-ocean/8 text-ocean w-fit rounded-full px-3 py-1 text-xs font-medium"
+                          : collection.accent === "turquoise"
+                            ? "bg-turquoise/12 text-[color-mix(in_oklch,var(--turquoise),var(--navy)_35%)] w-fit rounded-full px-3 py-1 text-xs font-medium"
+                            : "bg-navy/6 text-navy w-fit rounded-full px-3 py-1 text-xs font-medium"
+                      }
+                    >
+                      {collection.lureCount} {t("collections.lureCount")}
+                    </div>
+                    <div className="mt-auto space-y-2">
+                      <h3 className="text-foreground text-xl font-semibold">
+                        {pickLocalized(collection.title, locale)}
+                      </h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        {pickLocalized(collection.description, locale)}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+
+              return href ? (
+                <Link key={collection.id} href={href} className="block">
+                  {card}
+                </Link>
+              ) : (
+                <div key={collection.id}>{card}</div>
+              );
+            })}
           </div>
         </Container>
       </Section>
@@ -187,16 +242,24 @@ export async function HomeView({ locale }: HomeViewProps) {
 
       <Section spacing="default" className="bg-surface-muted/50">
         <Container>
-          <div className="mb-10 flex flex-col gap-3 sm:mb-12">
-            <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">
-              {t("latest.title")}
-            </h2>
-            <p className="text-muted-foreground max-w-2xl text-base">
-              {t("latest.description")}
-            </p>
+          <div className="mb-10 flex flex-col gap-3 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-3">
+              <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">
+                {t("latest.title")}
+              </h2>
+              <p className="text-muted-foreground max-w-2xl text-base">
+                {t("latest.description")}
+              </p>
+            </div>
+            <Link
+              href="/lures"
+              className="text-ocean shrink-0 text-sm font-medium hover:underline"
+            >
+              {t("hero.ctaSecondary")}
+            </Link>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {HOME_LURES.map((lure) => (
+            {discovery.latestLures.map((lure) => (
               <LureCard
                 key={lure.slug}
                 slug={lure.slug}
@@ -223,7 +286,7 @@ export async function HomeView({ locale }: HomeViewProps) {
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {HOME_STATISTICS.map((stat) => {
+            {liveStats.map((stat) => {
               const Icon = STAT_ICONS[stat.id as keyof typeof STAT_ICONS];
               return (
                 <StatisticCard

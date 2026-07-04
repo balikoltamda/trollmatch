@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { LureSection } from "@/modules/lure/components/ui/lure-section";
 import { localize } from "@/modules/lure/services/get-lure-detail";
 import type { LureSpecies } from "@/modules/lure/types/lure-detail";
@@ -40,9 +41,12 @@ export async function LureRecommendedSpecies({
             key={item.id}
             className="border-border flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2.5"
           >
-            <span className="text-foreground font-medium">
+            <Link
+              href={`/species/${item.id}`}
+              className="text-foreground font-medium hover:text-ocean transition-colors"
+            >
               {localize(item.name, locale)}
-            </span>
+            </Link>
             <span
               className={cn(
                 "rounded-md px-2 py-0.5 text-xs font-medium",
