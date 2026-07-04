@@ -1,19 +1,26 @@
-import { demoCatalogImporter } from "./demo-catalog-importer";
-import { duelCatalogImporter } from "./duel-catalog-importer";
-import { createImportRegistry } from "./import-registry";
+export {
+  manufacturerRegistry,
+  manufacturerRegistry as importRegistry,
+  duelManufacturerImporter,
+  duelManufacturerImporter as duelCatalogImporter,
+  createManufacturerRegistry,
+  ManufacturerRegistry,
+  parseManufacturerCliFlags,
+} from "./registered-manufacturers";
 
-/** Application import registry — add new manufacturers here, not in `run-import.ts`. */
-export const importRegistry = createImportRegistry()
-  .register(duelCatalogImporter)
-  .register(demoCatalogImporter)
-  .setDefault("duel");
-
-export { demoCatalogImporter } from "./demo-catalog-importer";
-export { duelCatalogImporter } from "./duel-catalog-importer";
 export type {
-  CatalogImporter,
-  CatalogImporterRunOptions,
-  CatalogImporterRunResult,
-  ImportRegistry,
-} from "./import-registry";
-export { createImportRegistry } from "./import-registry";
+  ManufacturerImporter,
+  ManufacturerImportResult,
+  ManufacturerImportRunOptions,
+} from "./manufacturer-importer";
+
+export type {
+  ManufacturerImporter as CatalogImporter,
+  ManufacturerImportRunOptions as CatalogImporterRunOptions,
+  ManufacturerImportResult as CatalogImporterRunResult,
+} from "./manufacturer-importer";
+
+export {
+  createManufacturerRegistry as createImportRegistry,
+  ManufacturerRegistry as ImportRegistry,
+} from "./registered-manufacturers";

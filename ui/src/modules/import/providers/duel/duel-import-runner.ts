@@ -2,7 +2,17 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { PrismaClient } from "@/generated/prisma/client";
+import {
+  collectImageUrlsFromRecords,
+  downloadManufacturerImages,
+  resolveManufacturerImagesRoot,
+} from "../../images/image-download-pipeline";
+import { reconcileManufacturerLifecycle } from "../../persistence/lifecycle-reconciler";
 import { createEmptyImportSummary, type ImportSummary } from "../../persistence/types";
+import {
+  buildImportReport,
+  writeImportReport,
+} from "../../reporting/import-report";
 import { validateCanonicalLureImport } from "../../validators/canonical-lure-validator";
 import { fetchDuelSnapshots } from "./duel-fetcher";
 import { mapDuelProductToCanonical } from "./duel-mapper";
@@ -18,34 +28,33 @@ import {
 } from "./types";
 
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = join(MODULE_DIR, "..", "..", "..", "..", "..", "..");
-const DEFAULT_REPORT_PATH = join(
-  REPO_ROOT,
+const DEFAULT_REPO_ROOT = join(MODULE_DIR, "..", "..", "..", "..", "..", "..");
+const LEGACY_REPORT_PATH = join(
+  DEFAULT_REPO_ROOT,
   "research",
   "manufacturers",
   "duel",
   "import-report.md",
 );
 
-/** English lure category IDs from `docs/connectors/DUEL_CONNECTOR.md`. */
-export const DUEL_LURE_CATEGORY_IDS = [
-  448, // DUEL SALT WATER LURE
-  445, // HARDCORE SALT WATER LURE
-  464, // BIG GAME SERIES
-  452, // 3DB SERIES
-  449, // AILE MAGNET SERIES
-];
-
 export type DuelImportRunOptions = {
-  /** Minimum number of distinct products to import (default 20). */
+  /** Cap products processed (undefined = import all discovered). */
+  limit?: number;
+  /** @deprecated Use `limit` — kept for backward compatibility. */
   minProducts?: number;
   /** Max category listing pages per category (default 5). */
   maxPagesPerCategory?: number;
   /** Delay between HTTP requests in ms (default 1000). */
   requestDelayMs?: number;
-  /** Skip live HTTP fetch and use latest on-disk snapshot only. */
+  /** Skip live HTTP fetch and use offline PID set. */
   offline?: boolean;
-  /** Path for markdown import report. */
+  /** Download manufacturer images to local storage. */
+  downloadImages?: boolean;
+  /** Repository root for reports and image storage. */
+  repoRoot?: string;
+  /** Reports root directory. */
+  reportsRoot?: string;
+  /** Legacy markdown report path. */
   reportPath?: string;
   /** Custom fetch implementation (for tests). */
   fetchFn?: typeof fetch;
@@ -77,8 +86,27 @@ export type DuelImportRunResult = {
   };
   persistence: ImportSummary;
   outcomes: DuelProductOutcome[];
+  observedLureModelIds: string[];
+  reconcile?: {
+    missing: string[];
+    discontinued: string[];
+  };
+  imageDownloads?: {
+    downloaded: number;
+    skipped: number;
+    errors: string[];
+  };
   reportPath: string;
 };
+
+/** English lure category IDs from `docs/connectors/DUEL_CONNECTOR.md`. */
+export const DUEL_LURE_CATEGORY_IDS = [
+  448,
+  445,
+  464,
+  452,
+  449,
+];
 
 function categoryListUrl(categoryId: number, page = 1): string {
   const base = `${DUEL_SITE_ORIGIN}/english/products/list.html?category=${categoryId}`;
@@ -161,31 +189,26 @@ export async function discoverDuelProductPids(
 }
 
 function classifyProductOutcome(
-  persistence: ImportSummary,
-  recordKey: string,
+  persistResult: {
+    isNew: boolean;
+    dataChanged: boolean;
+    summary: ImportSummary;
+  },
   modelSlug: string,
 ): "imported" | "updated" | "skipped" {
-  const createdModel = persistence.created.some(
-    (line) => line === `LureModel: ${modelSlug}`,
-  );
-  if (createdModel) {
+  if (persistResult.isNew) {
     return "imported";
   }
 
-  const updatedModel = persistence.updated.some(
+  const modelUpdated = persistResult.summary.updated.some(
     (line) => line === `LureModel: ${modelSlug}`,
   );
-  if (updatedModel) {
+
+  if (modelUpdated || persistResult.dataChanged) {
     return "updated";
   }
 
-  const touched =
-    persistence.created.some((line) => line.includes(recordKey)) ||
-    persistence.updated.some((line) => line.includes(modelSlug)) ||
-    persistence.created.length > 0 ||
-    persistence.updated.length > 0;
-
-  return touched ? "updated" : "skipped";
+  return "skipped";
 }
 
 function countSummary(outcomes: DuelProductOutcome[]) {
@@ -285,10 +308,14 @@ export async function runDuelImport(
   const startedAt = new Date();
   const fetchFn = options.fetchFn ?? fetch;
   const requestDelayMs = options.requestDelayMs ?? 1000;
-  const minProducts = options.minProducts ?? 20;
-  const reportPath = options.reportPath ?? DEFAULT_REPORT_PATH;
+  const limit = options.limit ?? options.minProducts;
+  const repoRoot = options.repoRoot ?? DEFAULT_REPO_ROOT;
+  const reportsRoot = options.reportsRoot ?? repoRoot;
+  const legacyReportPath = options.reportPath ?? LEGACY_REPORT_PATH;
   const outcomes: DuelProductOutcome[] = [];
   const aggregatePersistence = createEmptyImportSummary();
+  const observedLureModelIds: string[] = [];
+  const normalizedRecords: Array<ReturnType<typeof mapDuelProductToCanonical>> = [];
 
   if (!options.offline) {
     await fetchDuelSnapshots({
@@ -306,10 +333,10 @@ export async function runDuelImport(
         maxPagesPerCategory: options.maxPagesPerCategory,
       });
 
-  let successCount = 0;
+  let processedCount = 0;
 
   for (let index = 0; index < discoveredPids.length; index += 1) {
-    if (successCount >= minProducts) {
+    if (limit !== undefined && processedCount >= limit) {
       break;
     }
 
@@ -345,6 +372,8 @@ export async function runDuelImport(
         continue;
       }
 
+      normalizedRecords.push(validation.normalized);
+
       if (!options.prisma) {
         outcomes.push({
           pid,
@@ -357,29 +386,34 @@ export async function runDuelImport(
             (issue) => `${issue.code}: ${issue.message}`,
           ),
         });
-        successCount += 1;
+        processedCount += 1;
         continue;
       }
 
-      const persistence = await upsertDuelCanonicalImport(
+      const persistResult = await upsertDuelCanonicalImport(
         options.prisma,
         validation.normalized,
         startedAt,
       );
 
-      aggregatePersistence.created.push(...persistence.created);
-      aggregatePersistence.updated.push(...persistence.updated);
-      aggregatePersistence.skipped.push(...persistence.skipped);
-      aggregatePersistence.errors.push(...persistence.errors);
+      aggregatePersistence.created.push(...persistResult.summary.created);
+      aggregatePersistence.updated.push(...persistResult.summary.updated);
+      aggregatePersistence.skipped.push(...persistResult.summary.skipped);
+      aggregatePersistence.warnings.push(...persistResult.summary.warnings);
+      aggregatePersistence.errors.push(...persistResult.summary.errors);
 
-      if (persistence.errors.length > 0) {
+      if (persistResult.lureModelId) {
+        observedLureModelIds.push(persistResult.lureModelId);
+      }
+
+      if (persistResult.summary.errors.length > 0) {
         outcomes.push({
           pid,
           title: parsedProduct.productName,
           recordKey: validation.normalized.recordKey,
           modelSlug: validation.normalized.model.slug,
           status: "failed",
-          message: persistence.errors.join("; "),
+          message: persistResult.summary.errors.join("; "),
           validationWarnings: validation.warnings.map(
             (issue) => `${issue.code}: ${issue.message}`,
           ),
@@ -388,8 +422,7 @@ export async function runDuelImport(
       }
 
       const status = classifyProductOutcome(
-        persistence,
-        validation.normalized.recordKey,
+        persistResult,
         validation.normalized.model.slug,
       );
 
@@ -404,9 +437,7 @@ export async function runDuelImport(
         ),
       });
 
-      if (status === "imported" || status === "updated") {
-        successCount += 1;
-      }
+      processedCount += 1;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       outcomes.push({
@@ -418,33 +449,93 @@ export async function runDuelImport(
   }
 
   const completedAt = new Date();
+  let reconcile: DuelImportRunResult["reconcile"];
+  let imageDownloads: DuelImportRunResult["imageDownloads"];
 
-  if (successCount < minProducts && !options.offline) {
-    outcomes.push({
-      pid: "batch",
-      status: "failed",
-      message: `Only ${successCount} products passed validation/import; required ${minProducts}.`,
-    });
+  if (options.prisma) {
+    reconcile = await reconcileManufacturerLifecycle(
+      options.prisma,
+      "duel",
+      observedLureModelIds,
+    );
+
+    for (const slug of reconcile.missing) {
+      aggregatePersistence.removed?.push(`MISSING: ${slug}`);
+    }
+
+    for (const slug of reconcile.discontinued) {
+      aggregatePersistence.removed?.push(`DISCONTINUED: ${slug}`);
+    }
   }
 
-  const summary = countSummary(outcomes.filter((outcome) => outcome.pid !== "batch"));
+  if (options.downloadImages !== false && normalizedRecords.length > 0) {
+    const imageUrls = collectImageUrlsFromRecords(normalizedRecords);
+    const imageResult = await downloadManufacturerImages(
+      "duel",
+      imageUrls,
+      resolveManufacturerImagesRoot(repoRoot),
+      fetchFn,
+    );
 
-  const result: DuelImportRunResult = {
+    imageDownloads = {
+      downloaded: imageResult.downloaded.length,
+      skipped: imageResult.skipped.length,
+      errors: imageResult.errors,
+    };
+
+    aggregatePersistence.warnings.push(
+      ...imageResult.errors.map((error) => `Image: ${error}`),
+    );
+  }
+
+  const summary = countSummary(outcomes);
+
+  const jsonReport = buildImportReport({
+    manufacturer: "duel",
+    displayName: "DUEL",
+    startedAt,
+    completedAt,
+    productsProcessed: outcomes.length,
+    summary: aggregatePersistence,
+    imageDownloads,
+  });
+
+  const reportPath = await writeImportReport(jsonReport, reportsRoot);
+
+  await mkdir(dirname(legacyReportPath), { recursive: true });
+  await writeFile(
+    legacyReportPath,
+    renderDuelImportReport({
+      startedAt: startedAt.toISOString(),
+      completedAt: completedAt.toISOString(),
+      discoveredPids,
+      processedProducts: outcomes.length,
+      dryRun: !options.prisma,
+      summary,
+      persistence: aggregatePersistence,
+      outcomes,
+      observedLureModelIds,
+      reconcile,
+      imageDownloads,
+      reportPath,
+    }),
+    "utf8",
+  );
+
+  return {
     startedAt: startedAt.toISOString(),
     completedAt: completedAt.toISOString(),
     discoveredPids,
-    processedProducts: outcomes.filter((outcome) => outcome.pid !== "batch").length,
+    processedProducts: outcomes.length,
     dryRun: !options.prisma,
     summary,
     persistence: aggregatePersistence,
     outcomes,
+    observedLureModelIds,
+    reconcile,
+    imageDownloads,
     reportPath,
   };
-
-  await mkdir(dirname(reportPath), { recursive: true });
-  await writeFile(reportPath, renderDuelImportReport(result), "utf8");
-
-  return result;
 }
 
 export function printDuelImportSummary(result: DuelImportRunResult): void {

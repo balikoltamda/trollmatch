@@ -37,6 +37,7 @@
     "db:migrate:dev": "npm run db:migrate:dev --workspace=ui",
     "db:push": "npm run db:push --workspace=ui",
     "db:check": "npm run db:check --workspace=ui",
-    "db:status": "npm run db:status --workspace=ui"
+    "db:status": "npm run db:status --workspace=ui",
+    "import": "npm run import --workspace=ui"
   }
 }

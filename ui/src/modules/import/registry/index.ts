@@ -1,13 +1,26 @@
 export {
-  createImportRegistry,
-  importRegistry,
-  demoCatalogImporter,
-  duelCatalogImporter,
-} from "./registered-importers";
+  manufacturerRegistry,
+  manufacturerRegistry as importRegistry,
+  duelManufacturerImporter,
+  duelManufacturerImporter as duelCatalogImporter,
+  createManufacturerRegistry,
+  ManufacturerRegistry,
+  parseManufacturerCliFlags,
+} from "./registered-manufacturers";
 
 export type {
-  CatalogImporter,
-  CatalogImporterRunOptions,
-  CatalogImporterRunResult,
-  ImportRegistry,
-} from "./registered-importers";
+  ManufacturerImporter,
+  ManufacturerImportResult,
+  ManufacturerImportRunOptions,
+} from "./manufacturer-importer";
+
+export type {
+  ManufacturerImporter as CatalogImporter,
+  ManufacturerImportRunOptions as CatalogImporterRunOptions,
+  ManufacturerImportResult as CatalogImporterRunResult,
+} from "./manufacturer-importer";
+
+export {
+  createManufacturerRegistry as createImportRegistry,
+  ManufacturerRegistry as ImportRegistry,
+} from "./registered-manufacturers";

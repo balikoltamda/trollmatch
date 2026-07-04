@@ -1,0 +1,19 @@
+id: daiwa
+name: Daiwa
+official_website: https://www.daiwa.com
+country: JP
+supported_languages:
+  - en
+  - ja
+product_source:
+  type: static_json
+  location: research/manufacturers/daiwa/products
+image_source:
+  type: manufacturer_assets
+  location: research/manufacturers/daiwa/images
+catalog_source:
+  type: manufacturer_catalog
+  location: research/manufacturers/daiwa/catalog
+connector_name: daiwa
+update_frequency: quarterly
+trust_score: 84

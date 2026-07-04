@@ -3,6 +3,7 @@ import {
   ContentLifecycleState,
   ImageRole,
   ManufacturerProductStatus,
+  Prisma,
   ProductAliasKind,
 } from "@/generated/prisma/client";
 import type { PrismaClient } from "@/generated/prisma/client";
@@ -35,6 +36,42 @@ import {
   mergeImportSummaries,
   type ImportSummary,
 } from "../../persistence/types";
+import { pickChangedFields } from "../../persistence/lifecycle-reconciler";
+
+export type UpsertDuelImportResult = {
+  summary: ImportSummary;
+  lureModelId: string;
+  modelSlug: string;
+  isNew: boolean;
+  dataChanged: boolean;
+};
+
+const LURE_MODEL_COMPARE_KEYS = [
+  "manufacturerId",
+  "productLineId",
+  "nameEn",
+  "nameTr",
+  "formFactorEn",
+  "formFactorTr",
+  "bodyTypeSlug",
+  "bodyTypeEn",
+  "bodyTypeTr",
+  "buoyancySlug",
+  "buoyancyEn",
+  "buoyancyTr",
+  "divingDepthMinM",
+  "divingDepthMaxM",
+  "trollingSpeedMinKn",
+  "trollingSpeedMaxKn",
+  "coatingTypeSlug",
+  "coatingTypeEn",
+  "coatingTypeTr",
+  "actionSlug",
+  "actionEn",
+  "actionTr",
+  "shortDescriptionEn",
+  "shortDescriptionTr",
+] as const;
 
 function mapImageRole(role?: string): ImageRole {
   switch (role) {
@@ -370,12 +407,27 @@ async function upsertVariant(
   let lureVariantId: string;
 
   if (existingVariant) {
-    await tx.lureVariant.update({
-      where: { id: existingVariant.id },
-      data: variantData,
-    });
+    const changedFields = pickChangedFields(existingVariant, variantData, [
+      "colorId",
+      "labelEn",
+      "labelTr",
+      "lengthMm",
+      "weightG",
+      "sortOrder",
+      "isDefault",
+    ]);
+
+    if (Object.keys(changedFields).length > 0) {
+      await tx.lureVariant.update({
+        where: { id: existingVariant.id },
+        data: changedFields,
+      });
+      summary.updated.push(`LureVariant: ${variantInput.slug}`);
+    } else {
+      summary.skipped.push(`LureVariant: ${variantInput.slug}`);
+    }
+
     lureVariantId = existingVariant.id;
-    summary.updated.push(`LureVariant: ${variantInput.slug}`);
   } else {
     const created = await tx.lureVariant.create({
       data: {
@@ -402,7 +454,7 @@ async function upsertSingleRecord(
   tx: DbClient,
   record: CanonicalLureImport,
   importedAt: Date,
-): Promise<ImportSummary> {
+): Promise<UpsertDuelImportResult> {
   const summary = createEmptyImportSummary();
   const manufacturerInput = record.manufacturer;
   const productLineInput = record.productLine;
@@ -411,7 +463,13 @@ async function upsertSingleRecord(
 
   if (!record.variants.length) {
     summary.errors.push(`Record ${record.recordKey}: no variants to persist`);
-    return summary;
+    return {
+      summary,
+      lureModelId: "",
+      modelSlug: modelInput.slug,
+      isNew: false,
+      dataChanged: false,
+    };
   }
 
   let manufacturer = await findManufacturerByCanonicalIdentity(
@@ -522,10 +580,10 @@ async function upsertSingleRecord(
       modelInput.buoyancy?.manufacturerTerm,
       "tr",
     ),
-    divingDepthMinM: minM,
-    divingDepthMaxM: maxM,
-    trollingSpeedMinKn: minKn,
-    trollingSpeedMaxKn: maxKn,
+    divingDepthMinM: minM !== null ? new Prisma.Decimal(minM) : null,
+    divingDepthMaxM: maxM !== null ? new Prisma.Decimal(maxM) : null,
+    trollingSpeedMinKn: minKn !== null ? new Prisma.Decimal(minKn) : null,
+    trollingSpeedMaxKn: maxKn !== null ? new Prisma.Decimal(maxKn) : null,
     coatingTypeSlug: modelInput.coatingType?.slug ?? null,
     coatingTypeEn: resolveLocalizedAttribute(
       modelInput.coatingType?.label,
@@ -557,15 +615,30 @@ async function upsertSingleRecord(
     ...lifecycleTouch(importedAt),
   };
 
+  let isNew = false;
+  let dataChanged = false;
+
   if (lureModel) {
+    const changedFields = pickChangedFields(lureModel, modelPayload, [
+      ...LURE_MODEL_COMPARE_KEYS,
+    ]);
+    dataChanged = Object.keys(changedFields).length > 0;
+
     await tx.lureModel.update({
       where: { id: lureModel.id },
       data: {
-        ...modelPayload,
+        ...(dataChanged ? changedFields : {}),
+        ...lifecycleTouch(importedAt),
         firstSeenAt: lureModel.firstSeenAt ?? importedAt,
       },
     });
-    summary.updated.push(`LureModel: ${lureModel.slug}`);
+
+    if (dataChanged) {
+      summary.updated.push(`LureModel: ${lureModel.slug}`);
+    } else {
+      summary.skipped.push(`LureModel: ${lureModel.slug}`);
+    }
+
     lureModel = (await findLureModel(tx, lureModel.slug))!;
   } else {
     lureModel = await tx.lureModel.create({
@@ -577,6 +650,8 @@ async function upsertSingleRecord(
       },
     });
     summary.created.push(`LureModel: ${lureModel.slug}`);
+    isNew = true;
+    dataChanged = true;
   }
 
   if (pid) {
@@ -617,7 +692,13 @@ async function upsertSingleRecord(
 
   await ensureTechniqueLinks(tx, lureModel.id, record, summary);
 
-  return summary;
+  return {
+    summary,
+    lureModelId: lureModel.id,
+    modelSlug: lureModel.slug,
+    isNew,
+    dataChanged,
+  };
 }
 
 /** Upsert a canonical DUEL record with manufacturer lifecycle fields. Never deletes rows. */
@@ -625,7 +706,7 @@ export async function upsertDuelCanonicalImport(
   prisma: PrismaClient,
   record: CanonicalLureImport,
   importedAt: Date = new Date(),
-): Promise<ImportSummary> {
+): Promise<UpsertDuelImportResult> {
   return prisma.$transaction(async (tx) => upsertSingleRecord(tx, record, importedAt));
 }
 
@@ -638,8 +719,8 @@ export async function upsertDuelCanonicalImports(
 
   for (const record of records) {
     try {
-      const summary = await upsertDuelCanonicalImport(prisma, record, importedAt);
-      mergeImportSummaries(aggregate, summary);
+      const result = await upsertDuelCanonicalImport(prisma, record, importedAt);
+      mergeImportSummaries(aggregate, result.summary);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Unknown persistence error";

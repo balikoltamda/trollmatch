@@ -4,30 +4,50 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { printImportSummary } from "../src/modules/import/persistence";
-import { importRegistry } from "../src/modules/import/registry";
+import {
+  manufacturerRegistry,
+  parseManufacturerCliFlags,
+} from "../src/modules/import/registry/registered-importers";
+import { printImportReport } from "../src/modules/import/reporting/import-report";
 
 loadEnv({ cwd: resolve(import.meta.dirname, "..") });
 
 function printUsage(): void {
-  const providers = importRegistry
+  const manufacturers = manufacturerRegistry
     .list()
-    .map((entry) => `  ${entry.code.padEnd(8)} — ${entry.displayName}`)
+    .map(
+      (entry) =>
+        `  ${entry.code.padEnd(10)} — ${entry.displayName} [${entry.status}]`,
+    )
     .join("\n");
 
-  console.log(`Usage: npm run import:run [-- <provider> [options...]]
+  console.log(`Usage: npm run import -- [options]
 
-Providers:
-${providers}
+Options:
+  --manufacturer <code>   Import one manufacturer (repeatable)
+  -m <code>               Alias for --manufacturer
+  --all                   Import every registered manufacturer
+  --limit <n>             Cap products processed per manufacturer
+  --offline               Skip live HTTP fetch (DUEL: single PID snapshot)
+  --no-images             Skip manufacturer image downloads
+  -h, --help              Show this help
 
-Default provider: ${importRegistry.getDefaultCode()}
-Override with IMPORT_PROVIDER env var.
+Manufacturers:
+${manufacturers}
+
+Examples:
+  npm run import -- --manufacturer duel
+  npm run import -- --manufacturer yozuri --manufacturer halco
+  npm run import -- --all
+  npm run import -- --manufacturer duel --limit 20
 `);
 }
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
+  const flags = parseManufacturerCliFlags(args);
 
-  if (args[0] === "--help" || args[0] === "-h") {
+  if (flags.help) {
     printUsage();
     return;
   }
@@ -41,27 +61,62 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  let importer;
+  let importers;
   try {
-    importer = importRegistry.resolve(args[0]);
+    const codes = manufacturerRegistry.resolveCodes({
+      manufacturers: flags.manufacturers,
+      all: flags.all,
+    });
+    importers = manufacturerRegistry.resolveMany(codes);
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     printUsage();
     process.exit(1);
   }
 
-  const providerArgs = args[0] && importRegistry.has(args[0]) ? args.slice(1) : args;
-
   const pool = new Pool({ connectionString: databaseUrl });
   const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
+  let hadFailure = false;
+
   try {
-    console.log(`Running import provider: ${importer.code} (${importer.displayName})\n`);
+    for (const importer of importers) {
+      console.log(
+        `Running import: ${importer.code} (${importer.displayName}) [${importer.status}]\n`,
+      );
 
-    const result = await importer.run({ prisma, argv: providerArgs });
-    printImportSummary(result.summary);
+      const result = await importer.run({
+        prisma,
+        argv: args,
+        limit: flags.limit,
+        offline: flags.offline,
+        downloadImages: flags.downloadImages,
+      });
 
-    if (!result.success) {
+      printImportSummary(result.summary);
+      printImportReport({
+        manufacturer: result.manufacturer,
+        displayName: result.displayName,
+        startedAt: result.startedAt,
+        completedAt: result.completedAt,
+        durationMs: result.durationMs,
+        productsProcessed: result.productsProcessed,
+        created: result.summary.created.length,
+        updated: result.summary.updated.length,
+        skipped: result.summary.skipped.length,
+        removed: result.summary.removed?.length ?? 0,
+        warnings: result.summary.warnings,
+        errors: result.summary.errors,
+        summary: result.summary,
+        reportPath: result.reportPath,
+      });
+
+      if (!result.success) {
+        hadFailure = true;
+      }
+    }
+
+    if (hadFailure) {
       process.exit(1);
     }
   } finally {

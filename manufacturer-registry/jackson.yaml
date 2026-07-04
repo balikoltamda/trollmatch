@@ -1,0 +1,19 @@
+id: jackson
+name: Jackson
+official_website: https://www.jackson.co.jp
+country: JP
+supported_languages:
+  - en
+  - ja
+product_source:
+  type: static_json
+  location: research/manufacturers/jackson/products
+image_source:
+  type: manufacturer_assets
+  location: research/manufacturers/jackson/images
+catalog_source:
+  type: manufacturer_catalog
+  location: research/manufacturers/jackson/catalog
+connector_name: jackson
+update_frequency: semi_annual
+trust_score: 77
