@@ -49,7 +49,9 @@
       "weight": "Ağırlık",
       "divingDepth": "Dalış derinliği",
       "buoyancy": "Flotasyon",
-      "action": "Aksiyon"
+      "action": "Aksiyon",
+      "bodyType": "Gövde tipi",
+      "coatingType": "Kaplama"
     },
     "speciesKind": {
       "curated": "Küratörlü",

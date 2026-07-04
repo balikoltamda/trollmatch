@@ -8,11 +8,15 @@ import {
 import type { PrismaClient } from "@/generated/prisma/client";
 import type {
   CanonicalColor,
+  CanonicalDivingDepth,
   CanonicalImage,
+  CanonicalLocalizedText,
   CanonicalLureImport,
   CanonicalLureVariant,
+  CanonicalTrollingSpeedRange,
 } from "../../core/canonical-lure";
 import {
+  ensureTechnique,
   findColorBySlug,
   findImageByUrl,
   findLureModel,
@@ -197,6 +201,138 @@ function lifecycleTouch(now: Date) {
   };
 }
 
+function resolveLocalizedAttribute(
+  label: CanonicalLocalizedText | undefined,
+  manufacturerTerm: string | undefined,
+  locale: "en" | "tr",
+): string | null {
+  const localized = label ? resolveLocalized(label, locale) : "";
+  if (localized) {
+    return localized;
+  }
+
+  return manufacturerTerm?.trim() || null;
+}
+
+function resolveDepthMeters(depth: CanonicalDivingDepth | undefined): {
+  minM: number | null;
+  maxM: number | null;
+} {
+  if (!depth) {
+    return { minM: null, maxM: null };
+  }
+
+  const min =
+    depth.minMeters ??
+    depth.range?.min ??
+    (depth.ratedDepthMeters !== undefined ? depth.ratedDepthMeters : undefined);
+  const max =
+    depth.maxMeters ??
+    depth.range?.max ??
+    (depth.ratedDepthMeters !== undefined ? depth.ratedDepthMeters : undefined);
+
+  if (min === undefined && max === undefined) {
+    return { minM: null, maxM: null };
+  }
+
+  return {
+    minM: min ?? max ?? null,
+    maxM: max ?? min ?? null,
+  };
+}
+
+function resolveTrollingSpeedKnots(speed: CanonicalTrollingSpeedRange | undefined): {
+  minKn: number | null;
+  maxKn: number | null;
+} {
+  if (!speed) {
+    return { minKn: null, maxKn: null };
+  }
+
+  const min = speed.minKnots;
+  const max = speed.maxKnots;
+
+  if (min === undefined && max === undefined) {
+    return { minKn: null, maxKn: null };
+  }
+
+  return {
+    minKn: min ?? max ?? null,
+    maxKn: max ?? min ?? null,
+  };
+}
+
+function collectTechniqueSlugs(record: CanonicalLureImport): Array<{
+  slug: string;
+  label?: CanonicalLocalizedText;
+}> {
+  const bySlug = new Map<string, CanonicalLocalizedText | undefined>();
+
+  for (const technique of record.model.techniques ?? []) {
+    if (technique.slug.trim()) {
+      bySlug.set(technique.slug.trim().toLowerCase(), technique.label);
+    }
+  }
+
+  const tagSources = [
+    ...(record.tags ?? []),
+    ...(record.model.tags ?? []),
+    ...record.variants.flatMap((variant) => variant.tags ?? []),
+  ];
+
+  for (const tag of tagSources) {
+    if (tag.kind === "technique" && tag.value.trim()) {
+      const slug = tag.value.trim().toLowerCase();
+      if (!bySlug.has(slug)) {
+        bySlug.set(slug, localizedFromTag(tag.value));
+      }
+    }
+  }
+
+  return [...bySlug.entries()].map(([slug, label]) => ({ slug, label }));
+}
+
+function localizedFromTag(value: string): CanonicalLocalizedText {
+  const label = value
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+  return { en: label, default: label };
+}
+
+async function ensureTechniqueLinks(
+  tx: DbClient,
+  lureModelId: string,
+  record: CanonicalLureImport,
+  summary: ImportSummary,
+): Promise<void> {
+  const techniques = collectTechniqueSlugs(record);
+
+  for (const technique of techniques) {
+    const techniqueId = await ensureTechnique(tx, technique.slug, technique.label);
+    const existing = await tx.lureTechnique.findFirst({
+      where: {
+        lureModelId,
+        techniqueId,
+        deletedAt: null,
+      },
+    });
+
+    if (existing) {
+      summary.skipped.push(`LureTechnique: ${technique.slug}`);
+      continue;
+    }
+
+    await tx.lureTechnique.create({
+      data: {
+        lureModelId,
+        techniqueId,
+      },
+    });
+    summary.created.push(`LureTechnique: ${technique.slug}`);
+  }
+}
+
 async function upsertVariant(
   tx: DbClient,
   lureModelId: string,
@@ -353,6 +489,10 @@ async function upsertSingleRecord(
     (pid ? await findLureModelByDuelPid(tx, manufacturer.id, pid) : null) ??
     (await findLureModel(tx, modelInput.slug));
 
+  const { minM, maxM } = resolveDepthMeters(modelInput.divingDepth);
+  const { minKn, maxKn } = resolveTrollingSpeedKnots(modelInput.trollingSpeed);
+  const primaryAction = modelInput.actions?.[0];
+
   const modelPayload = {
     manufacturerId: manufacturer.id,
     productLineId: productLine.id,
@@ -360,6 +500,54 @@ async function upsertSingleRecord(
     nameTr: resolveLocalized(modelInput.name, "tr"),
     formFactorEn: modelInput.formFactorTerm ?? null,
     formFactorTr: modelInput.formFactorTerm ?? null,
+    bodyTypeSlug: modelInput.bodyType?.slug ?? null,
+    bodyTypeEn: resolveLocalizedAttribute(
+      modelInput.bodyType?.label,
+      modelInput.bodyType?.manufacturerTerm,
+      "en",
+    ),
+    bodyTypeTr: resolveLocalizedAttribute(
+      modelInput.bodyType?.label,
+      modelInput.bodyType?.manufacturerTerm,
+      "tr",
+    ),
+    buoyancySlug: modelInput.buoyancy?.slug ?? null,
+    buoyancyEn: resolveLocalizedAttribute(
+      modelInput.buoyancy?.label,
+      modelInput.buoyancy?.manufacturerTerm,
+      "en",
+    ),
+    buoyancyTr: resolveLocalizedAttribute(
+      modelInput.buoyancy?.label,
+      modelInput.buoyancy?.manufacturerTerm,
+      "tr",
+    ),
+    divingDepthMinM: minM,
+    divingDepthMaxM: maxM,
+    trollingSpeedMinKn: minKn,
+    trollingSpeedMaxKn: maxKn,
+    coatingTypeSlug: modelInput.coatingType?.slug ?? null,
+    coatingTypeEn: resolveLocalizedAttribute(
+      modelInput.coatingType?.label,
+      modelInput.coatingType?.manufacturerTerm,
+      "en",
+    ),
+    coatingTypeTr: resolveLocalizedAttribute(
+      modelInput.coatingType?.label,
+      modelInput.coatingType?.manufacturerTerm,
+      "tr",
+    ),
+    actionSlug: primaryAction?.slug ?? null,
+    actionEn: resolveLocalizedAttribute(
+      primaryAction?.label,
+      primaryAction?.manufacturerTerm,
+      "en",
+    ),
+    actionTr: resolveLocalizedAttribute(
+      primaryAction?.label,
+      primaryAction?.manufacturerTerm,
+      "tr",
+    ),
     shortDescriptionEn: modelInput.description
       ? resolveLocalized(modelInput.description, "en")
       : null,
@@ -426,6 +614,8 @@ async function upsertSingleRecord(
       summary,
     );
   }
+
+  await ensureTechniqueLinks(tx, lureModel.id, record, summary);
 
   return summary;
 }

@@ -49,7 +49,9 @@
       "weight": "Weight",
       "divingDepth": "Diving depth",
       "buoyancy": "Buoyancy",
-      "action": "Action"
+      "action": "Action",
+      "bodyType": "Body type",
+      "coatingType": "Coating"
     },
     "speciesKind": {
       "curated": "Curated",

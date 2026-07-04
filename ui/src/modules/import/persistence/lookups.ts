@@ -100,3 +100,35 @@ export async function findImageByUrl(
     },
   });
 }
+
+export async function findTechniqueBySlug(tx: DbClient, slug: string) {
+  return tx.technique.findFirst({
+    where: { slug, deletedAt: null },
+  });
+}
+
+export async function ensureTechnique(
+  tx: DbClient,
+  slug: string,
+  name?: CanonicalLocalizedText,
+): Promise<string> {
+  const existing = await findTechniqueBySlug(tx, slug);
+  if (existing) {
+    return existing.id;
+  }
+
+  const fallbackName = slug
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+
+  const created = await tx.technique.create({
+    data: {
+      slug,
+      nameEn: (name ? resolveLocalized(name, "en") : "") || fallbackName,
+      nameTr: (name ? resolveLocalized(name, "tr") : "") || fallbackName,
+    },
+  });
+
+  return created.id;
+}

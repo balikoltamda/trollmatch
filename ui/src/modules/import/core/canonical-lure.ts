@@ -144,6 +144,33 @@ export interface CanonicalAction {
   label?: CanonicalLocalizedText;
 }
 
+/** Hard-bait body shape (007 §4.5 form factor family). */
+export interface CanonicalBodyType {
+  slug?: string;
+  manufacturerTerm?: string;
+  label?: CanonicalLocalizedText;
+}
+
+/** Factory finish / coating (UV, glow, holographic, etc.). */
+export interface CanonicalCoatingType {
+  slug?: string;
+  manufacturerTerm?: string;
+  label?: CanonicalLocalizedText;
+}
+
+/** Manufacturer-rated trolling speed envelope. */
+export interface CanonicalTrollingSpeedRange {
+  minKnots?: number;
+  maxKnots?: number;
+  manufacturerLabel?: CanonicalLocalizedText;
+}
+
+/** Explicit technique taxonomy slug links (maps to Technique facade). */
+export interface CanonicalTechniqueRef {
+  slug: string;
+  label?: CanonicalLocalizedText;
+}
+
 /** Factory hooking specification (007 §8.8 Hook Configuration). */
 export interface CanonicalHookConfiguration {
   hookCount?: number;
@@ -233,10 +260,14 @@ export interface CanonicalLureModel {
   description?: CanonicalLocalizedText;
   formFactorSlug?: string;
   formFactorTerm?: string;
+  bodyType?: CanonicalBodyType;
   sizes?: CanonicalSize[];
   weights?: CanonicalWeight[];
   divingDepth?: CanonicalDivingDepth;
   buoyancy?: CanonicalBuoyancy;
+  coatingType?: CanonicalCoatingType;
+  trollingSpeed?: CanonicalTrollingSpeedRange;
+  techniques?: CanonicalTechniqueRef[];
   actions?: CanonicalAction[];
   hooks?: CanonicalHookConfiguration[];
   images?: CanonicalImage[];

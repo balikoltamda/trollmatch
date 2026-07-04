@@ -62,6 +62,113 @@ function toLocalized(nameEn: string, nameTr: string): LocalizedString {
   return { en: nameEn, tr: nameTr };
 }
 
+function toOptionalLocalized(
+  nameEn?: string | null,
+  nameTr?: string | null,
+): LocalizedString | undefined {
+  const en = nameEn?.trim() ?? "";
+  const tr = nameTr?.trim() ?? "";
+  if (!en && !tr) {
+    return undefined;
+  }
+
+  return { en, tr };
+}
+
+function hasLocalized(value: LocalizedString | undefined): boolean {
+  return Boolean(value && (value.en.trim() || value.tr.trim()));
+}
+
+function hasDivingDepth(depth?: { min: number; max: number }): boolean {
+  return Boolean(depth && (depth.min > 0 || depth.max > 0));
+}
+
+function mapDbDivingDepth(
+  record: LureModel,
+): { min: number; max: number } | undefined {
+  const min = record.divingDepthMinM ? Number(record.divingDepthMinM) : undefined;
+  const max = record.divingDepthMaxM ? Number(record.divingDepthMaxM) : undefined;
+
+  if (min === undefined && max === undefined) {
+    return undefined;
+  }
+
+  const resolvedMin = min ?? max ?? 0;
+  const resolvedMax = max ?? min ?? 0;
+
+  if (resolvedMin === 0 && resolvedMax === 0) {
+    return undefined;
+  }
+
+  return { min: resolvedMin, max: resolvedMax };
+}
+
+function mapDbTrolling(record: LureModel): LureDetail["trolling"] {
+  const minKn = record.trollingSpeedMinKn
+    ? Number(record.trollingSpeedMinKn)
+    : undefined;
+  const maxKn = record.trollingSpeedMaxKn
+    ? Number(record.trollingSpeedMaxKn)
+    : undefined;
+
+  if (minKn === undefined && maxKn === undefined) {
+    return undefined;
+  }
+
+  return {
+    speedKnots: {
+      min: minKn ?? maxKn ?? 0,
+      max: maxKn ?? minKn ?? 0,
+    },
+  };
+}
+
+function mergeTrollingInfo(
+  dbTrolling: LureDetail["trolling"],
+  enrichmentTrolling: LureDetail["trolling"],
+): LureDetail["trolling"] {
+  const dbSpeed = dbTrolling?.speedKnots;
+  const enrichmentSpeed = enrichmentTrolling?.speedKnots;
+  const hasDbSpeed =
+    Boolean(dbSpeed && (dbSpeed.min > 0 || dbSpeed.max > 0));
+  const hasEnrichmentSpeed =
+    Boolean(
+      enrichmentSpeed &&
+        (enrichmentSpeed.min > 0 || enrichmentSpeed.max > 0),
+    );
+
+  if (!hasDbSpeed && !hasEnrichmentSpeed) {
+    const leader = hasLocalized(enrichmentTrolling?.leader)
+      ? enrichmentTrolling?.leader
+      : undefined;
+    const mainLine = hasLocalized(enrichmentTrolling?.mainLine)
+      ? enrichmentTrolling?.mainLine
+      : undefined;
+    const notes = hasLocalized(enrichmentTrolling?.notes)
+      ? enrichmentTrolling?.notes
+      : undefined;
+
+    if (!leader && !mainLine && !notes) {
+      return undefined;
+    }
+
+    return { leader, mainLine, notes };
+  }
+
+  return {
+    speedKnots: hasDbSpeed ? dbSpeed : enrichmentSpeed,
+    leader: hasLocalized(enrichmentTrolling?.leader)
+      ? enrichmentTrolling?.leader
+      : undefined,
+    mainLine: hasLocalized(enrichmentTrolling?.mainLine)
+      ? enrichmentTrolling?.mainLine
+      : undefined,
+    notes: hasLocalized(enrichmentTrolling?.notes)
+      ? enrichmentTrolling?.notes
+      : undefined,
+  };
+}
+
 function mapSpeciesKind(
   kind: LureSpeciesAssociationKind,
 ): LureSpecies["kind"] {
@@ -178,6 +285,15 @@ function mapRecordToLureDetail(record: LureModelRecord): LureDetail {
   const defaultVariant =
     variants.find((variant) => variant.id === defaultVariantId) ?? variants[0];
 
+  const dbBuoyancy = toOptionalLocalized(record.buoyancyEn, record.buoyancyTr);
+  const dbAction = toOptionalLocalized(record.actionEn, record.actionTr);
+  const dbBodyType = toOptionalLocalized(record.bodyTypeEn, record.bodyTypeTr);
+  const dbCoatingType = toOptionalLocalized(
+    record.coatingTypeEn,
+    record.coatingTypeTr,
+  );
+  const dbDivingDepth = mapDbDivingDepth(record);
+
   return {
     slug: record.slug,
     manufacturer: toLocalized(
@@ -204,9 +320,22 @@ function mapRecordToLureDetail(record: LureModelRecord): LureDetail {
     specifications: {
       lengthMm: defaultVariant?.lengthMm ?? 0,
       weightG: defaultVariant?.weightG ?? 0,
-      divingDepthM: enrichment.specifications.divingDepthM,
-      buoyancy: enrichment.specifications.buoyancy,
-      action: enrichment.specifications.action,
+      divingDepthM: dbDivingDepth ??
+        (hasDivingDepth(enrichment.specifications.divingDepthM)
+          ? enrichment.specifications.divingDepthM
+          : undefined),
+      buoyancy: hasLocalized(dbBuoyancy)
+        ? dbBuoyancy
+        : hasLocalized(enrichment.specifications.buoyancy)
+          ? enrichment.specifications.buoyancy
+          : undefined,
+      action: hasLocalized(dbAction)
+        ? dbAction
+        : hasLocalized(enrichment.specifications.action)
+          ? enrichment.specifications.action
+          : undefined,
+      bodyType: dbBodyType,
+      coatingType: dbCoatingType,
     },
     recommendedSpecies:
       dbSpecies.length > 0
@@ -216,7 +345,7 @@ function mapRecordToLureDetail(record: LureModelRecord): LureDetail {
       dbTechniques.length > 0
         ? dbTechniques
         : (enrichment.recommendedTechniques ?? []),
-    trolling: enrichment.trolling,
+    trolling: mergeTrollingInfo(mapDbTrolling(record), enrichment.trolling),
     communityStatistics: enrichment.communityStatistics,
     aiInsights: enrichment.aiInsights,
     relatedLures: enrichment.relatedLures,

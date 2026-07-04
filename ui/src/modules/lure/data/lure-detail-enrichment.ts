@@ -20,11 +20,11 @@ export type LureDetailEnrichment = {
   lastVerifiedAt: string;
   specifications: Pick<
     LureSpecifications,
-    "divingDepthM" | "buoyancy" | "action"
+    "divingDepthM" | "buoyancy" | "action" | "bodyType" | "coatingType"
   >;
   recommendedSpecies?: LureSpecies[];
   recommendedTechniques?: LureTechnique[];
-  trolling: TrollingInfo;
+  trolling?: TrollingInfo;
   communityStatistics: CommunityStatistics;
   aiInsights: AiInsight;
   relatedLures: RelatedLure[];
@@ -222,17 +222,8 @@ function createDefaultEnrichment(updatedAt: Date): LureDetailEnrichment {
   return {
     verificationStatus: "unverified",
     lastVerifiedAt: updatedAt.toISOString(),
-    specifications: {
-      divingDepthM: { min: 0, max: 0 },
-      buoyancy: empty,
-      action: empty,
-    },
-    trolling: {
-      speedKnots: { min: 0, max: 0 },
-      leader: empty,
-      mainLine: empty,
-      notes: empty,
-    },
+    specifications: {},
+    trolling: undefined,
     communityStatistics: {
       usageAssertionCount: 0,
       verifiedCatchReportCount: 0,

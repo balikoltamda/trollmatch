@@ -34,7 +34,9 @@ export async function LureDetailView({
         techniques={lure.recommendedTechniques}
         locale={locale}
       />
-      <LureTrollingInfo trolling={lure.trolling} locale={locale} />
+      {lure.trolling ? (
+        <LureTrollingInfo trolling={lure.trolling} locale={locale} />
+      ) : null}
       <LureCommunityStatistics
         statistics={lure.communityStatistics}
         locale={locale}

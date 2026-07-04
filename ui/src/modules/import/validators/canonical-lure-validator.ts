@@ -10,6 +10,13 @@ import type {
   CanonicalTag,
   CanonicalWeight,
 } from "../core/canonical-lure";
+import {
+  isKnownBuoyancySlug,
+  isTopwaterLure,
+  recordHasMeaningfulDivingDepth,
+  resolveRecordBuoyancySlug,
+  validateBuoyancyDepthConsistency,
+} from "../domain/fishing-taxonomy";
 import type { ImportIssue } from "../core/types";
 import type {
   ValidationRuleCatalog,
@@ -122,7 +129,25 @@ export const CANONICAL_LURE_VALIDATION_RULES: ValidationRuleDescriptor[] = [
     code: "CANONICAL_TROLLING_SPEED",
     description: "Factory trolling speed range when trolling technique applies.",
     required: false,
-    fieldPath: "model.tags",
+    fieldPath: "model.trollingSpeed",
+  },
+  {
+    code: "CANONICAL_TOPWATER_DEPTH",
+    description: "Topwater lures must not specify a diving depth.",
+    required: true,
+    fieldPath: "model.divingDepth",
+  },
+  {
+    code: "CANONICAL_BUOYANCY_DEPTH",
+    description: "Buoyancy class must be consistent with the diving depth range.",
+    required: true,
+    fieldPath: "model.buoyancy",
+  },
+  {
+    code: "CANONICAL_SINKING_DEPTH",
+    description: "Sinking lures should specify a diving depth range.",
+    required: false,
+    fieldPath: "model.divingDepth",
   },
   {
     code: "CANONICAL_PRODUCT_CODE",
@@ -254,6 +279,14 @@ function hasTrollingTechnique(record: CanonicalLureImport): boolean {
 }
 
 function hasTrollingSpeedClaim(record: CanonicalLureImport): boolean {
+  const trolling = record.model.trollingSpeed;
+  if (
+    (trolling?.minKnots !== undefined && trolling.minKnots > 0) ||
+    (trolling?.maxKnots !== undefined && trolling.maxKnots > 0)
+  ) {
+    return true;
+  }
+
   const corpus = [
     record.model.description ? pickLocalizedText(record.model.description) : "",
     JSON.stringify(record.metadata.extras ?? {}),
@@ -756,6 +789,48 @@ export function validateCanonicalLureImport(
         "CANONICAL_PRODUCT_CODE",
         "No model code, SKU, or manufacturer_sku identifier is present",
         "model.modelCode",
+        recordKey,
+      );
+    }
+  }
+
+  if (isTopwaterLure(normalized) && recordHasMeaningfulDivingDepth(normalized)) {
+    pushError(
+      errors,
+      "CANONICAL_TOPWATER_DEPTH",
+      "Topwater lures must not specify a diving depth",
+      "model.divingDepth",
+      recordKey,
+    );
+  }
+
+  const buoyancySlug = resolveRecordBuoyancySlug(normalized);
+  if (buoyancySlug && !isKnownBuoyancySlug(buoyancySlug)) {
+    pushError(
+      errors,
+      "CANONICAL_BUOYANCY_UNKNOWN",
+      `Unknown buoyancy slug "${buoyancySlug}"`,
+      "model.buoyancy.slug",
+      recordKey,
+    );
+  }
+
+  const buoyancyDepthIssue = validateBuoyancyDepthConsistency(buoyancySlug, normalized);
+  if (buoyancyDepthIssue) {
+    if (buoyancyDepthIssue.code === "CANONICAL_SINKING_DEPTH") {
+      pushWarning(
+        warnings,
+        buoyancyDepthIssue.code,
+        buoyancyDepthIssue.message,
+        buoyancyDepthIssue.fieldPath,
+        recordKey,
+      );
+    } else {
+      pushError(
+        errors,
+        buoyancyDepthIssue.code,
+        buoyancyDepthIssue.message,
+        buoyancyDepthIssue.fieldPath,
         recordKey,
       );
     }

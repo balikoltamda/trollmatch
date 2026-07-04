@@ -15,6 +15,19 @@ type SpecRowProps = {
   source: string;
 };
 
+function hasLocalized(
+  value: { en: string; tr: string } | undefined,
+  locale: AppLocale,
+): boolean {
+  return Boolean(value && localize(value, locale).trim());
+}
+
+function hasDivingDepth(
+  depth: { min: number; max: number } | undefined,
+): boolean {
+  return Boolean(depth && (depth.min > 0 || depth.max > 0));
+}
+
 function SpecRow({ label, value, source }: SpecRowProps) {
   return (
     <div className="border-border flex flex-col gap-0.5 border-b py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
@@ -45,7 +58,50 @@ export async function LureSpecifications({
       ? `${specs.weightG} g`
       : `${specs.weightG} g (${(specs.weightG / 28.3495).toFixed(1)} oz)`;
 
-  const depthDisplay = `~${specs.divingDepthM.min}–${specs.divingDepthM.max} m`;
+  const rows: SpecRowProps[] = [
+    { label: t("specs.length"), value: lengthDisplay, source: sourceLabel },
+    { label: t("specs.weight"), value: weightDisplay, source: sourceLabel },
+  ];
+
+  if (hasDivingDepth(specs.divingDepthM)) {
+    rows.push({
+      label: t("specs.divingDepth"),
+      value: `~${specs.divingDepthM!.min}–${specs.divingDepthM!.max} m`,
+      source: sourceLabel,
+    });
+  }
+
+  if (hasLocalized(specs.buoyancy, locale)) {
+    rows.push({
+      label: t("specs.buoyancy"),
+      value: localize(specs.buoyancy!, locale),
+      source: sourceLabel,
+    });
+  }
+
+  if (hasLocalized(specs.action, locale)) {
+    rows.push({
+      label: t("specs.action"),
+      value: localize(specs.action!, locale),
+      source: sourceLabel,
+    });
+  }
+
+  if (hasLocalized(specs.bodyType, locale)) {
+    rows.push({
+      label: t("specs.bodyType"),
+      value: localize(specs.bodyType!, locale),
+      source: sourceLabel,
+    });
+  }
+
+  if (hasLocalized(specs.coatingType, locale)) {
+    rows.push({
+      label: t("specs.coatingType"),
+      value: localize(specs.coatingType!, locale),
+      source: sourceLabel,
+    });
+  }
 
   return (
     <LureSection
@@ -54,19 +110,14 @@ export async function LureSpecifications({
       description={t("sections.specificationsDescription")}
     >
       <dl>
-        <SpecRow label={t("specs.length")} value={lengthDisplay} source={sourceLabel} />
-        <SpecRow label={t("specs.weight")} value={weightDisplay} source={sourceLabel} />
-        <SpecRow label={t("specs.divingDepth")} value={depthDisplay} source={sourceLabel} />
-        <SpecRow
-          label={t("specs.buoyancy")}
-          value={localize(specs.buoyancy, locale)}
-          source={sourceLabel}
-        />
-        <SpecRow
-          label={t("specs.action")}
-          value={localize(specs.action, locale)}
-          source={sourceLabel}
-        />
+        {rows.map((row) => (
+          <SpecRow
+            key={row.label}
+            label={row.label}
+            value={row.value}
+            source={row.source}
+          />
+        ))}
       </dl>
     </LureSection>
   );

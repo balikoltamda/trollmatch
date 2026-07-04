@@ -1,5 +1,7 @@
 import type {
+  CanonicalBodyType,
   CanonicalBuoyancy,
+  CanonicalCoatingType,
   CanonicalColor,
   CanonicalDivingDepth,
   CanonicalExternalIdentifier,
@@ -10,6 +12,8 @@ import type {
   CanonicalLureVariant,
   CanonicalSize,
   CanonicalTag,
+  CanonicalTechniqueRef,
+  CanonicalTrollingSpeedRange,
   CanonicalWeight,
 } from "../../core/canonical-lure";
 import type {
@@ -24,7 +28,28 @@ import {
   DUEL_SITE_ORIGIN,
 } from "./parser.types";
 
-export const DUEL_MAPPER_SCHEMA_VERSION = "1.0.0";
+export const DUEL_MAPPER_SCHEMA_VERSION = "1.1.0";
+
+const TROLLING_SPEED_PATTERN =
+  /\b([\d.]+)\s*(?:~|–|-|to)\s*([\d.]+)\s*(?:knots?|kt|kn)\b|\b([\d.]+)\s*(?:knots?|kt|kn)\b/i;
+const UV_PATTERN = /\buv\b|ultra[\s-]?violet|uv[\s-]?reactive|uv[\s-]?coat/i;
+const GLOW_PATTERN = /\bglow\b|luminous|phosphor|fluorescent|夜光/i;
+const HOLOGRAPHIC_PATTERN = /\bholographic\b|ホログラフィック/i;
+
+const BODY_TYPE_PATTERNS: Array<{ pattern: RegExp; slug: string }> = [
+  { pattern: /\bminnow\b|ミノー/i, slug: "minnow" },
+  { pattern: /\bstick\s*bait\b|\bpencil\b|ペンシル/i, slug: "stickbait" },
+  { pattern: /\bcrank\b|\bshad\b|クランク/i, slug: "crankbait" },
+  { pattern: /\bpopper\b|\bpopping\b|ポッパー/i, slug: "popper" },
+  { pattern: /\bjerk\s*bait\b|ジャーク/i, slug: "jerkbait" },
+  { pattern: /\bswim\s*bait\b|スイム/i, slug: "swimbait" },
+  { pattern: /\blipless\b|リップレス/i, slug: "lipless" },
+  { pattern: /\bspoon\b|スプーン/i, slug: "spoon" },
+  { pattern: /\bjig\b|ジグ/i, slug: "jig" },
+  { pattern: /\bspinner\b|スピナー/i, slug: "spinnerbait" },
+  { pattern: /\bdeep\s*diver\b|ディープ/i, slug: "minnow" },
+  { pattern: /\bsurface\b|サーフェス/i, slug: "stickbait" },
+];
 
 const BUOYANCY_SLUGS: Record<string, string> = {
   floating: "floating",
@@ -269,6 +294,120 @@ export function normalizeTechniqueTags(product: DuelParsedProduct): CanonicalTag
   }));
 }
 
+/** Map technique tags to explicit canonical technique references. */
+export function normalizeTechniqueRefs(tags: CanonicalTag[]): CanonicalTechniqueRef[] {
+  const slugs = new Set<string>();
+
+  for (const tag of tags) {
+    if (tag.kind === "technique" && tag.value.trim()) {
+      slugs.add(tag.value.trim().toLowerCase());
+    }
+  }
+
+  return [...slugs].map((slug) => ({
+    slug,
+    label: localized(slug.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ")),
+  }));
+}
+
+/** Infer hard-bait body type from DUEL categories and product line. */
+export function normalizeBodyType(product: DuelParsedProduct): CanonicalBodyType | undefined {
+  const corpus = [
+    ...product.categories,
+    product.productLineName,
+    product.productName,
+    product.description,
+  ].join("\n");
+
+  for (const { pattern, slug } of BODY_TYPE_PATTERNS) {
+    if (pattern.test(corpus)) {
+      const term = corpus.match(pattern)?.[0]?.trim();
+      return {
+        slug,
+        manufacturerTerm: term,
+        label: localized(term ?? slug),
+      };
+    }
+  }
+
+  return undefined;
+}
+
+/** Infer factory coating from marketing copy and color tags. */
+export function normalizeCoatingType(product: DuelParsedProduct): CanonicalCoatingType | undefined {
+  const corpus = [
+    product.description,
+    ...product.featureBullets,
+    ...product.features.map((feature) => `${feature.title} ${feature.text}`),
+    ...product.colors.flatMap((color) => [color.name, ...color.tags]),
+  ].join("\n");
+
+  if (UV_PATTERN.test(corpus)) {
+    return {
+      slug: "uv-reactive",
+      manufacturerTerm: "UV",
+      label: localized("UV-reactive"),
+    };
+  }
+
+  if (GLOW_PATTERN.test(corpus)) {
+    return {
+      slug: "glow",
+      manufacturerTerm: "Glow",
+      label: localized("Glow"),
+    };
+  }
+
+  if (HOLOGRAPHIC_PATTERN.test(corpus)) {
+    return {
+      slug: "holographic",
+      manufacturerTerm: "Holographic",
+      label: localized("Holographic"),
+    };
+  }
+
+  return undefined;
+}
+
+/** Parse factory trolling speed range from DUEL marketing copy. */
+export function normalizeTrollingSpeed(product: DuelParsedProduct): CanonicalTrollingSpeedRange | undefined {
+  const corpus = [
+    product.description,
+    ...product.featureBullets,
+    ...product.features.map((feature) => `${feature.title} ${feature.text}`),
+  ].join("\n");
+
+  const rangeMatch = corpus.match(TROLLING_SPEED_PATTERN);
+  if (!rangeMatch) {
+    return undefined;
+  }
+
+  if (rangeMatch[1] && rangeMatch[2]) {
+    const minKnots = Number.parseFloat(rangeMatch[1]);
+    const maxKnots = Number.parseFloat(rangeMatch[2]);
+    if (Number.isFinite(minKnots) && Number.isFinite(maxKnots)) {
+      return {
+        minKnots: Math.min(minKnots, maxKnots),
+        maxKnots: Math.max(minKnots, maxKnots),
+        manufacturerLabel: localized(rangeMatch[0]),
+      };
+    }
+  }
+
+  if (rangeMatch[3]) {
+    const knots = Number.parseFloat(rangeMatch[3]);
+    if (Number.isFinite(knots)) {
+      return {
+        minKnots: knots,
+        maxKnots: knots,
+        manufacturerLabel: localized(rangeMatch[0]),
+      };
+    }
+  }
+
+  return undefined;
+}
+
 function normalizeSize(row: DuelParsedSpecRow): CanonicalSize | undefined {
   const lengthMm = normalizeLengthMm(row.sizeLabel, row.lengthMm);
   if (lengthMm === undefined) {
@@ -447,6 +586,10 @@ export function mapDuelProductToCanonical(
   );
   const productCodes = normalizeModelProductCodes(product.productCodes);
   const techniqueTags = normalizeTechniqueTags(product);
+  const techniqueRefs = normalizeTechniqueRefs(techniqueTags);
+  const bodyType = normalizeBodyType(product);
+  const coatingType = normalizeCoatingType(product);
+  const trollingSpeed = normalizeTrollingSpeed(product);
 
   const modelTags: CanonicalTag[] = [
     { kind: "marketing", value: product.brand, locale: "en" },
@@ -555,6 +698,10 @@ export function mapDuelProductToCanonical(
       modelCode: productCodes[0] || undefined,
       description: localized(product.description),
       formFactorTerm: product.productLineName || undefined,
+      bodyType,
+      coatingType,
+      trollingSpeed,
+      techniques: techniqueRefs.length > 0 ? techniqueRefs : undefined,
       sizes: modelSizes.length > 0 ? modelSizes : undefined,
       weights: modelWeights.length > 0 ? modelWeights : undefined,
       divingDepth: primarySpec
@@ -603,6 +750,9 @@ export function mapDuelProductToCanonical(
         categoryListing: category?.products ?? [],
         janSkuMissing: product.janSku.length === 0,
         normalizedTechniques: techniqueTags.map((tag) => tag.value),
+        bodyTypeSlug: bodyType?.slug,
+        coatingTypeSlug: coatingType?.slug,
+        trollingSpeed,
       },
     },
     importedAt: new Date().toISOString(),

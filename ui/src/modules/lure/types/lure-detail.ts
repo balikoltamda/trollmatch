@@ -21,9 +21,11 @@ export type LureVariant = {
 export type LureSpecifications = {
   lengthMm: number;
   weightG: number;
-  divingDepthM: { min: number; max: number };
-  buoyancy: LocalizedString;
-  action: LocalizedString;
+  divingDepthM?: { min: number; max: number };
+  buoyancy?: LocalizedString;
+  action?: LocalizedString;
+  bodyType?: LocalizedString;
+  coatingType?: LocalizedString;
 };
 
 export type LureSpecies = {
@@ -38,10 +40,10 @@ export type LureTechnique = {
 };
 
 export type TrollingInfo = {
-  speedKnots: { min: number; max: number };
-  leader: LocalizedString;
-  mainLine: LocalizedString;
-  notes: LocalizedString;
+  speedKnots?: { min: number; max: number };
+  leader?: LocalizedString;
+  mainLine?: LocalizedString;
+  notes?: LocalizedString;
 };
 
 export type CommunityStatistics = {
@@ -90,7 +92,7 @@ export type LureDetail = {
   specifications: LureSpecifications;
   recommendedSpecies: LureSpecies[];
   recommendedTechniques: LureTechnique[];
-  trolling: TrollingInfo;
+  trolling?: TrollingInfo;
   communityStatistics: CommunityStatistics;
   aiInsights: AiInsight;
   relatedLures: RelatedLure[];

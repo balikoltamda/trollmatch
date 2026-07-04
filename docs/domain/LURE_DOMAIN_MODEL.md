@@ -5,7 +5,7 @@
 **Platform (public):** Balık Oltamda Guide  
 **Module:** LureAtlas  
 **Document type:** Business domain model (not a database schema)  
-**Status:** Sprint 2 — Domain architecture baseline  
+**Status:** Sprint 3 — manufacturer fishing attributes persisted (body type, buoyancy, depth, trolling speed, coating, technique links)  
 **Authority:** Subordinate to `001_PROJECT_CHARTER.md`, `002_ENGINEERING_PRINCIPLES.md`, and `007_DATABASE_VISION.md`  
 **Primary locales:** Turkish (`tr`), English (`en`)
 
@@ -30,6 +30,8 @@ A lure in this platform is never a flat product row. It is a **knowledge aggrega
 9. **Audit lineage** — immutable change history and merge records.
 
 The canonical catalog anchor is the **LureAtlas Model**. **LureAtlas Variants** hang beneath it. Everything else attaches to the model, a variant, or a community evidence entity linked to either.
+
+**Sprint 3 implementation note:** Manufacturer body type, buoyancy, diving depth range, trolling speed range, coating type, and technique compatibility links are persisted on `lure_models` and `lure_techniques` from the canonical import DTO. Topwater models must not carry diving depth; buoyancy classes are validated against depth claims at import time.
 
 ---
 
