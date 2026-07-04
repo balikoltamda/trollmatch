@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import {
+  computeCompleteness,
+  editorNoteHasMeaningfulContent,
+} from "@/modules/studio/lib/completeness";
+import {
   EMPTY_EDITOR_NOTE,
   type EditorNoteForm,
   type ProductEditorData,
@@ -15,6 +19,8 @@ function mapEditorNote(
     shortRecommendationTr: string | null;
     longRecommendationEn: string | null;
     longRecommendationTr: string | null;
+    currentRecommendationEn: string | null;
+    currentRecommendationTr: string | null;
     mediterraneanNotesEn: string | null;
     mediterraneanNotesTr: string | null;
     aegeanNotesEn: string | null;
@@ -23,6 +29,16 @@ function mapEditorNote(
     northernCyprusNotesTr: string | null;
     seasonalityEn: string | null;
     seasonalityTr: string | null;
+    weatherEn: string | null;
+    weatherTr: string | null;
+    waterClarityEn: string | null;
+    waterClarityTr: string | null;
+    retrieveSpeedEn: string | null;
+    retrieveSpeedTr: string | null;
+    bestTargetSpeciesEn: string | null;
+    bestTargetSpeciesTr: string | null;
+    personalObservationsEn: string | null;
+    personalObservationsTr: string | null;
     recommendedRetrieveEn: string | null;
     recommendedRetrieveTr: string | null;
     warningsEn: string | null;
@@ -39,6 +55,8 @@ function mapEditorNote(
     shortRecommendationTr: note.shortRecommendationTr ?? "",
     longRecommendationEn: note.longRecommendationEn ?? "",
     longRecommendationTr: note.longRecommendationTr ?? "",
+    currentRecommendationEn: note.currentRecommendationEn ?? "",
+    currentRecommendationTr: note.currentRecommendationTr ?? "",
     mediterraneanNotesEn: note.mediterraneanNotesEn ?? "",
     mediterraneanNotesTr: note.mediterraneanNotesTr ?? "",
     aegeanNotesEn: note.aegeanNotesEn ?? "",
@@ -47,6 +65,16 @@ function mapEditorNote(
     northernCyprusNotesTr: note.northernCyprusNotesTr ?? "",
     seasonalityEn: note.seasonalityEn ?? "",
     seasonalityTr: note.seasonalityTr ?? "",
+    weatherEn: note.weatherEn ?? "",
+    weatherTr: note.weatherTr ?? "",
+    waterClarityEn: note.waterClarityEn ?? "",
+    waterClarityTr: note.waterClarityTr ?? "",
+    retrieveSpeedEn: note.retrieveSpeedEn ?? "",
+    retrieveSpeedTr: note.retrieveSpeedTr ?? "",
+    bestTargetSpeciesEn: note.bestTargetSpeciesEn ?? "",
+    bestTargetSpeciesTr: note.bestTargetSpeciesTr ?? "",
+    personalObservationsEn: note.personalObservationsEn ?? "",
+    personalObservationsTr: note.personalObservationsTr ?? "",
     recommendedRetrieveEn: note.recommendedRetrieveEn ?? "",
     recommendedRetrieveTr: note.recommendedRetrieveTr ?? "",
     warningsEn: note.warningsEn ?? "",
@@ -81,10 +109,32 @@ export async function getProductEditorData(
         orderBy: { createdAt: "desc" },
         take: 30,
       },
+      importFieldChanges: {
+        where: { status: "PENDING" },
+        orderBy: { createdAt: "desc" },
+      },
     },
   });
 
   if (!model) return null;
+
+  const hasCover = model.images.some((img) => img.role === "HERO");
+  const moderatorSpecies = model.lureSpeciesLinks.filter(
+    (l) => l.associationKind === "MODERATOR_CURATED",
+  );
+  const completeness = computeCompleteness({
+    nameTr: model.nameTr,
+    bodyTypeEn: model.bodyTypeEn,
+    actionEn: model.actionEn,
+    buoyancyEn: model.buoyancyEn,
+    divingDepthMinM: decimalToString(model.divingDepthMinM),
+    divingDepthMaxM: decimalToString(model.divingDepthMaxM),
+    imageCount: model.images.length,
+    hasCoverImage: hasCover,
+    moderatorSpeciesCount: moderatorSpecies.length,
+    hasEditorNote: model.editorNote !== null,
+    editorNoteHasContent: editorNoteHasMeaningfulContent(model.editorNote),
+  });
 
   return {
     id: model.id,
@@ -155,6 +205,19 @@ export async function getProductEditorData(
       summary: entry.summary,
       createdAt: entry.createdAt,
     })),
+    pendingImportDiffs: model.importFieldChanges.map((diff) => ({
+      id: diff.id,
+      fieldLabel: diff.fieldLabel,
+      fieldKey: diff.fieldKey,
+      oldValue: diff.oldValue,
+      newValue: diff.newValue,
+      status: diff.status,
+      createdAt: diff.createdAt,
+    })),
+    completeness: {
+      score: completeness.score,
+      missing: completeness.missing,
+    },
   };
 }
 

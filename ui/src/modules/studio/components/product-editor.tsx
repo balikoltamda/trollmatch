@@ -5,15 +5,23 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  markProductReady,
+  publishProduct,
   saveCanonicalProduct,
   saveEditorNotes,
+  unpublishProduct,
 } from "@/modules/studio/actions/product-actions";
+import { CompletenessBar } from "@/modules/studio/components/completeness-bar";
+import { EditorialStatusBadge } from "@/modules/studio/components/editorial-status-badge";
+import { ImageReviewPanel } from "@/modules/studio/components/image-review-panel";
+import { ImportDiffPanel } from "@/modules/studio/components/import-diff-panel";
 import {
   StudioField,
   StudioInput,
   StudioSelect,
   StudioTextarea,
 } from "@/modules/studio/components/studio-ui";
+import { EDITORIAL_STATUS_OPTIONS } from "@/modules/studio/lib/editorial";
 import type { ProductEditorData } from "@/modules/studio/types";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +30,7 @@ const TABS = [
   "Manufacturer",
   "Canonical",
   "Editor Notes",
+  "Import Changes",
   "Images",
   "Community",
   "History",
@@ -83,6 +92,27 @@ export function ProductEditor({
     });
   }
 
+  function handlePublish() {
+    startTransition(async () => {
+      const result = await publishProduct(product.id);
+      setMessage(result.ok ? "Product published." : result.error);
+    });
+  }
+
+  function handleUnpublish() {
+    startTransition(async () => {
+      const result = await unpublishProduct(product.id);
+      setMessage(result.ok ? "Product unpublished." : result.error);
+    });
+  }
+
+  function handleMarkReady() {
+    startTransition(async () => {
+      const result = await markProductReady(product.id);
+      setMessage(result.ok ? "Marked as Ready." : result.error);
+    });
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -92,8 +122,42 @@ export function ProductEditor({
             {product.manufacturer.nameEn} · {product.slug}
           </p>
         </div>
-        <Badge variant="muted">{product.lifecycleState}</Badge>
         <Badge variant="ocean">{product.manufacturerStatus}</Badge>
+        <EditorialStatusBadge state={product.lifecycleState} />
+        <CompletenessBar
+          score={product.completeness.score}
+          missing={product.completeness.missing}
+          className="min-w-48"
+        />
+        {product.lifecycleState !== "PUBLISHED" ? (
+          <button
+            type="button"
+            disabled={pending}
+            className={buttonVariants({ size: "sm" })}
+            onClick={handlePublish}
+          >
+            Publish
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled={pending}
+            className={buttonVariants({ size: "sm", variant: "outline" })}
+            onClick={handleUnpublish}
+          >
+            Unpublish
+          </button>
+        )}
+        {product.lifecycleState === "PENDING_REVIEW" ? (
+          <button
+            type="button"
+            disabled={pending}
+            className={buttonVariants({ size: "sm", variant: "secondary" })}
+            onClick={handleMarkReady}
+          >
+            Mark Ready
+          </button>
+        ) : null}
         <Link
           href={`/en/lures/${product.slug}`}
           className={buttonVariants({ size: "sm", variant: "outline" })}
@@ -213,13 +277,11 @@ export function ProductEditor({
                   }))
                 }
               >
-                {["DRAFT", "PENDING_REVIEW", "PUBLISHED", "DEPRECATED", "REJECTED"].map(
-                  (s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ),
-                )}
+                {EDITORIAL_STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
               </StudioSelect>
             </StudioField>
             <StudioField label="Body type (EN)">
@@ -410,6 +472,30 @@ export function ProductEditor({
                 }
               />
             </StudioField>
+            <StudioField label="Current recommendation (EN)">
+              <StudioTextarea
+                rows={3}
+                value={notes.currentRecommendationEn}
+                onChange={(e) =>
+                  setNotes((n) => ({
+                    ...n,
+                    currentRecommendationEn: e.target.value,
+                  }))
+                }
+              />
+            </StudioField>
+            <StudioField label="Current recommendation (TR)">
+              <StudioTextarea
+                rows={3}
+                value={notes.currentRecommendationTr}
+                onChange={(e) =>
+                  setNotes((n) => ({
+                    ...n,
+                    currentRecommendationTr: e.target.value,
+                  }))
+                }
+              />
+            </StudioField>
             <StudioField label="Mediterranean notes (EN)">
               <StudioTextarea
                 rows={3}
@@ -443,12 +529,50 @@ export function ProductEditor({
                 }
               />
             </StudioField>
-            <StudioField label="Seasonality (EN)">
+            <StudioField label="Season (EN)">
               <StudioTextarea
                 rows={2}
                 value={notes.seasonalityEn}
                 onChange={(e) =>
                   setNotes((n) => ({ ...n, seasonalityEn: e.target.value }))
+                }
+              />
+            </StudioField>
+            <StudioField label="Weather (EN)">
+              <StudioTextarea
+                rows={2}
+                value={notes.weatherEn}
+                onChange={(e) =>
+                  setNotes((n) => ({ ...n, weatherEn: e.target.value }))
+                }
+              />
+            </StudioField>
+            <StudioField label="Water clarity (EN)">
+              <StudioTextarea
+                rows={2}
+                value={notes.waterClarityEn}
+                onChange={(e) =>
+                  setNotes((n) => ({ ...n, waterClarityEn: e.target.value }))
+                }
+              />
+            </StudioField>
+            <StudioField label="Retrieve speed (EN)">
+              <StudioTextarea
+                rows={2}
+                value={notes.retrieveSpeedEn}
+                onChange={(e) =>
+                  setNotes((n) => ({ ...n, retrieveSpeedEn: e.target.value }))
+                }
+              />
+            </StudioField>
+            <StudioField label="Best target species (EN)">
+              <StudioInput
+                value={notes.bestTargetSpeciesEn}
+                onChange={(e) =>
+                  setNotes((n) => ({
+                    ...n,
+                    bestTargetSpeciesEn: e.target.value,
+                  }))
                 }
               />
             </StudioField>
@@ -478,6 +602,18 @@ export function ProductEditor({
                 value={notes.bestColorsEn}
                 onChange={(e) =>
                   setNotes((n) => ({ ...n, bestColorsEn: e.target.value }))
+                }
+              />
+            </StudioField>
+            <StudioField label="Personal observations (EN)">
+              <StudioTextarea
+                rows={3}
+                value={notes.personalObservationsEn}
+                onChange={(e) =>
+                  setNotes((n) => ({
+                    ...n,
+                    personalObservationsEn: e.target.value,
+                  }))
                 }
               />
             </StudioField>
@@ -519,30 +655,15 @@ export function ProductEditor({
         </div>
       )}
 
+      {tab === "Import Changes" && (
+        <ImportDiffPanel
+          lureModelId={product.id}
+          diffs={product.pendingImportDiffs}
+        />
+      )}
+
       {tab === "Images" && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {product.images.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No images yet.</p>
-          ) : (
-            product.images.map((img) => (
-              <div
-                key={img.id}
-                className="border-border/70 overflow-hidden rounded-xl border"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={img.url}
-                  alt=""
-                  className="bg-muted aspect-square w-full object-contain"
-                />
-                <div className="px-3 py-2 text-xs">
-                  <p className="font-medium">{img.role}</p>
-                  <p className="text-muted-foreground truncate">{img.url}</p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+        <ImageReviewPanel lureModelId={product.id} images={product.images} />
       )}
 
       {tab === "Community" && (

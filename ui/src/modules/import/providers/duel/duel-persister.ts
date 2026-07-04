@@ -37,6 +37,7 @@ import {
   type ImportSummary,
 } from "../../persistence/types";
 import { pickChangedFields } from "../../persistence/lifecycle-reconciler";
+import { recordImportFieldChanges } from "../../persistence/import-field-diff";
 
 export type UpsertDuelImportResult = {
   summary: ImportSummary;
@@ -624,6 +625,16 @@ async function upsertSingleRecord(
     ]);
     dataChanged = Object.keys(changedFields).length > 0;
 
+    if (dataChanged) {
+      await recordImportFieldChanges(
+        tx,
+        lureModel.id,
+        null,
+        lureModel as unknown as Record<string, unknown>,
+        changedFields as Record<string, unknown>,
+      );
+    }
+
     await tx.lureModel.update({
       where: { id: lureModel.id },
       data: {
@@ -644,7 +655,7 @@ async function upsertSingleRecord(
     lureModel = await tx.lureModel.create({
       data: {
         slug: modelInput.slug,
-        lifecycleState: ContentLifecycleState.DRAFT,
+        lifecycleState: ContentLifecycleState.PENDING_REVIEW,
         firstSeenAt: importedAt,
         ...modelPayload,
       },

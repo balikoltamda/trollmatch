@@ -18,6 +18,10 @@ export type DashboardStats = {
   fishSpecies: number;
   images: number;
   pendingReview: number;
+  readyToPublish: number;
+  published: number;
+  reviewQueue: number;
+  pendingImportDiffs: number;
 };
 
 export type ImportManufacturerRow = {
@@ -50,6 +54,8 @@ export type ProductListRow = {
   hasEditorNote: boolean;
   updatedAt: Date;
   imageUrl: string | null;
+  completenessScore: number;
+  completenessMissing: string[];
 };
 
 export type ProductListFilters = {
@@ -59,6 +65,8 @@ export type ProductListFilters = {
   lifecycle?: ContentLifecycleState;
   needsReview?: boolean;
   hasEditorNote?: boolean;
+  technique?: string;
+  species?: string;
   page?: number;
   pageSize?: number;
 };
@@ -128,6 +136,21 @@ export type ProductEditorData = {
     summary: string;
     createdAt: Date;
   }[];
+  pendingImportDiffs: ImportFieldChangeRow[];
+  completeness: {
+    score: number;
+    missing: string[];
+  };
+};
+
+export type ImportFieldChangeRow = {
+  id: string;
+  fieldLabel: string;
+  fieldKey: string;
+  oldValue: string | null;
+  newValue: string | null;
+  status: string;
+  createdAt: Date;
 };
 
 export type EditorNoteForm = {
@@ -135,6 +158,8 @@ export type EditorNoteForm = {
   shortRecommendationTr: string;
   longRecommendationEn: string;
   longRecommendationTr: string;
+  currentRecommendationEn: string;
+  currentRecommendationTr: string;
   mediterraneanNotesEn: string;
   mediterraneanNotesTr: string;
   aegeanNotesEn: string;
@@ -143,6 +168,16 @@ export type EditorNoteForm = {
   northernCyprusNotesTr: string;
   seasonalityEn: string;
   seasonalityTr: string;
+  weatherEn: string;
+  weatherTr: string;
+  waterClarityEn: string;
+  waterClarityTr: string;
+  retrieveSpeedEn: string;
+  retrieveSpeedTr: string;
+  bestTargetSpeciesEn: string;
+  bestTargetSpeciesTr: string;
+  personalObservationsEn: string;
+  personalObservationsTr: string;
   recommendedRetrieveEn: string;
   recommendedRetrieveTr: string;
   warningsEn: string;
@@ -158,6 +193,8 @@ export const EMPTY_EDITOR_NOTE: EditorNoteForm = {
   shortRecommendationTr: "",
   longRecommendationEn: "",
   longRecommendationTr: "",
+  currentRecommendationEn: "",
+  currentRecommendationTr: "",
   mediterraneanNotesEn: "",
   mediterraneanNotesTr: "",
   aegeanNotesEn: "",
@@ -166,6 +203,16 @@ export const EMPTY_EDITOR_NOTE: EditorNoteForm = {
   northernCyprusNotesTr: "",
   seasonalityEn: "",
   seasonalityTr: "",
+  weatherEn: "",
+  weatherTr: "",
+  waterClarityEn: "",
+  waterClarityTr: "",
+  retrieveSpeedEn: "",
+  retrieveSpeedTr: "",
+  bestTargetSpeciesEn: "",
+  bestTargetSpeciesTr: "",
+  personalObservationsEn: "",
+  personalObservationsTr: "",
   recommendedRetrieveEn: "",
   recommendedRetrieveTr: "",
   warningsEn: "",

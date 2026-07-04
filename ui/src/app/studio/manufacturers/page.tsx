@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import {
   StudioPageBody,
@@ -17,6 +18,10 @@ export default async function StudioManufacturersPage() {
     orderBy: { nameEn: "asc" },
     include: {
       _count: { select: { lureModels: true } },
+      lureModels: {
+        where: { deletedAt: null },
+        select: { lifecycleState: true },
+      },
     },
   });
 
@@ -24,7 +29,7 @@ export default async function StudioManufacturersPage() {
     <>
       <StudioPageHeader
         title="Manufacturers"
-        description="Catalog manufacturers — product counts from live database."
+        description="Catalog manufacturers — open a hub for import history and review stats."
       />
       <StudioPageBody>
         <StudioTable>
@@ -32,19 +37,38 @@ export default async function StudioManufacturersPage() {
             <tr>
               <StudioTh>Name</StudioTh>
               <StudioTh>Slug</StudioTh>
-              <StudioTh>Country</StudioTh>
               <StudioTh>Products</StudioTh>
+              <StudioTh>Needs review</StudioTh>
+              <StudioTh>Published</StudioTh>
+              <StudioTh />
             </tr>
           </thead>
           <tbody>
-            {manufacturers.map((m) => (
-              <tr key={m.id}>
-                <StudioTd>{m.nameEn}</StudioTd>
-                <StudioTd>{m.slug}</StudioTd>
-                <StudioTd>{m.countryCode ?? "—"}</StudioTd>
-                <StudioTd>{m._count.lureModels}</StudioTd>
-              </tr>
-            ))}
+            {manufacturers.map((m) => {
+              const needsReview = m.lureModels.filter(
+                (p) => p.lifecycleState === "PENDING_REVIEW",
+              ).length;
+              const published = m.lureModels.filter(
+                (p) => p.lifecycleState === "PUBLISHED",
+              ).length;
+              return (
+                <tr key={m.id}>
+                  <StudioTd>{m.nameEn}</StudioTd>
+                  <StudioTd>{m.slug}</StudioTd>
+                  <StudioTd>{m._count.lureModels}</StudioTd>
+                  <StudioTd>{needsReview}</StudioTd>
+                  <StudioTd>{published}</StudioTd>
+                  <StudioTd>
+                    <Link
+                      href={`/studio/manufacturers/${m.slug}`}
+                      className="text-ocean text-sm hover:underline"
+                    >
+                      Open hub
+                    </Link>
+                  </StudioTd>
+                </tr>
+              );
+            })}
           </tbody>
         </StudioTable>
       </StudioPageBody>

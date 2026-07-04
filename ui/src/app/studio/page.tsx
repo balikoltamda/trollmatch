@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { CompletenessBar } from "@/modules/studio/components/completeness-bar";
+import { EditorialStatusBadge } from "@/modules/studio/components/editorial-status-badge";
 import {
   StudioPageBody,
   StudioPageHeader,
@@ -16,16 +18,19 @@ import {
   getLatestImports,
   getRecentImporterActivity,
 } from "@/modules/studio/data/dashboard";
+import { listReviewQueue } from "@/modules/studio/data/review-queue";
 
 export const dynamic = "force-dynamic";
 
 export default async function StudioDashboardPage() {
-  const [stats, latestImports, latestProducts, activity] = await Promise.all([
-    getDashboardStats(),
-    getLatestImports(),
-    getLatestEditedProducts(),
-    getRecentImporterActivity(),
-  ]);
+  const [stats, latestImports, latestProducts, activity, reviewQueue] =
+    await Promise.all([
+      getDashboardStats(),
+      getLatestImports(),
+      getLatestEditedProducts(),
+      getRecentImporterActivity(),
+      listReviewQueue(10),
+    ]);
 
   return (
     <>
@@ -34,17 +39,78 @@ export default async function StudioDashboardPage() {
         description="Live catalog overview — box specs from imports, editorial work in progress."
       />
       <StudioPageBody>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StudioStatCard label="Lure models" value={stats.lureModels} />
-          <StudioStatCard label="Manufacturers" value={stats.manufacturers} />
-          <StudioStatCard label="Fish species" value={stats.fishSpecies} />
-          <StudioStatCard label="Images" value={stats.images} />
+          <StudioStatCard label="Needs review" value={stats.pendingReview} />
+          <StudioStatCard label="Ready" value={stats.readyToPublish} />
+          <StudioStatCard label="Published" value={stats.published} />
+          <StudioStatCard label="Review queue" value={stats.reviewQueue} />
           <StudioStatCard
-            label="Pending review"
-            value={stats.pendingReview}
-            hint="Awaiting editor pass"
+            label="Pending import diffs"
+            value={stats.pendingImportDiffs}
           />
+          <StudioStatCard label="Manufacturers" value={stats.manufacturers} />
+          <StudioStatCard label="Images" value={stats.images} />
         </div>
+
+        <section className="mt-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold">Review queue</h2>
+            <Link
+              href="/studio/review"
+              className={buttonVariants({ size: "sm", variant: "ghost" })}
+            >
+              Full queue
+            </Link>
+          </div>
+          <StudioTable>
+            <thead>
+              <tr>
+                <StudioTh>Product</StudioTh>
+                <StudioTh>Completeness</StudioTh>
+                <StudioTh>Missing</StudioTh>
+                <StudioTh>Status</StudioTh>
+              </tr>
+            </thead>
+            <tbody>
+              {reviewQueue.length === 0 ? (
+                <tr>
+                  <StudioTd colSpan={4} className="text-muted-foreground">
+                    Queue is clear.
+                  </StudioTd>
+                </tr>
+              ) : (
+                reviewQueue.map((row) => (
+                  <tr key={row.id}>
+                    <StudioTd>
+                      <Link
+                        href={`/studio/products/${row.id}`}
+                        className="hover:text-ocean font-medium"
+                      >
+                        {row.nameEn}
+                      </Link>
+                      <p className="text-muted-foreground text-xs">
+                        {row.manufacturerName}
+                      </p>
+                    </StudioTd>
+                    <StudioTd className="min-w-36">
+                      <CompletenessBar
+                        score={row.completeness.score}
+                        compact
+                      />
+                    </StudioTd>
+                    <StudioTd className="text-muted-foreground text-xs">
+                      {row.completeness.missing.join(", ")}
+                    </StudioTd>
+                    <StudioTd>
+                      <EditorialStatusBadge state={row.lifecycleState} />
+                    </StudioTd>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </StudioTable>
+        </section>
 
         <div className="mt-8 grid gap-8 xl:grid-cols-2">
           <section>
@@ -63,7 +129,7 @@ export default async function StudioDashboardPage() {
                   <StudioTh>Manufacturer</StudioTh>
                   <StudioTh>Status</StudioTh>
                   <StudioTh>New</StudioTh>
-                  <StudioTh>Updated</StudioTh>
+                  <StudioTh>Report</StudioTh>
                 </tr>
               </thead>
               <tbody>
@@ -79,7 +145,14 @@ export default async function StudioDashboardPage() {
                       <StudioTd>{batch.displayName}</StudioTd>
                       <StudioTd>{batch.status}</StudioTd>
                       <StudioTd>{batch.createdCount}</StudioTd>
-                      <StudioTd>{batch.updatedCount}</StudioTd>
+                      <StudioTd>
+                        <Link
+                          href={`/studio/import/batch/${batch.id}`}
+                          className="text-ocean text-sm hover:underline"
+                        >
+                          Open
+                        </Link>
+                      </StudioTd>
                     </tr>
                   ))
                 )}
@@ -101,8 +174,8 @@ export default async function StudioDashboardPage() {
               <thead>
                 <tr>
                   <StudioTh>Product</StudioTh>
+                  <StudioTh>Completeness</StudioTh>
                   <StudioTh>State</StudioTh>
-                  <StudioTh>Updated</StudioTh>
                 </tr>
               </thead>
               <tbody>
@@ -126,9 +199,14 @@ export default async function StudioDashboardPage() {
                           {product.manufacturerName}
                         </p>
                       </StudioTd>
-                      <StudioTd>{product.lifecycleState}</StudioTd>
-                      <StudioTd className="text-muted-foreground text-xs">
-                        {product.updatedAt.toLocaleDateString()}
+                      <StudioTd className="min-w-32">
+                        <CompletenessBar
+                          score={product.completenessScore}
+                          compact
+                        />
+                      </StudioTd>
+                      <StudioTd>
+                        <EditorialStatusBadge state={product.lifecycleState} />
                       </StudioTd>
                     </tr>
                   ))

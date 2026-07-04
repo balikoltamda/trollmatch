@@ -106,3 +106,38 @@ Future: auth/roles, community moderation, dedicated media upload pipeline, full 
 Authentication, roles, permissions, notifications, analytics.
 
 Single local admin assumed — do not expose `/studio` on public internet without a gate in production.
+
+---
+
+## Sprint 6.1 — Editorial workflow
+
+### Editorial status
+
+`DRAFT` → `PENDING_REVIEW` (Needs Review) → `READY` → `PUBLISHED` → `ARCHIVED`
+
+Importers set `PENDING_REVIEW` on create — never auto-publish.
+
+### Review queue (`/studio/review`)
+
+Products with completeness gaps, sorted lowest-first. Dashboard shows top 10.
+
+### Completeness score
+
+Weighted checklist: Turkish name, images, cover, fishing attributes, species, editor note.
+
+### Import diffs
+
+`import_field_changes` table — accept/reject UI on product **Import Changes** tab.
+
+### Bulk actions
+
+Products list: publish, unpublish, assign species/techniques, delete editor notes, CSV export.
+
+### Manufacturer hub (`/studio/manufacturers/[slug]`)
+
+Last import, product counts, needs review, published, missing, import history with report links.
+
+### Import reports (`/studio/import/batch/[id]`)
+
+Human-readable report sections from `import_batches.report_json`.
+

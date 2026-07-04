@@ -228,7 +228,7 @@ async function persistSingleRecord(
         shortDescriptionTr: modelInput.description
           ? resolveLocalized(modelInput.description, "tr")
           : null,
-        lifecycleState: ContentLifecycleState.DRAFT,
+        lifecycleState: ContentLifecycleState.PENDING_REVIEW,
       },
     });
     summary.created.push(`LureModel: ${lureModel.slug}`);

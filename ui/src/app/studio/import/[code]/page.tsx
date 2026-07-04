@@ -73,8 +73,13 @@ export default async function StudioImportHistoryPage({ params }: PageProps) {
                       ? `${(batch.durationMs / 1000).toFixed(1)}s`
                       : "—"}
                   </StudioTd>
-                  <StudioTd className="max-w-xs truncate text-xs">
-                    {batch.reportPath ?? "—"}
+                  <StudioTd>
+                    <Link
+                      href={`/studio/import/batch/${batch.id}`}
+                      className="text-ocean text-sm hover:underline"
+                    >
+                      Open report
+                    </Link>
                   </StudioTd>
                 </tr>
               ))

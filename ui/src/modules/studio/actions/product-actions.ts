@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { ContentLifecycleState, EditorNoteConfidence } from "@/generated/prisma/client";
+import type { ContentLifecycleState, EditorNoteConfidence, Prisma } from "@/generated/prisma/client";
+import { Prisma as PrismaRuntime } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { recordCatalogAudit } from "@/modules/studio/data/audit";
 
@@ -94,6 +95,7 @@ export async function saveCanonicalProduct(
     revalidatePath(`/studio/products/${lureModelId}`);
     revalidatePath("/studio/products");
     revalidatePath("/studio");
+    revalidatePath("/studio/review");
 
     return { ok: true };
   } catch (error) {
@@ -104,6 +106,272 @@ export async function saveCanonicalProduct(
   }
 }
 
+export async function publishProduct(
+  lureModelId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const model = await prisma.lureModel.update({
+      where: { id: lureModelId },
+      data: { lifecycleState: "PUBLISHED" },
+      select: { slug: true },
+    });
+
+    await recordCatalogAudit({
+      lureModelId,
+      entityType: "lure_model",
+      entityId: lureModelId,
+      action: "PUBLISH",
+      summary: `Published ${model.slug}`,
+    });
+
+    revalidateProductPaths(lureModelId);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Publish failed",
+    };
+  }
+}
+
+export async function unpublishProduct(
+  lureModelId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const model = await prisma.lureModel.update({
+      where: { id: lureModelId },
+      data: { lifecycleState: "READY" },
+      select: { slug: true },
+    });
+
+    await recordCatalogAudit({
+      lureModelId,
+      entityType: "lure_model",
+      entityId: lureModelId,
+      action: "UNPUBLISH",
+      summary: `Unpublished ${model.slug}`,
+    });
+
+    revalidateProductPaths(lureModelId);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Unpublish failed",
+    };
+  }
+}
+
+export async function markProductReady(
+  lureModelId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await prisma.lureModel.update({
+      where: { id: lureModelId },
+      data: { lifecycleState: "READY" },
+    });
+
+    await recordCatalogAudit({
+      lureModelId,
+      entityType: "lure_model",
+      entityId: lureModelId,
+      action: "LIFECYCLE_CHANGE",
+      summary: "Marked product as Ready",
+    });
+
+    revalidateProductPaths(lureModelId);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Update failed",
+    };
+  }
+}
+
+export async function resolveImportDiff(
+  diffId: string,
+  decision: "accept" | "reject",
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const diff = await prisma.importFieldChange.findUnique({
+      where: { id: diffId },
+    });
+    if (!diff || diff.status !== "PENDING") {
+      return { ok: false, error: "Diff not found or already resolved" };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      if (decision === "reject" && diff.oldValue !== null) {
+        const DECIMAL_FIELDS = new Set([
+          "divingDepthMinM",
+          "divingDepthMaxM",
+          "trollingSpeedMinKn",
+          "trollingSpeedMaxKn",
+        ]);
+        const revertValue = DECIMAL_FIELDS.has(diff.fieldKey)
+          ? new PrismaRuntime.Decimal(diff.oldValue)
+          : diff.oldValue;
+        await tx.lureModel.update({
+          where: { id: diff.lureModelId },
+          data: { [diff.fieldKey]: revertValue } as Prisma.LureModelUpdateInput,
+        });
+      }
+
+      await tx.importFieldChange.update({
+        where: { id: diffId },
+        data: {
+          status: decision === "accept" ? "ACCEPTED" : "REJECTED",
+          resolvedAt: new Date(),
+        },
+      });
+    });
+
+    await recordCatalogAudit({
+      lureModelId: diff.lureModelId,
+      entityType: "import_diff",
+      entityId: diffId,
+      action: "IMPORT_DIFF",
+      summary: `${decision === "accept" ? "Accepted" : "Rejected"} import change: ${diff.fieldLabel}`,
+    });
+
+    revalidateProductPaths(diff.lureModelId);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Diff resolution failed",
+    };
+  }
+}
+
+export async function setCoverImage(
+  lureModelId: string,
+  imageId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.image.updateMany({
+        where: { lureModelId, role: "HERO" },
+        data: { role: "PRODUCT" },
+      });
+      await tx.image.update({
+        where: { id: imageId, lureModelId },
+        data: { role: "HERO", sortOrder: 0 },
+      });
+    });
+
+    revalidateProductPaths(lureModelId);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Cover update failed",
+    };
+  }
+}
+
+export async function reorderProductImages(
+  lureModelId: string,
+  imageIds: string[],
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await prisma.$transaction(async (tx) => {
+      for (const [index, imageId] of imageIds.entries()) {
+        await tx.image.update({
+          where: { id: imageId, lureModelId },
+          data: { sortOrder: index },
+        });
+      }
+    });
+
+    revalidateProductPaths(lureModelId);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : "Reorder failed",
+    };
+  }
+}
+
+function editorNotePayload(data: {
+  shortRecommendationEn: string;
+  shortRecommendationTr: string;
+  longRecommendationEn: string;
+  longRecommendationTr: string;
+  currentRecommendationEn: string;
+  currentRecommendationTr: string;
+  mediterraneanNotesEn: string;
+  mediterraneanNotesTr: string;
+  aegeanNotesEn: string;
+  aegeanNotesTr: string;
+  northernCyprusNotesEn: string;
+  northernCyprusNotesTr: string;
+  seasonalityEn: string;
+  seasonalityTr: string;
+  weatherEn: string;
+  weatherTr: string;
+  waterClarityEn: string;
+  waterClarityTr: string;
+  retrieveSpeedEn: string;
+  retrieveSpeedTr: string;
+  bestTargetSpeciesEn: string;
+  bestTargetSpeciesTr: string;
+  personalObservationsEn: string;
+  personalObservationsTr: string;
+  recommendedRetrieveEn: string;
+  recommendedRetrieveTr: string;
+  warningsEn: string;
+  warningsTr: string;
+  bestColorsEn: string;
+  bestColorsTr: string;
+  confidence: EditorNoteConfidence;
+  internalNotes: string;
+}) {
+  return {
+    shortRecommendationEn: emptyToNull(data.shortRecommendationEn),
+    shortRecommendationTr: emptyToNull(data.shortRecommendationTr),
+    longRecommendationEn: emptyToNull(data.longRecommendationEn),
+    longRecommendationTr: emptyToNull(data.longRecommendationTr),
+    currentRecommendationEn: emptyToNull(data.currentRecommendationEn),
+    currentRecommendationTr: emptyToNull(data.currentRecommendationTr),
+    mediterraneanNotesEn: emptyToNull(data.mediterraneanNotesEn),
+    mediterraneanNotesTr: emptyToNull(data.mediterraneanNotesTr),
+    aegeanNotesEn: emptyToNull(data.aegeanNotesEn),
+    aegeanNotesTr: emptyToNull(data.aegeanNotesTr),
+    northernCyprusNotesEn: emptyToNull(data.northernCyprusNotesEn),
+    northernCyprusNotesTr: emptyToNull(data.northernCyprusNotesTr),
+    seasonalityEn: emptyToNull(data.seasonalityEn),
+    seasonalityTr: emptyToNull(data.seasonalityTr),
+    weatherEn: emptyToNull(data.weatherEn),
+    weatherTr: emptyToNull(data.weatherTr),
+    waterClarityEn: emptyToNull(data.waterClarityEn),
+    waterClarityTr: emptyToNull(data.waterClarityTr),
+    retrieveSpeedEn: emptyToNull(data.retrieveSpeedEn),
+    retrieveSpeedTr: emptyToNull(data.retrieveSpeedTr),
+    bestTargetSpeciesEn: emptyToNull(data.bestTargetSpeciesEn),
+    bestTargetSpeciesTr: emptyToNull(data.bestTargetSpeciesTr),
+    personalObservationsEn: emptyToNull(data.personalObservationsEn),
+    personalObservationsTr: emptyToNull(data.personalObservationsTr),
+    recommendedRetrieveEn: emptyToNull(data.recommendedRetrieveEn),
+    recommendedRetrieveTr: emptyToNull(data.recommendedRetrieveTr),
+    warningsEn: emptyToNull(data.warningsEn),
+    warningsTr: emptyToNull(data.warningsTr),
+    bestColorsEn: emptyToNull(data.bestColorsEn),
+    bestColorsTr: emptyToNull(data.bestColorsTr),
+    confidence: data.confidence,
+    internalNotes: emptyToNull(data.internalNotes),
+  };
+}
+
+function revalidateProductPaths(lureModelId: string) {
+  revalidatePath(`/studio/products/${lureModelId}`);
+  revalidatePath("/studio/products");
+  revalidatePath("/studio/review");
+  revalidatePath("/studio");
+}
+
 export async function saveEditorNotes(
   lureModelId: string,
   data: {
@@ -111,6 +379,8 @@ export async function saveEditorNotes(
     shortRecommendationTr: string;
     longRecommendationEn: string;
     longRecommendationTr: string;
+    currentRecommendationEn: string;
+    currentRecommendationTr: string;
     mediterraneanNotesEn: string;
     mediterraneanNotesTr: string;
     aegeanNotesEn: string;
@@ -119,6 +389,16 @@ export async function saveEditorNotes(
     northernCyprusNotesTr: string;
     seasonalityEn: string;
     seasonalityTr: string;
+    weatherEn: string;
+    weatherTr: string;
+    waterClarityEn: string;
+    waterClarityTr: string;
+    retrieveSpeedEn: string;
+    retrieveSpeedTr: string;
+    bestTargetSpeciesEn: string;
+    bestTargetSpeciesTr: string;
+    personalObservationsEn: string;
+    personalObservationsTr: string;
     recommendedRetrieveEn: string;
     recommendedRetrieveTr: string;
     warningsEn: string;
@@ -130,53 +410,11 @@ export async function saveEditorNotes(
   },
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
+    const payload = editorNotePayload(data);
     const note = await prisma.lureEditorNote.upsert({
       where: { lureModelId },
-      create: {
-        lureModelId,
-        shortRecommendationEn: emptyToNull(data.shortRecommendationEn),
-        shortRecommendationTr: emptyToNull(data.shortRecommendationTr),
-        longRecommendationEn: emptyToNull(data.longRecommendationEn),
-        longRecommendationTr: emptyToNull(data.longRecommendationTr),
-        mediterraneanNotesEn: emptyToNull(data.mediterraneanNotesEn),
-        mediterraneanNotesTr: emptyToNull(data.mediterraneanNotesTr),
-        aegeanNotesEn: emptyToNull(data.aegeanNotesEn),
-        aegeanNotesTr: emptyToNull(data.aegeanNotesTr),
-        northernCyprusNotesEn: emptyToNull(data.northernCyprusNotesEn),
-        northernCyprusNotesTr: emptyToNull(data.northernCyprusNotesTr),
-        seasonalityEn: emptyToNull(data.seasonalityEn),
-        seasonalityTr: emptyToNull(data.seasonalityTr),
-        recommendedRetrieveEn: emptyToNull(data.recommendedRetrieveEn),
-        recommendedRetrieveTr: emptyToNull(data.recommendedRetrieveTr),
-        warningsEn: emptyToNull(data.warningsEn),
-        warningsTr: emptyToNull(data.warningsTr),
-        bestColorsEn: emptyToNull(data.bestColorsEn),
-        bestColorsTr: emptyToNull(data.bestColorsTr),
-        confidence: data.confidence,
-        internalNotes: emptyToNull(data.internalNotes),
-      },
-      update: {
-        shortRecommendationEn: emptyToNull(data.shortRecommendationEn),
-        shortRecommendationTr: emptyToNull(data.shortRecommendationTr),
-        longRecommendationEn: emptyToNull(data.longRecommendationEn),
-        longRecommendationTr: emptyToNull(data.longRecommendationTr),
-        mediterraneanNotesEn: emptyToNull(data.mediterraneanNotesEn),
-        mediterraneanNotesTr: emptyToNull(data.mediterraneanNotesTr),
-        aegeanNotesEn: emptyToNull(data.aegeanNotesEn),
-        aegeanNotesTr: emptyToNull(data.aegeanNotesTr),
-        northernCyprusNotesEn: emptyToNull(data.northernCyprusNotesEn),
-        northernCyprusNotesTr: emptyToNull(data.northernCyprusNotesTr),
-        seasonalityEn: emptyToNull(data.seasonalityEn),
-        seasonalityTr: emptyToNull(data.seasonalityTr),
-        recommendedRetrieveEn: emptyToNull(data.recommendedRetrieveEn),
-        recommendedRetrieveTr: emptyToNull(data.recommendedRetrieveTr),
-        warningsEn: emptyToNull(data.warningsEn),
-        warningsTr: emptyToNull(data.warningsTr),
-        bestColorsEn: emptyToNull(data.bestColorsEn),
-        bestColorsTr: emptyToNull(data.bestColorsTr),
-        confidence: data.confidence,
-        internalNotes: emptyToNull(data.internalNotes),
-      },
+      create: { lureModelId, ...payload },
+      update: payload,
     });
 
     await recordCatalogAudit({
@@ -187,7 +425,7 @@ export async function saveEditorNotes(
       summary: "Updated Balık Oltamda editor notes",
     });
 
-    revalidatePath(`/studio/products/${lureModelId}`);
+    revalidateProductPaths(lureModelId);
     revalidatePath("/studio/notes");
 
     return { ok: true };

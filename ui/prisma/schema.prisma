@@ -14,9 +14,11 @@ datasource db {
 enum ContentLifecycleState {
   DRAFT
   PENDING_REVIEW
+  READY
   PUBLISHED
   DEPRECATED
   REJECTED
+  ARCHIVED
 
   @@map("content_lifecycle_state")
 }
@@ -97,11 +99,24 @@ enum CatalogAuditAction {
   IMPORT_BATCH
   IMPORT_CREATE
   IMPORT_UPDATE
+  IMPORT_DIFF
   EDITOR_CANONICAL
   EDITOR_NOTES
   LIFECYCLE_CHANGE
+  PUBLISH
+  UNPUBLISH
+  BULK_ACTION
 
   @@map("catalog_audit_action")
+}
+
+/// Pending importer field changes — editors accept or reject before reverting.
+enum ImportFieldChangeStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+
+  @@map("import_field_change_status")
 }
 
 // ---------------------------------------------------------------------------
@@ -203,8 +218,9 @@ model LureModel {
   lureTechniques   LureTechnique[]
   lureSpeciesLinks LureSpecies[]
   aliases          ProductAlias[]
-  editorNote       LureEditorNote?
-  auditEntries     CatalogAuditEntry[]
+  editorNote          LureEditorNote?
+  auditEntries        CatalogAuditEntry[]
+  importFieldChanges  ImportFieldChange[]
 
   @@index([manufacturerId])
   @@index([productLineId])
@@ -521,8 +537,20 @@ model LureEditorNote {
   aegeanNotesTr         String?              @map("aegean_notes_tr") @db.Text
   northernCyprusNotesEn String?              @map("northern_cyprus_notes_en") @db.Text
   northernCyprusNotesTr String?              @map("northern_cyprus_notes_tr") @db.Text
+  currentRecommendationEn String?            @map("current_recommendation_en") @db.Text
+  currentRecommendationTr String?            @map("current_recommendation_tr") @db.Text
   seasonalityEn         String?              @map("seasonality_en") @db.Text
   seasonalityTr         String?              @map("seasonality_tr") @db.Text
+  weatherEn             String?              @map("weather_en") @db.Text
+  weatherTr             String?              @map("weather_tr") @db.Text
+  waterClarityEn        String?              @map("water_clarity_en") @db.Text
+  waterClarityTr        String?              @map("water_clarity_tr") @db.Text
+  retrieveSpeedEn       String?              @map("retrieve_speed_en") @db.Text
+  retrieveSpeedTr       String?              @map("retrieve_speed_tr") @db.Text
+  bestTargetSpeciesEn   String?              @map("best_target_species_en") @db.Text
+  bestTargetSpeciesTr   String?              @map("best_target_species_tr") @db.Text
+  personalObservationsEn String?             @map("personal_observations_en") @db.Text
+  personalObservationsTr String?             @map("personal_observations_tr") @db.Text
   recommendedRetrieveEn String?              @map("recommended_retrieve_en") @db.Text
   recommendedRetrieveTr String?              @map("recommended_retrieve_tr") @db.Text
   warningsEn            String?              @map("warnings_en") @db.Text
@@ -562,13 +590,36 @@ model ImportBatch {
   reportJson         Json?             @map("report_json")
   createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  manufacturer Manufacturer? @relation(fields: [manufacturerId], references: [id], onDelete: SetNull)
+  manufacturer         Manufacturer?      @relation(fields: [manufacturerId], references: [id], onDelete: SetNull)
+  importFieldChanges   ImportFieldChange[]
 
   @@index([manufacturerCode])
   @@index([manufacturerId])
   @@index([startedAt(sort: Desc)])
   @@index([status])
   @@map("import_batches")
+}
+
+/// Importer field diff — surfaced in Studio for accept/reject workflow.
+model ImportFieldChange {
+  id             String                  @id @default(uuid()) @db.Uuid
+  lureModelId    String                  @map("lure_model_id") @db.Uuid
+  importBatchId  String?                 @map("import_batch_id") @db.Uuid
+  fieldKey       String                  @map("field_key") @db.VarChar(64)
+  fieldLabel     String                  @map("field_label") @db.VarChar(128)
+  oldValue       String?                 @map("old_value") @db.Text
+  newValue       String?                 @map("new_value") @db.Text
+  status         ImportFieldChangeStatus @default(PENDING)
+  createdAt      DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  resolvedAt     DateTime?               @map("resolved_at") @db.Timestamptz(6)
+
+  lureModel   LureModel    @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+  importBatch ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+
+  @@index([lureModelId, status])
+  @@index([importBatchId])
+  @@index([createdAt(sort: Desc)])
+  @@map("import_field_changes")
 }
 
 /// Append-only catalog change log for Studio history views.

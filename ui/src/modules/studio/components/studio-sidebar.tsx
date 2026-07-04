@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   BookOpen,
+  ClipboardList,
   Fish,
   FolderOpen,
   Image,
@@ -18,6 +19,7 @@ import type { StudioNavItem } from "@/modules/studio/types";
 
 const NAV_ITEMS: StudioNavItem[] = [
   { href: "/studio", label: "Dashboard", icon: "dashboard" },
+  { href: "/studio/review", label: "Review Queue", icon: "review" },
   { href: "/studio/import", label: "Import Center", icon: "import" },
   { href: "/studio/products", label: "Products", icon: "products" },
   { href: "/studio/manufacturers", label: "Manufacturers", icon: "manufacturers" },
@@ -31,6 +33,7 @@ const NAV_ITEMS: StudioNavItem[] = [
 
 const ICONS = {
   dashboard: LayoutDashboard,
+  review: ClipboardList,
   import: Ship,
   products: Package,
   manufacturers: Wrench,

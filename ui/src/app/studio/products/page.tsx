@@ -1,24 +1,25 @@
 import Link from "next/link";
 import type { ContentLifecycleState } from "@/generated/prisma/client";
 import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   StudioPageBody,
   StudioPageHeader,
 } from "@/modules/studio/components/studio-page";
-import {
-  StudioInput,
-  StudioSelect,
-  StudioTable,
-  StudioTd,
-  StudioTh,
-} from "@/modules/studio/components/studio-ui";
+import { StudioInput, StudioSelect } from "@/modules/studio/components/studio-ui";
+import { ProductsTable } from "@/modules/studio/components/products-table";
 import {
   LIFECYCLE_OPTIONS,
   listBodyTypeOptions,
   listManufacturerOptions,
   listProducts,
+  listSpeciesFilterOptions,
+  listTechniqueFilterOptions,
 } from "@/modules/studio/data/products";
+import {
+  listSpeciesOptions,
+  listTechniqueOptions,
+} from "@/modules/studio/data/product-detail";
+import { editorialStatusLabel } from "@/modules/studio/lib/editorial";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,8 @@ type PageProps = {
     lifecycle?: string;
     needsReview?: string;
     hasEditorNote?: string;
+    technique?: string;
+    species?: string;
     page?: string;
   }>;
 };
@@ -38,20 +41,33 @@ export default async function StudioProductsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = Number.parseInt(params.page ?? "1", 10) || 1;
 
-  const [{ rows, total, pageSize }, manufacturers, bodyTypes] =
-    await Promise.all([
-      listProducts({
-        q: params.q,
-        manufacturer: params.manufacturer,
-        bodyType: params.bodyType,
-        lifecycle: params.lifecycle as ContentLifecycleState | undefined,
-        needsReview: params.needsReview === "1",
-        hasEditorNote: params.hasEditorNote === "1",
-        page,
-      }),
-      listManufacturerOptions(),
-      listBodyTypeOptions(),
-    ]);
+  const [
+    { rows, total, pageSize },
+    manufacturers,
+    bodyTypes,
+    techniques,
+    species,
+    speciesForBulk,
+    techniquesForBulk,
+  ] = await Promise.all([
+    listProducts({
+      q: params.q,
+      manufacturer: params.manufacturer,
+      bodyType: params.bodyType,
+      lifecycle: params.lifecycle as ContentLifecycleState | undefined,
+      needsReview: params.needsReview === "1",
+      hasEditorNote: params.hasEditorNote === "1",
+      technique: params.technique,
+      species: params.species,
+      page,
+    }),
+    listManufacturerOptions(),
+    listBodyTypeOptions(),
+    listTechniqueFilterOptions(),
+    listSpeciesFilterOptions(),
+    listSpeciesOptions(),
+    listTechniqueOptions(),
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -59,13 +75,13 @@ export default async function StudioProductsPage({ searchParams }: PageProps) {
     <>
       <StudioPageHeader
         title="Products"
-        description="Server-side catalog table — filter, search, open the editor."
+        description="Power search by model, code, slug, fish, technique, or manufacturer."
       />
       <StudioPageBody>
         <form className="mb-6 grid gap-3 md:grid-cols-6" method="get">
           <StudioInput
             name="q"
-            placeholder="Search name or slug…"
+            placeholder="Search model, code, slug, fish, technique…"
             defaultValue={params.q}
             className="md:col-span-2"
           />
@@ -77,11 +93,19 @@ export default async function StudioProductsPage({ searchParams }: PageProps) {
               </option>
             ))}
           </StudioSelect>
-          <StudioSelect name="bodyType" defaultValue={params.bodyType ?? ""}>
-            <option value="">All body types</option>
-            {bodyTypes.map((b) => (
-              <option key={b.slug} value={b.slug}>
-                {b.label}
+          <StudioSelect name="technique" defaultValue={params.technique ?? ""}>
+            <option value="">All techniques</option>
+            {techniques.map((t) => (
+              <option key={t.slug} value={t.slug}>
+                {t.nameEn}
+              </option>
+            ))}
+          </StudioSelect>
+          <StudioSelect name="species" defaultValue={params.species ?? ""}>
+            <option value="">All species</option>
+            {species.map((s) => (
+              <option key={s.slug} value={s.slug}>
+                {s.nameEn}
               </option>
             ))}
           </StudioSelect>
@@ -89,7 +113,15 @@ export default async function StudioProductsPage({ searchParams }: PageProps) {
             <option value="">All states</option>
             {LIFECYCLE_OPTIONS.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {editorialStatusLabel(s)}
+              </option>
+            ))}
+          </StudioSelect>
+          <StudioSelect name="bodyType" defaultValue={params.bodyType ?? ""}>
+            <option value="">All body types</option>
+            {bodyTypes.map((b) => (
+              <option key={b.slug} value={b.slug}>
+                {b.label}
               </option>
             ))}
           </StudioSelect>
@@ -113,7 +145,7 @@ export default async function StudioProductsPage({ searchParams }: PageProps) {
               Has editor note
             </label>
             <button type="submit" className={buttonVariants({ size: "sm" })}>
-              Filter
+              Search
             </button>
           </div>
         </form>
@@ -122,50 +154,11 @@ export default async function StudioProductsPage({ searchParams }: PageProps) {
           {total} products · page {page} of {totalPages}
         </p>
 
-        <StudioTable>
-          <thead>
-            <tr>
-              <StudioTh>Product</StudioTh>
-              <StudioTh>Manufacturer</StudioTh>
-              <StudioTh>Body</StudioTh>
-              <StudioTh>State</StudioTh>
-              <StudioTh>Feed</StudioTh>
-              <StudioTh>Notes</StudioTh>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <StudioTd colSpan={6} className="text-muted-foreground">
-                  No products match these filters.
-                </StudioTd>
-              </tr>
-            ) : (
-              rows.map((row) => (
-                <tr key={row.id} className="hover:bg-muted/30">
-                  <StudioTd>
-                    <Link
-                      href={`/studio/products/${row.id}`}
-                      className="hover:text-ocean font-medium"
-                    >
-                      {row.nameEn}
-                    </Link>
-                    <p className="text-muted-foreground text-xs">{row.slug}</p>
-                  </StudioTd>
-                  <StudioTd>{row.manufacturerName}</StudioTd>
-                  <StudioTd>{row.bodyTypeEn ?? "—"}</StudioTd>
-                  <StudioTd>
-                    <Badge variant="muted">{row.lifecycleState}</Badge>
-                  </StudioTd>
-                  <StudioTd>
-                    <Badge variant="ocean">{row.manufacturerStatus}</Badge>
-                  </StudioTd>
-                  <StudioTd>{row.hasEditorNote ? "Yes" : "—"}</StudioTd>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </StudioTable>
+        <ProductsTable
+          rows={rows}
+          speciesOptions={speciesForBulk}
+          techniqueOptions={techniquesForBulk}
+        />
 
         {totalPages > 1 ? (
           <div className="mt-4 flex gap-2">
