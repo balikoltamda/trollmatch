@@ -81,7 +81,7 @@ General category for cordage used in sport fishing — main line, running line, 
 | `fluorocarbon-line` | Fluorocarbon Line | Florokarbon Misina |
 | `braided-line` | Braided Line | Örgü Misina |
 | `hybrid-line` | Hybrid Line | Hibrit Misina |
-| `wire-leader` | Wire Leader | Tel Fore |
+| `wire-leader` | Wire Leader | Tel Leader |
 
 Subtypes are **separate lexicon entries**, not inline adjectives. Importers that read "PE braid" map to `braided-line`, not a free-text tag.
 
@@ -107,7 +107,7 @@ Subtypes are **separate lexicon entries**, not inline adjectives. Importers that
 | Locale | Preferred term |
 |--------|----------------|
 | English | Leader |
-| Turkish | Fore |
+| Turkish | Leader |
 
 ### Deprecated — never use in UI
 
@@ -137,7 +137,7 @@ The exact benefit **depends on leader material**.
 - better shock absorption
 
 **Term id:** `monofilament-leader`  
-English: Monofilament Leader · Turkish: Monofilament Fore
+English: Monofilament Leader · Turkish: Monofilament Leader
 
 #### Fluorocarbon leader
 
@@ -145,7 +145,7 @@ English: Monofilament Leader · Turkish: Monofilament Fore
 - lower visibility
 
 **Term id:** `fluorocarbon-leader`  
-English: Fluorocarbon Leader · Turkish: Florokarbon Fore
+English: Fluorocarbon Leader · Turkish: Florokarbon Leader
 
 #### Wire leader
 
@@ -156,8 +156,8 @@ Metal section for toothy species — distinct rigging purpose from mono/fluoro l
 
 | Label | Locale | Region | Notes |
 |-------|--------|--------|-------|
-| Fore | tr | TR | Dominant sport-fishing term in Türkiye tackle shops and forums |
-| Fore | tr | CY | Same angler vocabulary in Northern Cyprus |
+| Fore | tr | TR | Regional search alias — tackle shops and forums; not preferred UI label |
+| Fore | tr | CY | Same in Northern Cyprus — search alias only |
 
 ### International aliases
 
@@ -175,7 +175,7 @@ fishing-line (Misina / Fishing Line)
 ├── hybrid-line
 └── wire-leader
 
-leader (Fore / Leader)
+leader (Leader / Leader)
 ├── monofilament-leader
 └── fluorocarbon-leader
 ```

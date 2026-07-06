@@ -124,12 +124,14 @@ export const WIRE_LEADER_TERM: LexiconTerm = {
   parentId: "fishing-line",
   preferred: {
     en: "Wire Leader",
-    tr: "Tel Fore",
+    tr: "Tel Leader",
   },
   aliases: [
     { label: "wire trace", locale: "en", kind: "international" },
     { label: "titanium leader", locale: "en", kind: "synonym" },
+    { label: "çelik leader", locale: "tr", kind: "search_term" },
     { label: "çelik fore", locale: "tr", kind: "search_term" },
+    { label: "titan leader", locale: "tr", kind: "synonym" },
     { label: "titan fore", locale: "tr", kind: "synonym" },
   ],
   deprecatedTerms: [],
@@ -138,7 +140,7 @@ export const WIRE_LEADER_TERM: LexiconTerm = {
   internationalTerms: ["wire leader", "wire trace"],
   notes: {
     en: "Metal leader section for toothy species. Distinct from mono/fluoro leader — abrasion against teeth, not knot transition to braid.",
-    tr: "Dişli türler için metal fore bölümü. Mono/floro fore'dan farklıdır — örgüye düğüm geçişinden çok diş aşınmasına karşı.",
+    tr: "Dişli türler için metal leader bölümü. Mono/floro leader'dan farklıdır — örgüye düğüm geçişinden çok diş aşınmasına karşı.",
   },
 };
 

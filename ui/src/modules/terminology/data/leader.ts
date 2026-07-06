@@ -9,14 +9,13 @@ export const LEADER_TERM: LexiconTerm = {
   domain: "leader",
   preferred: {
     en: "Leader",
-    tr: "Fore",
+    tr: "Leader",
   },
   aliases: [
     { label: "leader line", locale: "en", kind: "synonym" },
     { label: "shock leader", locale: "en", kind: "synonym", notes: "Context-specific — shock absorption emphasis" },
     { label: "fore", locale: "tr", kind: "search_term" },
     { label: "ön misina", locale: "tr", kind: "search_term", notes: "Descriptive — not preferred UI label" },
-    { label: "leader", locale: "tr", kind: "international", notes: "Loanword used in Turkish sport-fishing media" },
   ],
   deprecatedTerms: [
     {
@@ -71,9 +70,9 @@ Fluorocarbon leader:
 Wire leader is a separate lexicon entry (wire-leader) for toothy species — not a subtype label for mono/fluoro leaders.
 
 Do not collapse Leader into "main line" or "fishing line". Do not translate as "Beden".`,
-    tr: `Fore, kelime çevirisi değil — belirli bir takım bileşenidir.
+    tr: `Leader, kelime çevirisi değil — belirli bir takım bileşenidir.
 
-Fore, örgü misinaya (veya bazı kurulumlarda ana misina ile uç takım arasına) bağlanan kısa monofilament veya florokarbon bölümdür.
+Leader, örgü misinaya (veya bazı kurulumlarda ana misina ile uç takım arasına) bağlanan kısa monofilament veya florokarbon bölümdür.
 
 Şunlardan birini veya birkaçını sağlar:
 - aşınma direnci
@@ -81,19 +80,19 @@ Fore, örgü misinaya (veya bazı kurulumlarda ana misina ile uç takım arasın
 - kontrollü esneme
 - düğüm geçişi (örgü ile uç takım arasında)
 
-Kazanım fore malzemesine bağlıdır.
+Kazanım leader malzemesine bağlıdır.
 
-Monofilament fore:
+Monofilament leader:
 - daha fazla esneme
 - daha iyi şok emilimi
 
-Florokarbon fore:
+Florokarbon leader:
 - daha yüksek aşınma direnci
 - daha düşük görünürlük
 
-Tel fore dişli türler için ayrı lexicon girdisidir (wire-leader) — mono/floro fore alt türü değildir.
+Tel leader dişli türler için ayrı lexicon girdisidir (wire-leader) — mono/floro leader alt türü değildir.
 
-Fore'u "ana misina" veya genel "misina" ile birleştirme. "Beden" olarak çevirme.`,
+Leader'ı "ana misina" veya genel "misina" ile birleştirme. "Beden" olarak çevirme.`,
   },
 };
 
@@ -103,7 +102,7 @@ export const MONOFILAMENT_LEADER_TERM: LexiconTerm = {
   parentId: "leader",
   preferred: {
     en: "Monofilament Leader",
-    tr: "Monofilament Fore",
+    tr: "Monofilament Leader",
   },
   aliases: [
     { label: "mono leader", locale: "en", kind: "search_term" },
@@ -115,7 +114,7 @@ export const MONOFILAMENT_LEADER_TERM: LexiconTerm = {
   internationalTerms: ["mono leader"],
   notes: {
     en: "Leader section made from monofilament — prioritizes stretch and shock absorption over fluoro leaders.",
-    tr: "Monofilament malzemeden fore — floro fore'a göre esneme ve şok emilimini önceler.",
+    tr: "Monofilament malzemeden leader — floro leader'a göre esneme ve şok emilimini önceler.",
   },
 };
 
@@ -125,7 +124,7 @@ export const FLUOROCARBON_LEADER_TERM: LexiconTerm = {
   parentId: "leader",
   preferred: {
     en: "Fluorocarbon Leader",
-    tr: "Florokarbon Fore",
+    tr: "Florokarbon Leader",
   },
   aliases: [
     { label: "fluoro leader", locale: "en", kind: "search_term" },
@@ -139,7 +138,7 @@ export const FLUOROCARBON_LEADER_TERM: LexiconTerm = {
   internationalTerms: ["fluorocarbon leader", "FC leader"],
   notes: {
     en: "Leader section made from fluorocarbon — prioritizes abrasion resistance and low visibility.",
-    tr: "Florokarbon malzemeden fore — aşınma direnci ve düşük görünürlüğü önceler.",
+    tr: "Florokarbon malzemeden leader — aşınma direnci ve düşük görünürlüğü önceler.",
   },
 };
 

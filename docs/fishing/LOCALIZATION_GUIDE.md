@@ -17,9 +17,10 @@ The lexicon is not a bilingual dictionary. It is a **canonical vocabulary** wher
 ```
 term id: leader
   preferred.en → "Leader"     (international angler English)
-  preferred.tr → "Fore"         (Türkiye / Northern Cyprus sport-fishing usage)
+  preferred.tr → "Leader"       (Türkiye / Northern Cyprus sport-fishing usage)
 
   NOT: preferred.tr → "Beden"   (literal translation — deprecated)
+  "Fore" → regional search alias (TR, CY) — not preferred label
 ```
 
 ---
@@ -167,10 +168,10 @@ AI must:
 
 | | English | Turkish |
 |---|---------|---------|
-| **Preferred** | Leader | Fore |
-| **Search alias** | shock leader | ön misina |
+| **Preferred** | Leader | Leader |
+| **Search alias** | shock leader | fore, ön misina |
 | **Deprecated** | — | Beden, Lider |
-| **Regional** | — | Fore (TR), Fore (CY) |
+| **Regional** | — | Fore (TR, CY) — search only |
 | **Notes** | Full rigging documentation | Full rigging documentation (Turkish prose, same concepts) |
 
 English notes and Turkish notes describe the **same rigging physics** — they are not translations of each other sentence-by-sentence. They are independently written documentation for anglers reading in that language.
