@@ -48,7 +48,7 @@ function communityFromSlug(slug: string): CommunityConsensus | null {
     assertions: stats.usageAssertionCount,
     catchReports: stats.verifiedCatchReportCount,
     effectivenessBand: stats.effectivenessBand,
-    summary: `${stats.verifiedCatchReportCount} verified catch reports · ${stats.usageAssertionCount} usage assertions · effectiveness: ${stats.effectivenessBand}`,
+    summary: `${stats.verifiedCatchReportCount} verified catch reports · effectiveness: ${stats.effectivenessBand}`,
   };
 }
 
@@ -62,9 +62,9 @@ function buildLayers(
 
   layers.push({
     id: "manufacturer",
-    title: "Provenance",
+    title: "Manufacturer source",
     summary: model.lastImportedAt
-      ? `Box specs from ${model.manufacturer.nameEn} feed, last imported ${model.lastImportedAt.toLocaleDateString()}.`
+      ? `Specs from ${model.manufacturer.nameEn}, last updated ${model.lastImportedAt.toLocaleDateString()}.`
       : `Catalog entry for ${model.manufacturer.nameEn} — not yet confirmed against a live import.`,
     confidence: model.lastImportedAt ? "HIGH" : "LOW",
     evidence: [
@@ -96,7 +96,7 @@ function buildLayers(
   if (community) {
     layers.push({
       id: "community",
-      title: "Community consensus",
+      title: "Angler reports",
       summary: community.summary,
       confidence:
         community.effectivenessBand === "high"
@@ -106,11 +106,10 @@ function buildLayers(
             : "LOW",
       evidence: [
         `${community.catchReports} verified catch reports`,
-        `${community.assertions} usage assertions`,
-        `Effectiveness band: ${community.effectivenessBand}`,
+        `Effectiveness: ${community.effectivenessBand}`,
       ],
       provenance: [
-        { label: "Source", value: "Angler catch reports & usage assertions" },
+        { label: "Source", value: "Verified angler catch reports" },
       ],
       verified: community.catchReports >= 3,
     });
@@ -122,17 +121,17 @@ function buildLayers(
 
   layers.push({
     id: "ai",
-    title: "AI summary",
+    title: "Editor summary",
     summary: hasAiNote
-      ? "Field note draft exists — verify against water experience before trusting."
+      ? "Editor note on file — check against real catch reports before relying on it."
       : pendingCount > 0
-        ? "AI enrichment suggestions awaiting editorial verification."
-        : "No AI-generated summary approved yet.",
+        ? "Editor suggestions awaiting review."
+        : "No approved summary yet.",
     confidence: hasAiNote ? (model.editorNote?.confidence ?? "MEDIUM") : "LOW",
     evidence: hasAiNote
-      ? ["Editor note present (may include AI-assisted draft)"]
-      : ["No approved AI summary"],
-    provenance: [{ label: "Pipeline", value: "AI enrichment → editorial verify" }],
+      ? ["Editor note present"]
+      : ["No approved summary"],
+    provenance: [{ label: "Pipeline", value: "Editorial review" }],
     verified: hasAiNote && (model.editorNote?.confidence ?? "LOW") !== "LOW",
   });
 
@@ -309,10 +308,10 @@ export function buildPublicTrustSummary(input: {
 
   const answer =
     input.lifecycleState === "PUBLISHED" && input.pendingSuggestions === 0
-      ? "Published after editorial verification — box specs plus field-tested notes."
+      ? "Published after Balık Oltamda review — manufacturer specs plus verified catch reports."
       : input.lastImportedAt
-        ? "Manufacturer specs on file — editorial and community layers still building."
-        : "Limited provenance — verify before relying on this page.";
+        ? "Manufacturer specs on file — catch reports and editorial review still building."
+        : "Limited source detail — check catch reports before relying on this page.";
 
   return {
     score,

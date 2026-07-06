@@ -63,8 +63,7 @@ export function KnowledgeHubPanel({ items }: KnowledgeHubPanelProps) {
   if (items.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
-        Knowledge Hub is empty. Discovered sources will appear here for editorial
-        verification.
+        Knowledge archive is empty. New sources will appear here for editorial review.
       </p>
     );
   }
@@ -149,7 +148,7 @@ export function KnowledgeHubPanel({ items }: KnowledgeHubPanelProps) {
                 <span>{item.evidenceCount} references</span>
               ) : null}
               <span>
-                Discovered {item.discoveredAt.toLocaleDateString("en-GB")}
+                Added {item.discoveredAt.toLocaleDateString("en-GB")}
               </span>
             </div>
 

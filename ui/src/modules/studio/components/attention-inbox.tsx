@@ -102,7 +102,7 @@ export function AttentionInbox({ items }: AttentionInboxProps) {
                   {item.topSuggestion.provenance &&
                   Object.keys(item.topSuggestion.provenance).length > 0 ? (
                     <p className="text-muted-foreground mt-1 text-xs">
-                      Provenance:{" "}
+                      Source:{" "}
                       {Object.entries(item.topSuggestion.provenance)
                         .map(([k, v]) => `${k}=${String(v)}`)
                         .join(" · ")}

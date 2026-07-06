@@ -19,8 +19,8 @@ export default async function StudioDashboardPage() {
   return (
     <>
       <StudioPageHeader
-        title="Why should I trust this information?"
-        description="Trust is the product. Every item shows provenance, evidence, confidence, community consensus, and editorial verification status."
+        title="Editorial inbox"
+        description="Items needing review before publication — manufacturer source, catch reports, and Balık Oltamda verification status."
       />
       <StudioPageBody>
         <p className="text-muted-foreground mb-6 text-sm">

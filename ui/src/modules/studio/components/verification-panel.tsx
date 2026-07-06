@@ -202,7 +202,7 @@ export function VerificationPanel({
 
             {s.provenance && Object.keys(s.provenance).length > 0 ? (
               <p className="text-muted-foreground mt-2 text-xs">
-                <span className="font-medium">Provenance: </span>
+                <span className="font-medium">Source: </span>
                 {Object.entries(s.provenance)
                   .map(([k, v]) => `${k}=${String(v)}`)
                   .join(" · ")}

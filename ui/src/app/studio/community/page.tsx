@@ -24,8 +24,8 @@ export default async function StudioCommunityPage() {
   return (
     <>
       <StudioPageHeader
-        title="Community consensus"
-        description="Angler catch reports and effectiveness claims — verify evidence before they earn trust on the public site."
+        title="Angler reports"
+        description="Catch reports and field notes — verify before they appear on public lure and species pages."
       />
       <StudioPageBody>
         <p className="text-muted-foreground mb-4 text-sm">
@@ -83,7 +83,7 @@ export default async function StudioCommunityPage() {
                 ) : null}
                 {s.provenance && typeof s.provenance === "object" ? (
                   <p className="text-muted-foreground mt-1 text-xs">
-                    <span className="text-foreground font-medium">Provenance: </span>
+                    <span className="text-foreground font-medium">Source: </span>
                     {Object.entries(s.provenance as Record<string, unknown>)
                       .map(([k, v]) => `${k}=${String(v)}`)
                       .join(" · ")}

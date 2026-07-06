@@ -193,6 +193,26 @@ See `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`.
 
 ---
 
+## Sprint 8.0 — Brand & Copy Consistency (shipped)
+
+**Goal:** One consistent angler voice — no placeholder slogans or startup wording.
+
+### Delivered
+
+| Area | Change |
+|------|--------|
+| **Brand statement** | TR: *Gerçek av tecrübeleriyle doğrulanmış balıkçılık platformu.* |
+| **Hero** | Clear TrollMatch title + brand statement + manufacturer / catch / verification subtitle |
+| **Removed** | Kutuda yazan / Suda olan slogans, Knowledge Engine, AI Insights labels |
+| **Renamed** | Manufacturer specs, catch reports, source archive (Studio) |
+| **Locales** | Full `en.json` + `tr.json` copy pass |
+
+### Voice rule
+
+Sound like an experienced angler — not a software company.
+
+---
+
 ## Evolutionary domain design (platform law)
 
 **Goal:** Keep fishing knowledge models simple — extensible, not premature.

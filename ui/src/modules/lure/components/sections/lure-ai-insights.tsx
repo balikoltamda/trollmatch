@@ -16,8 +16,8 @@ export async function LureAiInsights({ insights, locale }: LureAiInsightsProps) 
   return (
     <LureSection
       id="ai-insights"
-      title={t("sections.aiInsights")}
-      description={t("sections.aiInsightsDescription")}
+      title={t("sections.summary")}
+      description={t("sections.summaryDescription")}
     >
       <div className="border-border bg-muted/30 space-y-4 rounded-lg border p-4">
         <div className="flex items-center gap-2">

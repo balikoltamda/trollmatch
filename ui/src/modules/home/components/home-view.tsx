@@ -93,12 +93,12 @@ export async function HomeView({ locale }: HomeViewProps) {
             <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
               {t("hero.regionScope")}
             </p>
-            <h1 className="text-foreground text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl lg:leading-[1.08]">
+            <h1 className="text-foreground text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl lg:leading-[1.12]">
               {t("hero.title")}
-              <span className="text-gradient-ocean block sm:inline sm:pl-3">
-                {t("hero.titleAccent")}
-              </span>
             </h1>
+            <p className="text-foreground/90 max-w-2xl text-lg font-medium leading-relaxed sm:text-xl">
+              {t("hero.brandStatement")}
+            </p>
             <p className="text-muted-foreground max-w-2xl text-base leading-relaxed sm:text-lg">
               {t("hero.description")}
             </p>

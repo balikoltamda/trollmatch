@@ -2,19 +2,19 @@
   "Layout": {
     "siteName": "Balık Oltamda Guide",
     "moduleName": "LureAtlas",
-    "tagline": "Balıkçıdan balıkçıya yem notları",
+    "tagline": "Gerçek av tecrübeleriyle doğrulanmış balıkçılık rehberi",
     "brandName": "TrollMatch",
-    "brandPromise": "Kutuda yazanı ve suda olanı bir araya getiriyoruz.",
-    "brandTagline": "Kutu bilgisi · saha notu",
+    "brandPromise": "Gerçek av tecrübeleriyle doğrulanmış balıkçılık platformu.",
+    "brandTagline": "Üretici bilgisi · doğrulanmış av raporları",
     "navHome": "Ana sayfa",
     "navSpecies": "Balıklar",
-    "navLures": "LureAtlas",
+    "navLures": "Yemler",
     "navContribute": "Yem ekle",
     "navLabel": "Ana menü",
-    "searchPlaceholder": "Yem ara…",
+    "searchPlaceholder": "Yem, marka veya balık türü ara…",
     "searchAria": "Yem ara",
     "footer": "© Balık Oltamda. Tüm hakları saklıdır.",
-    "footerTagline": "Kutuda yazanı ve suda olanı bir araya getiriyoruz.",
+    "footerTagline": "Gerçek av tecrübeleriyle doğrulanmış balıkçılık platformu.",
     "footerExplore": "Gezin",
     "footerDeveloperLabel": "Balık Oltamda",
     "footerDeveloperAria": "Balık Oltamda — yeni sekmede açılır",
@@ -27,64 +27,64 @@
   },
   "Home": {
     "meta": {
-      "title": "TrollMatch — Ege ve Akdeniz yem rehberi",
-      "description": "Kutuda yazan ile sahada bildirilen — Türkiye, Kıbrıs ve Ege-Akdeniz için yemler, türler ve balıkçı notları."
+      "title": "TrollMatch — Gerçek avlarla doğrulanmış balıkçılık rehberi",
+      "description": "Gerçek av tecrübeleriyle doğrulanmış balıkçılık platformu. Üretici bilgileri, doğrulanmış av raporları ve Balık Oltamda kontrolü — Türkiye, Kıbrıs ve Ege-Akdeniz."
     },
     "hero": {
-      "eyebrow": "LureAtlas · Ege ve Akdeniz",
+      "eyebrow": "Balık Oltamda · Ege ve Akdeniz",
       "regionScope": "Türkiye · Kıbrıs · Ege",
-      "title": "Kutuda yazan.",
-      "titleAccent": "Suda olan.",
-      "description": "Kutuda yazanı ve suda olanı bir araya getiriyoruz. Önce Türkiye ve Kıbrıs sularında sık avlanan türlerden başladık.",
-      "searchPlaceholder": "Model, marka veya balık türü ara…",
+      "title": "TrollMatch",
+      "brandStatement": "Gerçek av tecrübeleriyle doğrulanmış balıkçılık platformu.",
+      "description": "Üretici bilgileri, balıkçıların gerçek av deneyimleri ve Balık Oltamda doğrulaması — hepsi bir arada.",
+      "searchPlaceholder": "Yem, marka veya balık türü ara…",
       "searchAria": "Yem ara",
       "ctaPrimary": "Yem ekle",
       "ctaSecondary": "Yemlere bak"
     },
     "species": {
       "title": "Bu sularda sık aranan türler",
-      "description": "Lüfer, levrek, palamut, çipura — bu sularda çok hedeflenen türler. Hangi yemle denendiğini ve ne bildirildiğini burada topluyoruz.",
+      "description": "Lüfer, levrek, palamut, çipura — hangi yemle, hangi teknikle denendiğini ve ne bildirildiğini burada topluyoruz.",
       "viewAll": "Tüm av türleri"
     },
     "collections": {
-      "title": "Burada nasıl avlanıyorsa ona göre",
+      "title": "Av yöntemine göre",
       "description": "Boğaz lüferi, Ege kıyısı spin, palamut trolling — her av için kullanılan yemler.",
       "lureCount": "yem"
     },
     "manufacturers": {
       "title": "Takip ettiğimiz markalar",
-      "description": "Kutu bilgilerini ve listelerini tuttuğumuz sert yem markaları — birkaçı hâlâ ekleniyor.",
-      "importing": "Yolda",
+      "description": "Üretici bilgilerini ve modellerini kaydettiğimiz sert yem markaları.",
+      "importing": "Ekleniyor",
       "models": "{count} yem kayıtlı"
     },
     "latest": {
-      "title": "Son eklenenler",
-      "description": "Üretici sitelerinden güncellediğimiz yeni modeller.",
-      "verified": "Kontrol edildi"
+      "title": "Son eklenen yemler",
+      "description": "Üretici kaynaklarından güncellediğimiz yeni modeller.",
+      "verified": "Doğrulandı"
     },
     "statistics": {
-      "title": "Sayılar kısaca",
-      "description": "Rehberde şu an ne var — ne eksik ne fazla."
+      "title": "Rehberde ne var",
+      "description": "Kayıtlı yem, tür ve marka sayıları — güncel durum."
     }
   },
   "Discovery": {
     "meta": {
       "title": "Yem ara",
-      "description": "Model, marka, tür veya teknikle yem bul.",
+      "description": "Model, marka, balık türü veya av tekniğine göre yem bul.",
       "searchTitle": "Arama: {query}"
     },
     "title": "Yem ara",
     "description": "Model, marka, balık türü veya av yöntemine göre ara.",
     "searchTitle": "“{query}” için sonuçlar",
-    "searchDescription": "Katalogda aramanla eşleşen yemler.",
-    "searchPlaceholder": "Model, marka veya balık türü ara…",
+    "searchDescription": "Aramanla eşleşen yemler.",
+    "searchPlaceholder": "Yem, marka veya balık türü ara…",
     "searchAria": "Yem ara",
     "emptyTitle": "Yem bulunamadı",
     "emptyDescription": "Farklı bir yazım, marka adı veya balık türü dene.",
     "browseSpecies": "Balık türüne göre gez",
-    "verified": "Kontrol edildi",
+    "verified": "Doğrulandı",
     "resultsCount": "{count, plural, =0 {Sonuç yok} one {# yem} other {# yem}}",
-    "pagination": "Arama sayfaları",
+    "pagination": "Sayfa",
     "previous": "Önceki",
     "next": "Sonraki"
   },
@@ -94,42 +94,45 @@
       "description": "Bu sayfa yok veya taşınmış olabilir.",
       "home": "Ana sayfa",
       "browseLures": "Yemlere göz at",
-      "browseSpecies": "Türlere göz at"
+      "browseSpecies": "Balık türlerine göz at"
     },
     "lureNotFound": {
       "title": "Yem bulunamadı",
-      "description": "Bu yem rehberde yok — ya da bağlantı hatalı olabilir."
+      "description": "Bu yem rehberde yok — bağlantıyı kontrol et veya bildiğin yemi ekle."
     },
     "speciesNotFound": {
       "title": "Tür bulunamadı",
-      "description": "Bu balık türü rehberde yok — ya da bağlantı hatalı olabilir."
+      "description": "Bu balık türü rehberde yok — bağlantıyı kontrol et."
     },
     "manufacturerNotFound": {
-      "title": "Üretici bulunamadı",
-      "description": "Bu marka rehberde yok — ya da bağlantı hatalı olabilir."
+      "title": "Marka bulunamadı",
+      "description": "Bu marka rehberde yok — bağlantıyı kontrol et."
     },
     "unavailable": {
-      "title": "Geçici olarak kullanılamıyor",
-      "description": "Bu sayfa şu an yüklenemedi. Bağlantın sorunsuz — biraz sonra tekrar dene."
+      "title": "Şu an yüklenemiyor",
+      "description": "Bu sayfa geçici olarak açılmadı. Biraz sonra tekrar dene."
     },
     "error": {
-      "title": "Bir şeyler ters gitti",
-      "description": "Beklenmeyen bir sorun oluştu. Rehberin geri kalanı hâlâ erişilebilir.",
+      "title": "Bir sorun oluştu",
+      "description": "Beklenmeyen bir hata oluştu. Rehberin geri kalanına devam edebilirsin.",
       "home": "Ana sayfa",
       "retry": "Tekrar dene"
     },
+    "loading": {
+      "ariaLabel": "Yükleniyor"
+    },
     "manufacturer": {
-      "lureCount": "{count, plural, =0 {Listelenen yem yok} one {# yem rehberde} other {# yem rehberde}}",
+      "lureCount": "{count, plural, =0 {Kayıtlı yem yok} one {# yem kayıtlı} other {# yem kayıtlı}}",
       "noLures": "Bu marka için henüz yayınlanmış yem yok."
     },
     "empty": {
-      "title": "Henüz bir şey yok",
-      "description": "Yakında tekrar bak."
+      "title": "Henüz kayıt yok",
+      "description": "Yakında tekrar bak — veya sen ilk kaydı ekle."
     },
-    "missingSection": "Bu bölüm geçici olarak kullanılamıyor."
+    "missingSection": "Bu bölüm şu an gösterilemiyor."
   },
   "Taxonomy": {
-    "sectionTitle": "Adlar ve taksonomi",
+    "sectionTitle": "Adlar",
     "aliases": "Diğer adlar",
     "regional": "Bölgesel adlar",
     "confusedWith": "Sık karıştırılan türler",
@@ -139,15 +142,15 @@
   "Lures": {
     "meta": {
       "title": "Yemlere göz at",
-      "description": "Rehberdeki tüm yemler — Ege ve Doğu Akdeniz için kutu bilgisi ve saha notları."
+      "description": "Ege ve Doğu Akdeniz için üretici bilgileri ve doğrulanmış av raporlarıyla kayıtlı yemler."
     },
     "title": "Yemlere göz at",
-    "description": "Kayıtlı tüm yemler — üretici kutu bilgisinden balıkçı saha notlarına.",
+    "description": "Kayıtlı tüm yemler — üretici bilgisinden doğrulanmış av raporlarına.",
     "emptyTitle": "Henüz yem yok",
-    "emptyDescription": "Üretici sayfalarından modeller ekliyoruz. Yakında tekrar bak veya bildiğin bir yemi ekle.",
-    "verified": "Kontrol edildi",
+    "emptyDescription": "Üretici kaynaklarından modeller ekliyoruz. Yakında tekrar bak veya bildiğin yemi ekle.",
+    "verified": "Doğrulandı",
     "resultsCount": "{count, plural, =0 {Yem yok} one {# yem} other {# yem}}",
-    "pagination": "Yem listesi sayfaları",
+    "pagination": "Sayfa",
     "previous": "Önceki",
     "next": "Sonraki"
   },
@@ -156,26 +159,26 @@
       "title": "Hedef türler",
       "description": "Türkiye, Kıbrıs ve Doğu Akdeniz'de avlanan balıklar — ve her türe bağlı yemler.",
       "detailTitle": "{name} — yemler ve notlar",
-      "detailDescription": "{name} için bağlı yemler — rehberde {count, plural, one {# model} other {# model}}."
+      "detailDescription": "{name} için kayıtlı yemler — rehberde {count, plural, one {# model} other {# model}}."
     },
     "title": "Hedef türler",
-    "description": "Bu sularda avlanan balıklar — ve her tür için kutu bilgisi veya saha notu olan yemler.",
+    "description": "Bu sularda avlanan balıklar — hangi yemlerin kayıtlı olduğunu ve hangi teknikle bildirildiğini gör.",
     "searchPlaceholder": "Bir tür için yem ara…",
     "searchAria": "Yem ara",
-    "empty": "Katalogda henüz tür yok.",
+    "empty": "Henüz tür kaydı yok.",
     "lureCount": "{count, plural, one {# yem} other {# yem}}",
     "footerHint": "Belirli bir yem mi arıyorsun?",
     "browseLures": "Tüm yemlere bak",
     "breadcrumbLabel": "Konum",
     "breadcrumbHome": "Ana sayfa",
     "breadcrumbSpecies": "Balıklar",
-    "detailDescription": "{count, plural, =0 {Henüz bağlı yem yok} one {# yem bağlı} other {# yem bağlı}} — kutu bilgisi ve balıkçı notları.",
+    "detailDescription": "{count, plural, =0 {Henüz bağlı yem yok} one {# yem kayıtlı} other {# yem kayıtlı}} — üretici bilgisi ve av raporları.",
     "viewAllLures": "Bu tür için tüm yemler",
-    "catalogLuresTitle": "Bağlı tüm yemler",
-    "catalogLuresDescription": "Kutu bilgisi ve editoryal etiketlerden katalog bağlantıları — etkinlik önerisi değildir. Her zaman doğru teknikle avlanın.",
+    "catalogLuresTitle": "Kayıtlı yemler",
+    "catalogLuresDescription": "Üretici ve editoryal etiketlerden katalog kayıtları — av tekniği olmadan etkinlik önerisi değildir.",
     "noLuresYet": "Bu türe henüz yem bağlanmadı.",
     "contributeLure": "Bu balık için kullandığın yemi ekle",
-    "verified": "Kontrol edildi"
+    "verified": "Doğrulandı"
   },
   "CatchReport": {
     "verified": "Doğrulanmış rapor",
@@ -183,14 +186,14 @@
     "shore": "Kıyı",
     "catchCount": "{count, plural, one {# balık} other {# balık}}",
     "lureSection": {
-      "title": "Gerçek av raporları",
-      "description": "Balıkçıların bu yemle gerçekten ne yakaladığı — yayınlanmadan önce doğrulanır.",
+      "title": "Doğrulanmış av raporları",
+      "description": "Balıkçıların bu yemle gerçekten ne yakaladığı — yayınlanmadan önce Balık Oltamda ekibi kontrol eder.",
       "empty": "Henüz doğrulanmış av raporu yok. İlk sen paylaş."
     },
     "speciesSection": {
       "title": "Tekniğe göre öne çıkan yemler",
       "description": "Onaylı av raporları balıkçılık tekniğine göre gruplandı — yöntemler birbirine karıştırılmaz.",
-      "stats": "{reports, plural, one {# rapor} other {# rapor}} · {catches, plural, one {# balık} other {# balık}} bildirildi",
+      "stats": "{reports, plural, one {# rapor} other {# rapor}} · {catches, plural, one {# balık} other {# balık}}",
       "source": "Onaylı balıkçı raporlarına dayanır.",
       "contribute": "Avını paylaş"
     },
@@ -205,7 +208,7 @@
       "catchCount": "Kaç adet",
       "notes": "Kısa not (isteğe bağlı)",
       "notesPlaceholder": "ör. şafak, kayalık, hızlı çekiş",
-      "technique": "Balıkçılık tekniği",
+      "technique": "Av tekniği",
       "submit": "Raporu gönder",
       "submitting": "Gönderiliyor…",
       "success": "Teşekkürler — raporun inceleme bekliyor.",
@@ -213,56 +216,56 @@
     }
   },
   "Knowledge": {
-    "relatedTitle": "İlgili bilgi kaynakları",
-    "relatedDescription": "Bu sayfaya bağlı doğrulanmış kaynaklar — her zaman orijinale yönlendirir, içerik burada yansıtılmaz.",
-    "viewOriginal": "Orijinal kaynağı görüntüle",
-    "searchSectionTitle": "Bilgi kaynakları",
-    "searchSectionDescription": "Aramanızla eşleşen indekslenmiş makale, video ve yayınlar — devamı için orijinal kaynağı açın."
+    "relatedTitle": "İlgili kaynaklar",
+    "relatedDescription": "Bu sayfaya bağlı doğrulanmış kaynaklar — içerik burada yansıtılmaz, orijinal adrese yönlendirilir.",
+    "viewOriginal": "Orijinal kaynağı aç",
+    "searchSectionTitle": "Kaynaklar",
+    "searchSectionDescription": "Aramanla eşleşen makale, video ve yayınlar — devamı için orijinal kaynağı aç."
   },
   "LureDetail": {
     "pageLandmark": "Yem detayı",
     "breadcrumbLabel": "Konum",
     "breadcrumbHome": "Ana sayfa",
-    "breadcrumbLures": "LureAtlas",
+    "breadcrumbLures": "Yemler",
     "variantLabel": "Renk",
-    "manufacturerSource": "Kutuda yazan",
+    "manufacturerSource": "Üretici bilgisi",
     "verification": {
-      "unverified": "Henüz kontrol edilmedi",
-      "partiallyVerified": "Kısmen kontrol edildi",
+      "unverified": "Henüz doğrulanmadı",
+      "partiallyVerified": "Kısmen doğrulandı",
       "manufacturerVerified": "Üretici bilgisiyle uyumlu",
-      "moderatorVerified": "Ekibimiz kontrol etti",
+      "moderatorVerified": "Balık Oltamda ekibi doğruladı",
       "expertEndorsed": "Deneyimli balıkçı onaylı",
-      "lastVerified": "Son kontrol"
+      "lastVerified": "Son doğrulama"
     },
     "trust": {
-      "title": "Buna neden güvenmeliyim?",
-      "description": "Kaynak, kanıt, topluluk görüşü ve editoryal doğrulama — tek yerde.",
+      "title": "Bu bilgiye güvenebilir miyim?",
+      "description": "Üretici kaynağı, av raporları ve Balık Oltamda doğrulaması — tek yerde.",
       "editorialVerified": "Editoryal doğrulandı",
       "notPublished": "Henüz yayınlanmadı",
       "editorConfidence": "Editör güveni",
-      "communityConsensus": "Topluluk görüşü",
-      "evidence": "Kanıt",
+      "communityConsensus": "Balıkçı raporları",
+      "evidence": "Dayanak",
       "provenance": "Kaynak"
     },
     "sections": {
-      "specifications": "Kutuda yazan",
+      "specifications": "Üretici bilgisi",
       "specificationsDescription": "Boy, ağırlık, dalış derinliği — üreticinin listelediği özellikler.",
       "species": "Hedef türler",
-      "speciesDescription": "Kutudaki öneri, balıkçıların hedefi ve sahada bildirilenler.",
-      "techniques": "Nasıl avlanıyor",
-      "techniquesDescription": "Bu yemin formuna uygun yöntemler — kutu bilgisi ve saha notlarından.",
+      "speciesDescription": "Üretici önerisi, balıkçı hedefi ve doğrulanmış av raporları.",
+      "techniques": "Av teknikleri",
+      "techniquesDescription": "Bu yemin formuna uygun yöntemler — üretici bilgisi ve av raporlarından.",
       "trolling": "Trolling notları",
       "trollingDescription": "Hız, fore ve misina — üreticinin önerdiği gibi.",
-      "community": "Sahada olan",
-      "communityDescription": "Balıkçıların bildirdikleri — nerede, ne zaman, nasıl gitmiş.",
-      "aiInsights": "Kısaca",
-      "aiInsightsDescription": "Kutu bilgisi ile saha notlarını bir araya getiren kısa özet — kaynaklarıyla.",
+      "community": "Av raporları",
+      "communityDescription": "Balıkçıların bildirdikleri — nerede, ne zaman, hangi teknikle.",
+      "summary": "Kısa özet",
+      "summaryDescription": "Üretici bilgisi ile av raporlarının özeti — kaynaklarıyla birlikte.",
       "related": "Benzer yemler",
       "relatedDescription": "Yan yana kıyaslamak isteyebileceğin diğer modeller.",
       "sponsored": "Nereden alınır",
       "sponsoredDescription": "İstersen satıcı linklerine bak — istemediğinde göstermiyoruz.",
-      "history": "Neler değişti",
-      "historyDescription": "Kutu bilgisi veya saha notlarında yapılan güncellemeler."
+      "history": "Güncellemeler",
+      "historyDescription": "Üretici bilgisi veya av raporlarında yapılan değişiklikler."
     },
     "specs": {
       "length": "Boy",
@@ -274,9 +277,9 @@
       "coatingType": "Kaplama"
     },
     "speciesKind": {
-      "curated": "Bizim notumuz",
-      "marketing": "Kutuda yazan",
-      "community": "Sahada bildirilen"
+      "curated": "Editoryal not",
+      "marketing": "Üretici önerisi",
+      "community": "Av raporlarından"
     },
     "trolling": {
       "speed": "Trolling hızı",
@@ -286,17 +289,17 @@
     },
     "community": {
       "assertions": "Saha notları",
-      "catchReports": "Bildirilen avlar",
+      "catchReports": "Av raporları",
       "effectiveness": "Ne bildiriliyor",
       "bandLow": "Az olumlu rapor",
       "bandModerate": "Karışık raporlar",
-      "bandHigh": "Çoğunlukla olumlu rapor",
+      "bandHigh": "Çoğunlukla olumlu",
       "bandInsufficient": "Henüz yeterli rapor yok",
-      "topRegions": "Nerde denenmiş",
-      "source": "Balıkçı bildirimleri — kutuda yazan değil."
+      "topRegions": "Nerede denenmiş",
+      "source": "Doğrulanmış balıkçı raporları — üretici önerisi değil."
     },
     "ai": {
-      "assistedLabel": "Kısaca",
+      "assistedLabel": "Özet",
       "citations": "Kaynaklar",
       "corpusDate": "Notların tarihi"
     },
@@ -309,7 +312,7 @@
     "pageLandmark": "Yem ekleme",
     "eyebrow": "Bildiğini paylaş",
     "title": "Yem ekle",
-    "description": "Kayda değer bir yem biliyor musun? Kutu bilgisini ve sahada gördüklerini ekle. Kaydetme henüz yok — şimdilik önizleme.",
+    "description": "Kayda değer bir yem biliyor musun? Üretici bilgisini ve sahada gördüklerini ekle. Kaydetme henüz yok — şimdilik önizleme.",
     "save": "Kaydet",
     "saveDisabledHint": "Kaydetme yakında açılacak.",
     "sections": {

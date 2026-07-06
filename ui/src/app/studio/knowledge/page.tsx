@@ -45,15 +45,14 @@ export default async function StudioKnowledgePage() {
   return (
     <>
       <StudioPageHeader
-        title="Knowledge Hub"
-        description={`Verified fishing knowledge — indexed, connected, never mirrored. ${stats.pending} awaiting review · ${stats.approved} approved.`}
+        title="Source archive"
+        description={`Verified fishing sources — indexed and linked, never copied. ${stats.pending} awaiting review · ${stats.approved} approved.`}
       />
       <StudioPageBody>
         <p className="text-muted-foreground mb-6 max-w-3xl text-sm leading-relaxed">
-          Knowledge is everywhere. Trust is earned. TrollMatch discovers — Balık
-          Oltamda verifies. We index trustworthy sources, connect them to
-          species, lures and techniques, and always direct users to the original
-          source. Photos and videos remain on their original platform.
+          TrollMatch indexes trustworthy sources; Balık Oltamda verifies them. We link
+          species, lures, and techniques to the original article or video — photos and
+          videos stay on the source site.
         </p>
 
         <div className="mb-4 flex flex-wrap gap-2 text-xs">

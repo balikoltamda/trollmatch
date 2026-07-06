@@ -93,7 +93,7 @@ function CommunityConsensusBlock({
   return (
     <div className="bg-muted/30 mt-4 rounded-lg px-4 py-3">
       <p className="text-xs font-medium tracking-wide uppercase">
-        Community consensus
+        Angler reports
       </p>
       <p className="mt-1 text-sm">{consensus.summary}</p>
     </div>
@@ -162,7 +162,7 @@ export function TrustScorePill({ score }: { score: number }) {
         tone,
       )}
     >
-      {score}% trust
+      {score}% verified
     </span>
   );
 }

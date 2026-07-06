@@ -2,20 +2,20 @@
   "Layout": {
     "siteName": "Balık Oltamda Guide",
     "moduleName": "LureAtlas",
-    "tagline": "Lure notes from anglers, for anglers",
+    "tagline": "Fishing guide verified by real catch experiences",
     "brandName": "TrollMatch",
-    "brandPromise": "We bring together what is written on the box and what happens on the water.",
-    "brandTagline": "Box specs · water notes",
+    "brandPromise": "Fishing platform verified by real catch experiences.",
+    "brandTagline": "Manufacturer specs · verified catch reports",
     "navHome": "Home",
     "navSpecies": "Fish",
-    "navLures": "LureAtlas",
+    "navLures": "Lures",
     "navContribute": "Add a lure",
     "navLabel": "Main navigation",
-    "searchPlaceholder": "Search lures…",
+    "searchPlaceholder": "Search lure, brand, or species…",
     "searchAria": "Search lures",
     "footer": "© Balık Oltamda. All rights reserved.",
-    "footerTagline": "We bring together what is written on the box and what happens on the water.",
-    "footerExplore": "Explore",
+    "footerTagline": "Fishing platform verified by real catch experiences.",
+    "footerExplore": "Browse",
     "footerDeveloperLabel": "Balık Oltamda",
     "footerDeveloperAria": "Balık Oltamda — opens in new tab",
     "footerDevelopedBy": "Built and maintained by the Balık Oltamda team.",
@@ -27,64 +27,64 @@
   },
   "Home": {
     "meta": {
-      "title": "TrollMatch — Lure guide for the Aegean & Eastern Mediterranean",
-      "description": "What the box says and what anglers report from the water — lures, species, and notes for Turkey, Cyprus, and the Eastern Mediterranean."
+      "title": "TrollMatch — Fishing guide verified by real catches",
+      "description": "Fishing platform verified by real catch experiences. Manufacturer specs, verified angler reports, and Balık Oltamda review — Turkey, Cyprus, and the Eastern Mediterranean."
     },
     "hero": {
-      "eyebrow": "LureAtlas · Aegean & Eastern Mediterranean",
-      "regionScope": "Turkey · Northern Cyprus · Aegean Sea",
-      "title": "What's on the box.",
-      "titleAccent": "What happens on the water.",
-      "description": "We bring together what is written on the box and what happens on the water. Starting with the fish and methods common around Turkey and Cyprus.",
-      "searchPlaceholder": "Search by model, brand, or species…",
+      "eyebrow": "Balık Oltamda · Aegean & Eastern Mediterranean",
+      "regionScope": "Turkey · Northern Cyprus · Aegean",
+      "title": "TrollMatch",
+      "brandStatement": "Fishing platform verified by real catch experiences.",
+      "description": "Manufacturer specs, verified angler catch reports, and Balık Oltamda editorial review — all in one place.",
+      "searchPlaceholder": "Search lure, brand, or species…",
       "searchAria": "Search lures",
       "ctaPrimary": "Add a lure",
       "ctaSecondary": "Browse lures"
     },
     "species": {
-      "title": "Commonly fished here",
-      "description": "Lüfer, levrek, palamut, and çipura — species people target most in these waters. We list which lures have been tried and reported.",
+      "title": "Commonly targeted here",
+      "description": "Lüfer, levrek, palamut, and çipura — which lures were tried, with which technique, and what anglers reported.",
       "viewAll": "All target species"
     },
     "collections": {
-      "title": "Grouped by how people fish here",
-      "description": "Bosphorus runs, Aegean shore casting, and Mediterranean trolling — lures people use for each.",
+      "title": "By how people fish",
+      "description": "Bosphorus bluefish, Aegean shore casting, and Mediterranean trolling — lures used for each.",
       "lureCount": "lures"
     },
     "manufacturers": {
-      "title": "Brands we follow",
-      "description": "Hard-bait makers whose box specs and listings we keep on file — plus a few still being added.",
-      "importing": "On the way",
+      "title": "Brands we track",
+      "description": "Hard-bait makers whose specs and models we keep on file.",
+      "importing": "Being added",
       "models": "{count} lures listed"
     },
     "latest": {
-      "title": "Recently added",
-      "description": "New models from manufacturer pages we've updated.",
-      "verified": "Checked"
+      "title": "Recently added lures",
+      "description": "New models updated from manufacturer sources.",
+      "verified": "Verified"
     },
     "statistics": {
-      "title": "By the numbers",
-      "description": "What's in the guide right now — no more, no less."
+      "title": "What's in the guide",
+      "description": "Current counts of lures, species, and brands."
     }
   },
   "Discovery": {
     "meta": {
       "title": "Search lures",
-      "description": "Find lures by model, brand, species, or technique.",
+      "description": "Find lures by model, brand, species, or fishing technique.",
       "searchTitle": "Search: {query}"
     },
     "title": "Search lures",
-    "description": "Search by model, brand, species, or how people fish it.",
+    "description": "Search by model, brand, species, or how you fish it.",
     "searchTitle": "Results for “{query}”",
-    "searchDescription": "Lures matching your search across the catalog.",
-    "searchPlaceholder": "Search by model, brand, or species…",
+    "searchDescription": "Lures matching your search.",
+    "searchPlaceholder": "Search lure, brand, or species…",
     "searchAria": "Search lures",
     "emptyTitle": "No lures found",
-    "emptyDescription": "Try a different spelling, brand name, or fish species.",
+    "emptyDescription": "Try a different spelling, brand, or fish species.",
     "browseSpecies": "Browse by fish species",
-    "verified": "Checked",
+    "verified": "Verified",
     "resultsCount": "{count, plural, =0 {No results} one {# lure} other {# lures}}",
-    "pagination": "Search results pages",
+    "pagination": "Pages",
     "previous": "Previous",
     "next": "Next"
   },
@@ -98,19 +98,19 @@
     },
     "lureNotFound": {
       "title": "Lure not found",
-      "description": "We don't have this lure in the guide yet — or the link may be wrong."
+      "description": "This lure isn't in the guide yet — check the link or add one you know."
     },
     "speciesNotFound": {
       "title": "Species not found",
-      "description": "We don't have this fish species in the guide yet — or the link may be wrong."
+      "description": "This fish species isn't in the guide yet — check the link."
     },
     "manufacturerNotFound": {
-      "title": "Manufacturer not found",
-      "description": "We don't have this brand in the guide yet — or the link may be wrong."
+      "title": "Brand not found",
+      "description": "This brand isn't in the guide yet — check the link."
     },
     "unavailable": {
-      "title": "Temporarily unavailable",
-      "description": "We couldn't load this page right now. Your connection is fine — try again in a moment."
+      "title": "Can't load right now",
+      "description": "This page didn't load. Try again in a moment."
     },
     "error": {
       "title": "Something went wrong",
@@ -118,18 +118,21 @@
       "home": "Home",
       "retry": "Try again"
     },
+    "loading": {
+      "ariaLabel": "Loading"
+    },
     "manufacturer": {
-      "lureCount": "{count, plural, =0 {No lures listed} one {# lure in guide} other {# lures in guide}}",
+      "lureCount": "{count, plural, =0 {No lures listed} one {# lure listed} other {# lures listed}}",
       "noLures": "No published lures for this brand yet."
     },
     "empty": {
       "title": "Nothing here yet",
-      "description": "Check back soon."
+      "description": "Check back soon — or add the first entry yourself."
     },
-    "missingSection": "This section is temporarily unavailable."
+    "missingSection": "This section can't be shown right now."
   },
   "Taxonomy": {
-    "sectionTitle": "Names & taxonomy",
+    "sectionTitle": "Names",
     "aliases": "Also known as",
     "regional": "Regional names",
     "confusedWith": "Frequently confused with",
@@ -139,43 +142,43 @@
   "Lures": {
     "meta": {
       "title": "Browse lures",
-      "description": "Every lure in the guide — box specs and field notes for the Aegean and Eastern Mediterranean."
+      "description": "Lures in the guide with manufacturer specs and verified catch reports for the Aegean and Eastern Mediterranean."
     },
     "title": "Browse lures",
-    "description": "Every lure we've logged — from manufacturer box specs to angler field notes.",
-    "emptyTitle": "No lures listed yet",
-    "emptyDescription": "We're adding models from manufacturer pages. Check back soon or add one you know.",
-    "verified": "Checked",
+    "description": "Every lure we've logged — from manufacturer specs to verified catch reports.",
+    "emptyTitle": "No lures yet",
+    "emptyDescription": "We're adding models from manufacturer sources. Check back soon or add one you know.",
+    "verified": "Verified",
     "resultsCount": "{count, plural, =0 {No lures} one {# lure} other {# lures}}",
-    "pagination": "Lure list pages",
+    "pagination": "Pages",
     "previous": "Previous",
     "next": "Next"
   },
   "Species": {
     "meta": {
       "title": "Target species",
-      "description": "Fish people target in Turkey, Cyprus, and the Eastern Mediterranean — and which lures are linked to each.",
+      "description": "Fish targeted in Turkey, Cyprus, and the Eastern Mediterranean — and lures linked to each.",
       "detailTitle": "{name} — lures & notes",
-      "detailDescription": "Lures linked to {name} — {count, plural, one {# model} other {# models}} in the guide."
+      "detailDescription": "Lures recorded for {name} — {count, plural, one {# model} other {# models}} in the guide."
     },
     "title": "Target species",
-    "description": "Fish people target in these waters — and which lures have box specs or field notes for each.",
+    "description": "Fish targeted in these waters — see which lures are recorded and which techniques anglers reported.",
     "searchPlaceholder": "Search lures for a species…",
     "searchAria": "Search lures",
-    "empty": "No species in the catalog yet.",
+    "empty": "No species recorded yet.",
     "lureCount": "{count, plural, one {# lure} other {# lures}}",
     "footerHint": "Looking for a specific lure?",
     "browseLures": "Browse all lures",
     "breadcrumbLabel": "You are here",
     "breadcrumbHome": "Home",
     "breadcrumbSpecies": "Fish",
-    "detailDescription": "{count, plural, =0 {No lures linked yet} one {# lure linked} other {# lures linked}} — box specs and angler notes.",
-    "viewAllLures": "View all lures for this species",
-    "catalogLuresTitle": "All linked lures",
-    "catalogLuresDescription": "Catalog links from box specs and editorial tags — not effectiveness recommendations. Always fish with the right technique.",
+    "detailDescription": "{count, plural, =0 {No lures linked yet} one {# lure linked} other {# lures linked}} — manufacturer specs and catch reports.",
+    "viewAllLures": "All lures for this species",
+    "catalogLuresTitle": "Recorded lures",
+    "catalogLuresDescription": "Catalog entries from manufacturer and editorial tags — not effectiveness advice without a fishing technique.",
     "noLuresYet": "No lures linked to this species yet.",
     "contributeLure": "Add a lure you use for this fish",
-    "verified": "Checked"
+    "verified": "Verified"
   },
   "CatchReport": {
     "verified": "Verified report",
@@ -183,14 +186,14 @@
     "shore": "Shore",
     "catchCount": "{count, plural, one {# fish} other {# fish}}",
     "lureSection": {
-      "title": "Real catch reports",
-      "description": "What anglers actually caught with this lure — verified before publication.",
-      "empty": "No verified catch reports yet. Be the first to share yours below."
+      "title": "Verified catch reports",
+      "description": "What anglers actually caught with this lure — checked by the Balık Oltamda team before publication.",
+      "empty": "No verified catch reports yet. Be the first to share yours."
     },
     "speciesSection": {
       "title": "Top lures by technique",
-      "description": "Approved catch reports grouped by fishing technique — never generalized across methods.",
-      "stats": "{reports, plural, one {# report} other {# reports}} · {catches, plural, one {# fish} other {# fish}} reported",
+      "description": "Approved catch reports grouped by fishing technique — methods are never mixed together.",
+      "stats": "{reports, plural, one {# report} other {# reports}} · {catches, plural, one {# fish} other {# fish}}",
       "source": "Based on approved angler reports.",
       "contribute": "Share your catch"
     },
@@ -213,56 +216,56 @@
     }
   },
   "Knowledge": {
-    "relatedTitle": "Related knowledge",
-    "relatedDescription": "Verified sources linked to this page — always linking to the original, never mirrored here.",
-    "viewOriginal": "View original source",
-    "searchSectionTitle": "Knowledge sources",
-    "searchSectionDescription": "Indexed articles, videos, and papers matching your search — open the original to read more."
+    "relatedTitle": "Related sources",
+    "relatedDescription": "Verified sources linked to this page — content stays on the original site, never copied here.",
+    "viewOriginal": "Open original source",
+    "searchSectionTitle": "Sources",
+    "searchSectionDescription": "Articles, videos, and publications matching your search — open the original to read more."
   },
   "LureDetail": {
     "pageLandmark": "Lure detail",
     "breadcrumbLabel": "You are here",
     "breadcrumbHome": "Home",
-    "breadcrumbLures": "LureAtlas",
+    "breadcrumbLures": "Lures",
     "variantLabel": "Colour",
-    "manufacturerSource": "On the box",
+    "manufacturerSource": "Manufacturer specs",
     "verification": {
-      "unverified": "Not checked yet",
-      "partiallyVerified": "Partly checked",
+      "unverified": "Not verified yet",
+      "partiallyVerified": "Partly verified",
       "manufacturerVerified": "Matches manufacturer info",
-      "moderatorVerified": "Checked by our team",
+      "moderatorVerified": "Verified by Balık Oltamda team",
       "expertEndorsed": "Backed by an experienced angler",
-      "lastVerified": "Last checked"
+      "lastVerified": "Last verified"
     },
     "trust": {
-      "title": "Why trust this?",
-      "description": "Provenance, evidence, community consensus, and editorial verification — in one place.",
+      "title": "Can I trust this?",
+      "description": "Manufacturer source, catch reports, and Balık Oltamda verification — in one place.",
       "editorialVerified": "Editorially verified",
-      "notPublished": "Not yet published",
+      "notPublished": "Not published yet",
       "editorConfidence": "Editor confidence",
-      "communityConsensus": "Community consensus",
-      "evidence": "Evidence",
-      "provenance": "Provenance"
+      "communityConsensus": "Angler reports",
+      "evidence": "Supporting detail",
+      "provenance": "Source"
     },
     "sections": {
-      "specifications": "On the box",
-      "specificationsDescription": "Length, weight, dive depth, and the rest — as the manufacturer lists them.",
+      "specifications": "Manufacturer specs",
+      "specificationsDescription": "Length, weight, dive depth — as the manufacturer lists them.",
       "species": "Target species",
-      "speciesDescription": "What the box suggests, what anglers aim for, and what people have reported.",
-      "techniques": "How people fish it",
-      "techniquesDescription": "Methods that match this lure's shape and action — from specs and field notes.",
+      "speciesDescription": "Manufacturer suggestion, angler targets, and verified catch reports.",
+      "techniques": "Fishing techniques",
+      "techniquesDescription": "Methods that suit this lure's shape and action — from specs and catch reports.",
       "trolling": "Trolling notes",
       "trollingDescription": "Speed, leader, and line — as the manufacturer suggests.",
-      "community": "On the water",
-      "communityDescription": "What anglers have reported back — where, when, and how it went for them.",
-      "aiInsights": "At a glance",
-      "aiInsightsDescription": "A short read pulling together box specs and reported field notes, with sources linked.",
+      "community": "Catch reports",
+      "communityDescription": "What anglers reported — where, when, and with which technique.",
+      "summary": "Short summary",
+      "summaryDescription": "Manufacturer specs and catch reports pulled together — with sources linked.",
       "related": "Similar lures",
       "relatedDescription": "Other models worth comparing side by side.",
       "sponsored": "Find retailers",
       "sponsoredDescription": "Shop links if you want them — only when you ask.",
-      "history": "What's changed",
-      "historyDescription": "Updates to this lure's box specs or field notes over time."
+      "history": "Updates",
+      "historyDescription": "Changes to manufacturer specs or catch reports over time."
     },
     "specs": {
       "length": "Length",
@@ -274,9 +277,9 @@
       "coatingType": "Coating"
     },
     "speciesKind": {
-      "curated": "Our note",
-      "marketing": "On the box",
-      "community": "Anglers report"
+      "curated": "Editorial note",
+      "marketing": "Manufacturer suggestion",
+      "community": "From catch reports"
     },
     "trolling": {
       "speed": "Trolling speed",
@@ -286,17 +289,17 @@
     },
     "community": {
       "assertions": "Field notes",
-      "catchReports": "Reported catches",
-      "effectiveness": "What people report",
+      "catchReports": "Catch reports",
+      "effectiveness": "What anglers report",
       "bandLow": "Few positive reports",
       "bandModerate": "Mixed reports",
-      "bandHigh": "Mostly positive reports",
+      "bandHigh": "Mostly positive",
       "bandInsufficient": "Not enough reports yet",
       "topRegions": "Where people fish it",
-      "source": "From angler reports — not what's printed on the box."
+      "source": "Verified angler reports — not the manufacturer's suggestion alone."
     },
     "ai": {
-      "assistedLabel": "At a glance",
+      "assistedLabel": "Summary",
       "citations": "Sources",
       "corpusDate": "Notes from"
     },
@@ -309,7 +312,7 @@
     "pageLandmark": "Add a lure",
     "eyebrow": "Share what you know",
     "title": "Add a lure",
-    "description": "Know a lure worth listing? Add the box details and anything you've seen on the water. Saving isn't available yet — preview only for now.",
+    "description": "Know a lure worth listing? Add manufacturer specs and what you've seen on the water. Saving isn't available yet — preview only.",
     "save": "Save",
     "saveDisabledHint": "Saving will be available soon.",
     "sections": {
@@ -330,7 +333,7 @@
     "preview": {
       "title": "Preview",
       "emptyTitle": "Nothing selected yet",
-      "emptyDescription": "Your lure card will show up here as you fill in the form.",
+      "emptyDescription": "Your lure card will appear here as you fill in the form.",
       "imagePlaceholder": "Photo preview",
       "notSelected": "Not selected"
     }

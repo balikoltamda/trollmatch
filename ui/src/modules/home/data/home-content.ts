@@ -182,8 +182,8 @@ export const HOME_STATISTICS: HomeStatistic[] = [
     label: { en: "Lures in the guide", tr: "Kayıtlı yemler" },
     value: "1,240+",
     hint: {
-      en: "Box specs we've logged from manufacturers.",
-      tr: "Üreticilerin kutusunda yazan bilgiler.",
+      en: "Manufacturer specs we've logged.",
+      tr: "Kayıtlı üretici bilgileri.",
     },
     accent: "ocean",
   },
@@ -192,8 +192,8 @@ export const HOME_STATISTICS: HomeStatistic[] = [
     label: { en: "Brands", tr: "Markalar" },
     value: "7",
     hint: {
-      en: "Hard-bait makers — box specs on file, more being added.",
-      tr: "Kutu bilgilerini tuttuğumuz sert yem markaları — yenileri ekleniyor.",
+      en: "Hard-bait makers on file — more being added.",
+      tr: "Kayıtlı sert yem markaları — yenileri ekleniyor.",
     },
     accent: "turquoise",
   },
@@ -202,8 +202,8 @@ export const HOME_STATISTICS: HomeStatistic[] = [
     label: { en: "Target species", tr: "Avlanan türler" },
     value: "180+",
     hint: {
-      en: "Species linked to lures — from box labels and angler reports.",
-      tr: "Yemlere bağlı türler — kutu etiketleri ve balıkçı bildirimleri.",
+      en: "Species linked to lures — from manufacturer tags and catch reports.",
+      tr: "Yemlere bağlı türler — üretici etiketleri ve av raporları.",
     },
     accent: "navy",
   },
