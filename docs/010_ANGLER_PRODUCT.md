@@ -213,6 +213,28 @@ Sound like an experienced angler — not a software company.
 
 ---
 
+## Sprint 8.2 — Premium UI Refresh (shipped)
+
+**Goal:** Presentation that inspires confidence — closer to Linear, Notion, and Stripe than a CMS. No workflow changes; TrollMatch palette unchanged.
+
+### Delivered
+
+| Area | Change |
+|------|--------|
+| **Design tokens** | Softer borders, typography scale, `.label-caps`, `.page-header`, `.section-stack`, refined elevated surfaces |
+| **Foundation** | Cards, sections, container width/padding, inputs, premium search (`h-14` on hero/discovery) |
+| **Discovery** | Species index + lure results: page headers, `EmptyState`, wider grid gaps |
+| **Detail pages** | Species + lure layouts: clearer hierarchy, taxonomy cards, catch-report lists |
+| **Home** | Quieter hero gradient, larger spacing, section rhythm |
+| **Studio** | Cleaner tables — rounded shell, uppercase column labels, generous row padding |
+| **Empty / loading** | Shared `EmptyState`; skeleton loaders match card grid |
+
+### Design rule
+
+Reduce visual noise. Desktop first; mobile excellent. Improve presentation only — never redesign workflows.
+
+---
+
 ## Evolutionary domain design (platform law)
 
 **Goal:** Keep fishing knowledge models simple — extensible, not premature.

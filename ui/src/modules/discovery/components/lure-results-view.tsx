@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { LureCard } from "@/components/cards/lure-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { DiscoverySearchForm } from "@/modules/discovery/components/discovery-search-form";
@@ -59,48 +60,38 @@ export async function LureResultsView({
   return (
     <Section spacing="default">
       <Container>
-        <div className="mb-10 flex flex-col gap-6 sm:mb-12">
+        <header className="page-header">
           <div className="space-y-3">
-            <h1 className="text-foreground text-3xl font-semibold tracking-tight sm:text-4xl">
-              {title}
-            </h1>
-            <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
+            <h1>{title}</h1>
+            <p className="text-muted-foreground text-base leading-relaxed sm:text-lg">
               {description}
             </p>
           </div>
           {showSearch ? (
-            <div className="max-w-xl">
-              <DiscoverySearchForm
-                defaultQuery={result.query ?? ""}
-                placeholder={t("searchPlaceholder")}
-                ariaLabel={t("searchAria")}
-                size="lg"
-              />
-            </div>
+            <DiscoverySearchForm
+              defaultQuery={result.query ?? ""}
+              placeholder={t("searchPlaceholder")}
+              ariaLabel={t("searchAria")}
+              size="lg"
+            />
           ) : null}
           {result.query || result.speciesSlug ? (
-            <p className="text-muted-foreground text-sm">
-              {resultsLabel}
-            </p>
+            <p className="text-muted-foreground text-sm">{resultsLabel}</p>
           ) : null}
-        </div>
+        </header>
 
         {result.rows.length === 0 ? (
-          <div className="border-border bg-surface-muted/40 rounded-xl border px-6 py-12 text-center">
-            <h2 className="text-foreground text-lg font-semibold">{emptyTitle}</h2>
-            <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm leading-relaxed">
-              {emptyDescription}
-            </p>
+          <EmptyState title={emptyTitle} description={emptyDescription}>
             <Link
               href="/species"
-              className="text-ocean mt-6 inline-block text-sm font-medium hover:underline"
+              className="text-ocean text-sm font-medium hover:underline"
             >
               {t("browseSpecies")}
             </Link>
-          </div>
+          </EmptyState>
         ) : (
           <>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {result.rows.map((lure) => (
                 <LureCard
                   key={lure.slug}
@@ -117,7 +108,7 @@ export async function LureResultsView({
 
             {totalPages > 1 ? (
               <nav
-                className="border-border mt-10 flex items-center justify-between gap-4 border-t pt-6"
+                className="border-border/60 mt-14 flex items-center justify-between gap-4 border-t pt-8"
                 aria-label={pageLabel}
               >
                 {result.page > 1 ? (
@@ -135,7 +126,7 @@ export async function LureResultsView({
                 ) : (
                   <span />
                 )}
-                <span className="text-muted-foreground text-sm">
+                <span className="text-muted-foreground text-sm tabular-nums">
                   {result.page} / {totalPages}
                 </span>
                 {result.page < totalPages ? (

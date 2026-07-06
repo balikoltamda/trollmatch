@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type EmptyPlaceholderProps = {
   title: string;
@@ -12,12 +13,8 @@ export function EmptyPlaceholder({
   children,
 }: EmptyPlaceholderProps) {
   return (
-    <div className="border-border bg-surface-muted/30 rounded-lg border px-4 py-6 text-center">
-      <p className="text-muted-foreground text-sm font-medium">{title}</p>
-      {description ? (
-        <p className="text-muted-foreground mt-1 text-xs">{description}</p>
-      ) : null}
+    <EmptyState title={title} description={description} compact>
       {children}
-    </div>
+    </EmptyState>
   );
 }

@@ -76,24 +76,20 @@ export async function HomeView({ locale }: HomeViewProps) {
 
   return (
     <div className="-mx-4 sm:-mx-6">
-      <section className="relative overflow-hidden border-b border-border/60">
+      <section className="relative overflow-hidden border-b border-border/40">
         <div
-          className="pointer-events-none absolute inset-0 opacity-60"
+          className="pointer-events-none absolute inset-0 opacity-40"
           aria-hidden
           style={{
             background:
-              "radial-gradient(ellipse 80% 60% at 50% -10%, color-mix(in oklch, var(--turquoise), transparent 75%), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, color-mix(in oklch, var(--ocean), transparent 85%), transparent)",
+              "radial-gradient(ellipse 70% 50% at 50% -20%, color-mix(in oklch, var(--turquoise), transparent 82%), transparent)",
           }}
         />
-        <Container className="relative py-20 sm:py-28 lg:py-32">
-          <div className="mx-auto flex max-w-3xl flex-col items-center gap-8 text-center">
-            <p className="text-ocean text-sm font-medium tracking-[0.2em] uppercase">
-              {t("hero.eyebrow")}
-            </p>
-            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              {t("hero.regionScope")}
-            </p>
-            <h1 className="text-foreground text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl lg:leading-[1.12]">
+        <Container className="relative py-24 sm:py-32 lg:py-36">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-10 text-center">
+            <p className="label-caps text-ocean">{t("hero.eyebrow")}</p>
+            <p className="text-muted-foreground label-caps">{t("hero.regionScope")}</p>
+            <h1 className="text-foreground text-4xl font-semibold tracking-tight sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
               {t("hero.title")}
             </h1>
             <p className="text-foreground/90 max-w-2xl text-lg font-medium leading-relaxed sm:text-xl">
@@ -102,7 +98,7 @@ export async function HomeView({ locale }: HomeViewProps) {
             <p className="text-muted-foreground max-w-2xl text-base leading-relaxed sm:text-lg">
               {t("hero.description")}
             </p>
-            <div className="w-full max-w-xl">
+            <div className="w-full max-w-2xl">
               <HeroSearch
                 placeholder={t("hero.searchPlaceholder")}
                 ariaLabel={t("hero.searchAria")}
@@ -128,12 +124,12 @@ export async function HomeView({ locale }: HomeViewProps) {
 
       <Section spacing="default">
         <Container>
-          <div className="mb-10 flex flex-col gap-3 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-12 flex flex-col gap-4 sm:mb-14 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-3">
-              <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">
+              <h2 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
                 {t("species.title")}
               </h2>
-              <p className="text-muted-foreground max-w-2xl text-base">
+              <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
                 {t("species.description")}
               </p>
             </div>
@@ -144,7 +140,7 @@ export async function HomeView({ locale }: HomeViewProps) {
               {t("species.viewAll")}
             </Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {discovery.species.map((species) => (
               <SpeciesCard
                 key={species.slug}
@@ -158,22 +154,22 @@ export async function HomeView({ locale }: HomeViewProps) {
         </Container>
       </Section>
 
-      <Section spacing="default" className="bg-surface-muted/50">
+      <Section spacing="default" className="bg-surface-muted/30">
         <Container>
-          <div className="mb-10 flex flex-col gap-3 sm:mb-12">
-            <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">
+          <div className="mb-12 flex flex-col gap-4 sm:mb-14">
+            <h2 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
               {t("collections.title")}
             </h2>
-            <p className="text-muted-foreground max-w-2xl text-base">
+            <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
               {t("collections.description")}
             </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
             {HOME_COLLECTIONS.map((collection) => {
               const href = COLLECTION_LINKS[collection.id];
               const card = (
                 <Card interactive className="h-full">
-                  <CardContent className="flex h-full flex-col gap-4 p-6">
+                  <CardContent className="flex h-full flex-col gap-5 p-7">
                     <div
                       className={
                         collection.accent === "ocean"
@@ -211,15 +207,15 @@ export async function HomeView({ locale }: HomeViewProps) {
 
       <Section spacing="default">
         <Container>
-          <div className="mb-10 flex flex-col gap-3 sm:mb-12">
-            <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">
+          <div className="mb-12 flex flex-col gap-4 sm:mb-14">
+            <h2 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
               {t("manufacturers.title")}
             </h2>
-            <p className="text-muted-foreground max-w-2xl text-base">
+            <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
               {t("manufacturers.description")}
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {HOME_MANUFACTURERS.map((manufacturer) => (
               <ManufacturerCard
                 key={manufacturer.id}
@@ -240,14 +236,14 @@ export async function HomeView({ locale }: HomeViewProps) {
         </Container>
       </Section>
 
-      <Section spacing="default" className="bg-surface-muted/50">
+      <Section spacing="default" className="bg-surface-muted/30">
         <Container>
-          <div className="mb-10 flex flex-col gap-3 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-12 flex flex-col gap-4 sm:mb-14 sm:flex-row sm:items-end sm:justify-between">
             <div className="space-y-3">
-              <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">
+              <h2 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
                 {t("latest.title")}
               </h2>
-              <p className="text-muted-foreground max-w-2xl text-base">
+              <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
                 {t("latest.description")}
               </p>
             </div>
@@ -258,7 +254,7 @@ export async function HomeView({ locale }: HomeViewProps) {
               {t("hero.ctaSecondary")}
             </Link>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {discovery.latestLures.map((lure) => (
               <LureCard
                 key={lure.slug}
@@ -277,15 +273,15 @@ export async function HomeView({ locale }: HomeViewProps) {
 
       <Section spacing="loose">
         <Container>
-          <div className="mb-10 flex flex-col gap-3 sm:mb-12">
-            <h2 className="text-foreground text-2xl font-semibold sm:text-3xl">
+          <div className="mb-12 flex flex-col gap-4 sm:mb-14">
+            <h2 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
               {t("statistics.title")}
             </h2>
-            <p className="text-muted-foreground max-w-2xl text-base">
+            <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
               {t("statistics.description")}
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {liveStats.map((stat) => {
               const Icon = STAT_ICONS[stat.id as keyof typeof STAT_ICONS];
               return (

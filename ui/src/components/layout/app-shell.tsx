@@ -28,7 +28,7 @@ export function AppShell({ children, skipLabel }: AppShellProps) {
 
 export function AppMain({ children }: { children: ReactNode }) {
   return (
-    <Container size="wide" className="py-8 sm:py-10 lg:py-12">
+    <Container size="wide" className="py-10 sm:py-14 lg:py-16">
       {children}
     </Container>
   );

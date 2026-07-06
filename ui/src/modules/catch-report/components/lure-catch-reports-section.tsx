@@ -41,11 +41,11 @@ export async function LureCatchReportsSection({
       description={t("lureSection.description")}
     >
       {reports.length > 0 ? (
-        <ul className="mb-6 space-y-3">
+        <ul className="mb-8 space-y-3">
           {reports.map((report) => (
             <li
               key={report.id}
-              className="border-border rounded-lg border px-4 py-3"
+              className="border-border/50 bg-card rounded-xl border px-5 py-4 shadow-[0_1px_2px_oklch(0.28_0.04_255/0.03)]"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <Link
@@ -77,11 +77,13 @@ export async function LureCatchReportsSection({
           ))}
         </ul>
       ) : (
-        <p className="text-muted-foreground mb-6 text-sm">{t("lureSection.empty")}</p>
+        <p className="text-muted-foreground mb-8 text-base leading-relaxed">
+          {t("lureSection.empty")}
+        </p>
       )}
 
       {formContext ? (
-        <div className="border-border bg-surface-muted/40 rounded-xl border p-4 sm:p-5">
+        <div className="border-border/50 bg-surface-muted/30 rounded-2xl border p-6 sm:p-8">
           <CatchReportQuickForm
             context={formContext}
             locale={locale}

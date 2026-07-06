@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { SpeciesCard } from "@/components/cards/species-card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { DiscoverySearchForm } from "@/modules/discovery/components/discovery-search-form";
@@ -22,28 +23,24 @@ export async function SpeciesIndexView({
   return (
     <Section spacing="default">
       <Container>
-        <div className="mb-10 flex flex-col gap-6 sm:mb-12">
+        <header className="page-header">
           <div className="space-y-3">
-            <h1 className="text-foreground text-3xl font-semibold tracking-tight sm:text-4xl">
-              {t("title")}
-            </h1>
-            <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
+            <h1>{t("title")}</h1>
+            <p className="text-muted-foreground text-base leading-relaxed sm:text-lg">
               {t("description")}
             </p>
           </div>
-          <div className="max-w-xl">
-            <DiscoverySearchForm
-              placeholder={t("searchPlaceholder")}
-              ariaLabel={t("searchAria")}
-              size="lg"
-            />
-          </div>
-        </div>
+          <DiscoverySearchForm
+            placeholder={t("searchPlaceholder")}
+            ariaLabel={t("searchAria")}
+            size="lg"
+          />
+        </header>
 
         {species.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("empty")}</p>
+          <EmptyState title={t("empty")} compact />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {species.map((item) => (
               <SpeciesCard
                 key={item.slug}
@@ -57,7 +54,7 @@ export async function SpeciesIndexView({
           </div>
         )}
 
-        <p className="text-muted-foreground mt-10 text-sm">
+        <p className="text-muted-foreground mt-14 text-sm">
           {t("footerHint")}{" "}
           <Link href="/lures" className="text-ocean font-medium hover:underline">
             {t("browseLures")}

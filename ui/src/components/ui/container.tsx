@@ -8,7 +8,7 @@ type ContainerProps = ComponentProps<"div"> & {
 const sizeClasses = {
   narrow: "max-w-3xl",
   default: "max-w-6xl",
-  wide: "max-w-7xl",
+  wide: "max-w-[90rem]",
 };
 
 export function Container({
@@ -18,7 +18,11 @@ export function Container({
 }: ContainerProps) {
   return (
     <div
-      className={cn("mx-auto w-full px-4 sm:px-6 lg:px-8", sizeClasses[size], className)}
+      className={cn(
+        "mx-auto w-full px-5 sm:px-8 lg:px-10",
+        sizeClasses[size],
+        className,
+      )}
       {...props}
     />
   );

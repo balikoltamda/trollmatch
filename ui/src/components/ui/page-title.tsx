@@ -26,11 +26,9 @@ export function PageTitle({
       {...props}
     >
       {eyebrow ? (
-        <p className="text-ocean text-sm font-medium tracking-wide uppercase">
-          {eyebrow}
-        </p>
+        <p className="label-caps text-ocean">{eyebrow}</p>
       ) : null}
-      <h1 className="text-foreground text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+      <h1 className="text-foreground text-3xl font-semibold tracking-tight sm:text-4xl lg:leading-[1.1]">
         {title}
       </h1>
       {description ? (

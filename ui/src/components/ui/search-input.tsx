@@ -18,7 +18,7 @@ export function SearchInput({
   return (
     <div className={cn("relative w-full", className)}>
       <Search
-        className="text-muted-foreground pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2"
+        className="text-muted-foreground/70 pointer-events-none absolute top-1/2 left-4 size-[1.125rem] -translate-y-1/2"
         aria-hidden
       />
       <Input

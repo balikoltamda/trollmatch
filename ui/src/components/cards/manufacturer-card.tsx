@@ -23,10 +23,10 @@ export function ManufacturerCard({
   const badgeText = statusLabel ?? (status === "importing" ? "Importing" : country);
 
   return (
-    <Card interactive className={cn("overflow-hidden", className)}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="bg-navy/6 text-navy flex size-10 items-center justify-center rounded-xl">
+    <Card interactive className={cn("h-full", className)}>
+      <CardHeader className="pb-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="bg-navy/5 text-navy flex size-11 items-center justify-center rounded-2xl">
             <Building2 className="size-5" aria-hidden />
           </div>
           {status === "importing" ? (
@@ -37,8 +37,12 @@ export function ManufacturerCard({
         </div>
       </CardHeader>
       <CardContent className="pt-0">
-        <h3 className="text-foreground text-lg font-semibold">{name}</h3>
-        <p className="text-muted-foreground mt-1 text-sm">{productLabel}</p>
+        <h3 className="text-foreground text-lg font-semibold tracking-tight">
+          {name}
+        </h3>
+        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+          {productLabel}
+        </p>
       </CardContent>
     </Card>
   );

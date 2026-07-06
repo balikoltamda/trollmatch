@@ -30,31 +30,31 @@ export async function SpeciesTaxonomySection({
   return (
     <section
       id="species-taxonomy"
-      className="border-border bg-card mb-10 rounded-xl border p-4 sm:p-6"
+      className="border-border/50 bg-card surface-elevated rounded-2xl border p-6 sm:p-8"
     >
-      <h2 className="text-foreground mb-4 text-lg font-semibold">
+      <h2 className="text-foreground mb-5 text-xl font-semibold tracking-tight">
         {t("sectionTitle")}
       </h2>
 
       {notes ? (
-        <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+        <p className="text-muted-foreground mb-6 text-base leading-relaxed">
           {notes}
         </p>
       ) : null}
 
       {hasAliases ? (
-        <div className="mb-4">
-          <h3 className="text-foreground text-sm font-medium">{t("aliases")}</h3>
-          <p className="text-muted-foreground mt-1 text-sm">
+        <div className="mb-6">
+          <h3 className="label-caps">{t("aliases")}</h3>
+          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
             {taxonomy.aliases.map((a) => a.alias).join(" · ")}
           </p>
         </div>
       ) : null}
 
       {hasRegional ? (
-        <div className="mb-4">
-          <h3 className="text-foreground text-sm font-medium">{t("regional")}</h3>
-          <ul className="text-muted-foreground mt-1 space-y-1 text-sm">
+        <div className="mb-6">
+          <h3 className="label-caps">{t("regional")}</h3>
+          <ul className="text-muted-foreground mt-2 space-y-2 text-sm">
             {taxonomy.regionalNames.map((r) => (
               <li key={`${r.countryScope}-${r.name}`}>
                 {r.name}{" "}
@@ -67,14 +67,12 @@ export async function SpeciesTaxonomySection({
 
       {hasConfusions ? (
         <div>
-          <h3 className="text-foreground text-sm font-medium">
-            {t("confusedWith")}
-          </h3>
-          <ul className="mt-2 space-y-3">
+          <h3 className="label-caps">{t("confusedWith")}</h3>
+          <ul className="mt-4 space-y-3">
             {taxonomy.confusions.map((c) => (
               <li
                 key={c.confusedWithSlug}
-                className="border-border rounded-lg border px-3 py-2"
+                className="border-border/50 rounded-xl border px-4 py-3"
               >
                 <Link
                   href={`/species/${c.confusedWithSlug}`}

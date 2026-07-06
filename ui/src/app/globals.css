@@ -77,8 +77,8 @@
   --accent: var(--coral);
   --accent-foreground: oklch(0.99 0.01 80);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.91 0.012 250);
-  --input: oklch(0.91 0.012 250);
+  --border: oklch(0.92 0.008 250);
+  --input: oklch(0.96 0.006 250);
   --ring: var(--ocean);
   --chart-1: var(--turquoise);
   --chart-2: var(--ocean);
@@ -130,16 +130,29 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground text-[0.9375rem] leading-relaxed antialiased;
+    font-feature-settings: "cv11", "ss01";
   }
   html {
     @apply font-sans;
+  }
+  h1 {
+    @apply text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.75rem] lg:leading-[1.1];
+  }
+  h2 {
+    @apply text-xl font-semibold tracking-tight sm:text-2xl;
+  }
+  h3 {
+    @apply text-lg font-semibold tracking-tight;
+  }
+  h4 {
+    @apply text-base font-semibold tracking-tight;
   }
   h1,
   h2,
   h3,
   h4 {
-    @apply font-heading tracking-tight text-balance;
+    @apply font-heading text-balance;
   }
 }
 
@@ -156,10 +169,22 @@
   }
 
   .surface-elevated {
-    @apply bg-card shadow-sm transition-shadow duration-300 ease-out;
+    @apply bg-card shadow-[0_1px_2px_oklch(0.28_0.04_255/0.04),0_4px_16px_oklch(0.28_0.04_255/0.04)] transition-[box-shadow,transform] duration-300 ease-out;
   }
 
   .surface-elevated:hover {
-    @apply shadow-md;
+    @apply shadow-[0_2px_4px_oklch(0.28_0.04_255/0.06),0_8px_24px_oklch(0.28_0.04_255/0.06)];
+  }
+
+  .label-caps {
+    @apply text-muted-foreground text-[0.6875rem] font-medium tracking-[0.14em] uppercase;
+  }
+
+  .page-header {
+    @apply mb-12 flex max-w-3xl flex-col gap-4 sm:mb-16;
+  }
+
+  .section-stack {
+    @apply flex flex-col gap-10 sm:gap-12 lg:gap-14;
   }
 }

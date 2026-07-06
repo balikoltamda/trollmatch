@@ -26,60 +26,61 @@ export async function LureHero({ lure, activeVariant, locale }: LureHeroProps) {
   };
 
   return (
-    <header className="space-y-4">
+    <header className="space-y-8">
       <nav aria-label={t("breadcrumbLabel")}>
-        <ol className="text-muted-foreground flex flex-wrap items-center gap-1 text-xs sm:text-sm">
+        <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
           <li>
             <Link href="/" className="hover:text-foreground transition-colors">
               {t("breadcrumbHome")}
             </Link>
           </li>
-          <li aria-hidden>/</li>
-          <li>
-            <span>{t("breadcrumbLures")}</span>
+          <li aria-hidden className="text-border">
+            /
           </li>
-          <li aria-hidden>/</li>
           <li>
-            <span className="text-foreground">
-              {localize(lure.manufacturer, locale)}
-            </span>
+            <Link
+              href="/lures"
+              className="hover:text-foreground transition-colors"
+            >
+              {t("breadcrumbLures")}
+            </Link>
           </li>
-          <li aria-hidden>/</li>
-          <li>
-            <span className="text-foreground font-medium">
-              {localize(lure.modelName, locale)}
-            </span>
+          <li aria-hidden className="text-border">
+            /
+          </li>
+          <li className="text-foreground font-medium">
+            {localize(lure.modelName, locale)}
           </li>
         </ol>
       </nav>
 
-      <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
-        <div className="bg-muted relative aspect-[4/3] overflow-hidden rounded-xl">
-          <Image
-            src={activeVariant.imageSrc}
-            alt={localize(activeVariant.label, locale)}
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-contain p-6"
-          />
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14 lg:items-start">
+        <div className="border-border/50 bg-card overflow-hidden rounded-2xl border shadow-[0_1px_2px_oklch(0.28_0.04_255/0.04),0_12px_40px_oklch(0.28_0.04_255/0.04)]">
+          <div className="bg-surface-muted/60 relative aspect-[5/4]">
+            <Image
+              src={activeVariant.imageSrc}
+              alt={localize(activeVariant.label, locale)}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 55vw"
+              className="object-contain p-10 sm:p-12"
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="space-y-1">
-            <p className="text-muted-foreground text-sm font-medium">
-              {localize(lure.manufacturer, locale)}
-            </p>
-            <h1 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
+        <div className="flex flex-col gap-6 lg:pt-2">
+          <div className="space-y-3">
+            <p className="label-caps">{localize(lure.manufacturer, locale)}</p>
+            <h1 className="text-foreground tracking-tight">
               {localize(lure.modelName, locale)}
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm sm:text-base">
               {localize(lure.formFactor, locale)} ·{" "}
               {localize(lure.productLine, locale)}
             </p>
           </div>
 
-          <p className="text-foreground/90 text-sm leading-relaxed sm:text-base">
+          <p className="text-foreground/85 max-w-xl text-base leading-relaxed">
             {localize(lure.shortDescription, locale)}
           </p>
 

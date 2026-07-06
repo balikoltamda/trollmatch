@@ -30,7 +30,7 @@ export async function LureDetailView({
   const activeVariant = getActiveVariant(lure, variantId);
 
   return (
-    <article className="flex flex-col gap-6 sm:gap-8">
+    <article className="section-stack max-w-5xl">
       <LureHero lure={lure} activeVariant={activeVariant} locale={locale} />
       <LureTrustSummary trust={lure.trust} locale={locale} />
       <LureSpecifications lure={lure} locale={locale} />

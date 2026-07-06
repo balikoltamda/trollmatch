@@ -32,9 +32,18 @@ export function DiscoverySearchForm({
   }
 
   return (
-    <div className={cn("relative w-full", className)}>
+    <div
+      className={cn(
+        "relative w-full",
+        size === "lg" && "max-w-2xl",
+        className,
+      )}
+    >
       <Search
-        className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+        className={cn(
+          "text-muted-foreground/70 pointer-events-none absolute top-1/2 -translate-y-1/2",
+          size === "lg" ? "left-5 size-5" : "left-4 size-4",
+        )}
         aria-hidden
       />
       <Input
@@ -43,7 +52,11 @@ export function DiscoverySearchForm({
         defaultValue={defaultQuery}
         placeholder={placeholder}
         aria-label={ariaLabel}
-        className={cn("pl-9", size === "lg" ? "h-12 text-base" : "h-9 text-sm")}
+        className={cn(
+          size === "lg"
+            ? "h-14 rounded-2xl pl-12 text-base shadow-[0_1px_2px_oklch(0.28_0.04_255/0.04),0_8px_24px_oklch(0.28_0.04_255/0.04)]"
+            : "h-11 pl-10 text-sm",
+        )}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
             submit((event.target as HTMLInputElement).value);

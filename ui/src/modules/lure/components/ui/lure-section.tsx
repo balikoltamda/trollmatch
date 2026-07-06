@@ -21,19 +21,21 @@ export function LureSection({
       id={id}
       aria-labelledby={`${id}-heading`}
       className={cn(
-        "border-border bg-card text-card-foreground scroll-mt-20 rounded-xl border p-4 sm:p-6",
+        "border-border/50 bg-card scroll-mt-24 rounded-2xl border p-6 shadow-[0_1px_2px_oklch(0.28_0.04_255/0.03)] sm:p-8 lg:p-10",
         className,
       )}
     >
-      <header className="mb-4 space-y-1">
+      <header className="mb-6 max-w-2xl space-y-2 sm:mb-8">
         <h2
           id={`${id}-heading`}
-          className="text-foreground text-lg font-semibold tracking-tight sm:text-xl"
+          className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl"
         >
           {title}
         </h2>
         {description ? (
-          <p className="text-muted-foreground text-sm">{description}</p>
+          <p className="text-muted-foreground text-sm leading-relaxed sm:text-base">
+            {description}
+          </p>
         ) : null}
       </header>
       {children}

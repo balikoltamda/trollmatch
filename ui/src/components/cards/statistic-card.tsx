@@ -12,10 +12,10 @@ type StatisticCardProps = {
 };
 
 const accentClasses: Record<NonNullable<StatisticCardProps["accent"]>, string> = {
-  ocean: "bg-ocean/8 text-ocean",
-  turquoise: "bg-turquoise/12 text-[color-mix(in_oklch,var(--turquoise),var(--navy)_35%)]",
-  coral: "bg-coral/10 text-[color-mix(in_oklch,var(--coral),var(--navy)_30%)]",
-  navy: "bg-navy/6 text-navy",
+  ocean: "bg-ocean/6 text-ocean",
+  turquoise: "bg-turquoise/10 text-[color-mix(in_oklch,var(--turquoise),var(--navy)_35%)]",
+  coral: "bg-coral/8 text-[color-mix(in_oklch,var(--coral),var(--navy)_30%)]",
+  navy: "bg-navy/5 text-navy",
 };
 
 export function StatisticCard({
@@ -27,23 +27,23 @@ export function StatisticCard({
   className,
 }: StatisticCardProps) {
   return (
-    <Card className={cn("surface-elevated", className)}>
-      <CardContent className="flex flex-col gap-4 p-6">
+    <Card className={cn("h-full", className)}>
+      <CardContent className="flex flex-col gap-5 p-7 sm:p-8">
         <div
           className={cn(
-            "flex size-11 items-center justify-center rounded-xl",
+            "flex size-12 items-center justify-center rounded-2xl",
             accentClasses[accent],
           )}
         >
           <Icon className="size-5" aria-hidden />
         </div>
         <div>
-          <p className="text-muted-foreground text-sm font-medium">{label}</p>
-          <p className="text-foreground mt-1 text-3xl font-semibold tracking-tight">
+          <p className="label-caps">{label}</p>
+          <p className="text-foreground mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
             {value}
           </p>
           {hint ? (
-            <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
+            <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
               {hint}
             </p>
           ) : null}

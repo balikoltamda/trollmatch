@@ -5,21 +5,21 @@ import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { Container } from "@/components/ui/container";
 
 const navLinkClass =
-  "text-muted-foreground hover:text-foreground rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200";
+  "text-muted-foreground hover:text-foreground rounded-xl px-3.5 py-2 text-sm font-medium transition-colors duration-200";
 
 export async function SiteHeader() {
   const t = await getTranslations("Layout");
 
   return (
-    <header className="border-border/70 bg-background/90 supports-[backdrop-filter]:bg-background/75 sticky top-0 z-50 border-b backdrop-blur-md">
+    <header className="border-border/50 bg-background/85 supports-[backdrop-filter]:bg-background/70 sticky top-0 z-50 border-b backdrop-blur-xl">
       <Container size="wide">
-        <div className="flex h-16 items-center gap-4 lg:gap-8">
+        <div className="flex h-[4.25rem] items-center gap-5 lg:gap-10">
           <Link
             href="/"
-            className="focus-visible:ring-ring flex shrink-0 items-center gap-3 rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+            className="focus-visible:ring-ring flex shrink-0 items-center gap-3 rounded-xl focus-visible:ring-2 focus-visible:outline-none"
           >
             <span
-              className="bg-navy text-off-white flex size-9 items-center justify-center rounded-xl text-sm font-bold tracking-tight"
+              className="bg-navy text-off-white flex size-10 items-center justify-center rounded-2xl text-sm font-bold tracking-tight"
               aria-hidden
             >
               TM
@@ -28,14 +28,14 @@ export async function SiteHeader() {
               <span className="text-foreground block text-sm font-semibold tracking-tight">
                 {t("brandName")}
               </span>
-              <span className="text-muted-foreground block text-xs">
+              <span className="text-muted-foreground block text-xs leading-snug">
                 {t("brandTagline")}
               </span>
             </span>
           </Link>
 
           <nav
-            className="hidden items-center gap-1 md:flex"
+            className="hidden items-center gap-0.5 md:flex"
             aria-label={t("navLabel")}
           >
             <Link href="/" className={navLinkClass}>
@@ -52,11 +52,13 @@ export async function SiteHeader() {
             </Link>
           </nav>
 
-          <div className="ml-auto flex items-center gap-3">
-            <HeaderSearch
-              placeholder={t("searchPlaceholder")}
-              ariaLabel={t("searchAria")}
-            />
+          <div className="ml-auto flex min-w-0 items-center gap-3">
+            <div className="hidden w-full max-w-xs lg:block">
+              <HeaderSearch
+                placeholder={t("searchPlaceholder")}
+                ariaLabel={t("searchAria")}
+              />
+            </div>
             <LocaleSwitcher />
           </div>
         </div>

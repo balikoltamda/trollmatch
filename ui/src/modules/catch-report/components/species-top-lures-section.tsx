@@ -21,23 +21,23 @@ export async function SpeciesTopLuresSection({
   }
 
   return (
-    <section className="mb-12">
-      <div className="mb-6 space-y-2">
-        <h2 className="text-foreground text-2xl font-semibold">
+    <section>
+      <div className="mb-8 space-y-3">
+        <h2 className="text-foreground text-2xl font-semibold tracking-tight sm:text-3xl">
           {t("speciesSection.title")}
         </h2>
-        <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
+        <p className="text-muted-foreground max-w-2xl text-base leading-relaxed">
           {t("speciesSection.description")}
         </p>
       </div>
 
-      <div className="space-y-10">
+      <div className="space-y-12">
         {groups.map((group) => (
           <div key={group.technique.slug}>
-            <h3 className="text-foreground mb-4 text-lg font-medium">
+            <h3 className="text-foreground mb-5 text-lg font-medium tracking-tight">
               {pickLocalized(group.technique.name, locale)}
             </h3>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {group.lures.map((lure) => (
                 <div key={`${group.technique.slug}-${lure.slug}`} className="space-y-2">
                   <LureCard
@@ -62,7 +62,7 @@ export async function SpeciesTopLuresSection({
         ))}
       </div>
 
-      <p className="text-muted-foreground mt-4 text-xs">
+      <p className="text-muted-foreground mt-8 text-sm">
         {t("speciesSection.source")}{" "}
         <Link href="/add-lure" className="text-ocean font-medium hover:underline">
           {t("speciesSection.contribute")}
