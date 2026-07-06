@@ -109,24 +109,14 @@ UI · Search · AI summaries · Importers · Studio · Public pages · APIs
 
 ---
 
-## Sprint 7.4 — Community reports (next)
-
-**Goal:** Anglers submit catch/effectiveness reports; platform learns; editors validate in Studio.
-
-- Public report form on lure detail
-- `CatchReport` / assertion persistence (schema)
-- Reports feed trust layer + community statistics (replace enrichment mock)
-- Studio inbox receives community suggestions (existing pipeline)
-
----
-
-## Sprint 7.4 — Regional experience
+## Sprint 7.4 — Regional experience (next)
 
 **Goal:** Every lure page answers “how does this work *here*?”
 
 - Surface `LureEditorNote` regional fields on public lure detail
 - Region selector or default Eastern Mediterranean lens
 - Collections filter by region + species + technique
+- Wire approved catch reports into trust layer + community statistics (replace enrichment mock)
 
 ---
 
