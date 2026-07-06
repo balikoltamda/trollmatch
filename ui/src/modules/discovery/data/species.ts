@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PUBLIC_LURE_WHERE } from "@/modules/discovery/lib/public-visibility";
-import { listLuresForSpecies } from "@/modules/discovery/data/browse-lures";
+import { listPublicLures } from "@/modules/discovery/data/browse-lures";
+import { getTopLuresForSpeciesFromReports } from "@/modules/catch-report/data/queries";
 import type { SpeciesCardData, SpeciesDetailData } from "@/modules/discovery/types";
 
 async function publishedLureCountsBySpecies(): Promise<Map<string, number>> {
@@ -65,14 +66,18 @@ export async function getSpeciesDetail(
       return null;
     }
 
-    const lures = await listLuresForSpecies(slug);
+    const [lureList, topLuresFromReports] = await Promise.all([
+      listPublicLures({ species: slug, page: 1, pageSize: 48 }),
+      getTopLuresForSpeciesFromReports(slug, 8),
+    ]);
 
     return {
       slug: species.slug,
       name: { en: species.nameEn, tr: species.nameTr },
       scientificName: species.scientificName,
-      lureCount: lures.length,
-      lures,
+      lureCount: lureList.total,
+      lures: lureList.rows,
+      topLuresFromReports,
     };
   } catch {
     return null;

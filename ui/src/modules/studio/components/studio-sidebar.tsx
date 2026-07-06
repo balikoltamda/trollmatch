@@ -21,6 +21,7 @@ const NAV_ITEMS: StudioNavItem[] = [
   { href: "/studio", label: "Attention", icon: "dashboard" },
   { href: "/studio/review", label: "Verify", icon: "review" },
   { href: "/studio/community", label: "Community", icon: "community" },
+  { href: "/studio/community/reports", label: "Catch reports", icon: "notes" },
   { href: "/studio/import", label: "Import Center", icon: "import" },
   { href: "/studio/products", label: "Products", icon: "products" },
   { href: "/studio/manufacturers", label: "Manufacturers", icon: "manufacturers" },

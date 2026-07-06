@@ -123,9 +123,44 @@
     "breadcrumbSpecies": "Balıklar",
     "detailDescription": "{count, plural, =0 {Henüz bağlı yem yok} one {# yem bağlı} other {# yem bağlı}} — kutu bilgisi ve balıkçı notları.",
     "viewAllLures": "Bu tür için tüm yemler",
+    "catalogLuresTitle": "Bağlı tüm yemler",
     "noLuresYet": "Bu türe henüz yem bağlanmadı.",
     "contributeLure": "Bu balık için kullandığın yemi ekle",
     "verified": "Kontrol edildi"
+  },
+  "CatchReport": {
+    "verified": "Doğrulanmış rapor",
+    "boat": "Tekne",
+    "shore": "Kıyı",
+    "catchCount": "{count, plural, one {# balık} other {# balık}}",
+    "lureSection": {
+      "title": "Gerçek av raporları",
+      "description": "Balıkçıların bu yemle gerçekten ne yakaladığı — yayınlanmadan önce doğrulanır.",
+      "empty": "Henüz doğrulanmış av raporu yok. İlk sen paylaş."
+    },
+    "speciesSection": {
+      "title": "En başarılı yemler",
+      "description": "Bu tür için en çok onaylı av raporu alan yemler.",
+      "stats": "{reports, plural, one {# rapor} other {# rapor}} · {catches, plural, one {# balık} other {# balık}} bildirildi",
+      "source": "Onaylı balıkçı raporlarına dayanır.",
+      "contribute": "Avını paylaş"
+    },
+    "form": {
+      "title": "Avını bildir",
+      "species": "Yakalanan balık",
+      "variant": "Renk / varyant",
+      "region": "Nerede",
+      "when": "Ne zaman",
+      "boat": "Tekne",
+      "shore": "Kıyı",
+      "catchCount": "Kaç adet",
+      "notes": "Kısa not (isteğe bağlı)",
+      "notesPlaceholder": "ör. şafak, kayalık, hızlı çekiş",
+      "submit": "Raporu gönder",
+      "submitting": "Gönderiliyor…",
+      "success": "Teşekkürler — raporun inceleme bekliyor.",
+      "error": "Gönderilemedi. Tekrar dene."
+    }
   },
   "LureDetail": {
     "pageLandmark": "Yem detayı",

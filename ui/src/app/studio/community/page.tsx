@@ -28,6 +28,14 @@ export default async function StudioCommunityPage() {
         description="Angler catch reports and effectiveness claims — verify evidence before they earn trust on the public site."
       />
       <StudioPageBody>
+        <p className="text-muted-foreground mb-4 text-sm">
+          <Link
+            href="/studio/community/reports"
+            className="text-ocean font-medium hover:underline"
+          >
+            Review catch reports →
+          </Link>
+        </p>
         {suggestions.length === 0 ? (
           <p className="text-muted-foreground text-sm">
             No community suggestions pending verification.

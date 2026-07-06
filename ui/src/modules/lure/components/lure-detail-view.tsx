@@ -5,6 +5,7 @@ import { LureRecommendedSpecies } from "@/modules/lure/components/sections/lure-
 import { LureRecommendedTechniques } from "@/modules/lure/components/sections/lure-recommended-techniques";
 import { LureTrollingInfo } from "@/modules/lure/components/sections/lure-trolling-info";
 import { LureCommunityStatistics } from "@/modules/lure/components/sections/lure-community-statistics";
+import { LureCatchReportsSection } from "@/modules/catch-report/components/lure-catch-reports-section";
 import { LureAiInsights } from "@/modules/lure/components/sections/lure-ai-insights";
 import { LureRelatedLures } from "@/modules/lure/components/sections/lure-related-lures";
 import { LureSponsoredLinks } from "@/modules/lure/components/sections/lure-sponsored-links";
@@ -42,6 +43,11 @@ export async function LureDetailView({
       <LureCommunityStatistics
         statistics={lure.communityStatistics}
         locale={locale}
+      />
+      <LureCatchReportsSection
+        lureSlug={lure.slug}
+        locale={locale}
+        variantSlug={activeVariant.id}
       />
       <LureAiInsights insights={lure.aiInsights} locale={locale} />
       <LureRelatedLures related={lure.relatedLures} locale={locale} />

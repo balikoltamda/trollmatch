@@ -123,9 +123,44 @@
     "breadcrumbSpecies": "Fish",
     "detailDescription": "{count, plural, =0 {No lures linked yet} one {# lure linked} other {# lures linked}} — box specs and angler notes.",
     "viewAllLures": "View all lures for this species",
+    "catalogLuresTitle": "All linked lures",
     "noLuresYet": "No lures linked to this species yet.",
     "contributeLure": "Add a lure you use for this fish",
     "verified": "Checked"
+  },
+  "CatchReport": {
+    "verified": "Verified report",
+    "boat": "Boat",
+    "shore": "Shore",
+    "catchCount": "{count, plural, one {# fish} other {# fish}}",
+    "lureSection": {
+      "title": "Real catch reports",
+      "description": "What anglers actually caught with this lure — verified before publication.",
+      "empty": "No verified catch reports yet. Be the first to share yours below."
+    },
+    "speciesSection": {
+      "title": "Most successful lures",
+      "description": "Lures with the most approved catch reports for this species.",
+      "stats": "{reports, plural, one {# report} other {# reports}} · {catches, plural, one {# fish} other {# fish}} reported",
+      "source": "Based on approved angler reports.",
+      "contribute": "Share your catch"
+    },
+    "form": {
+      "title": "Report your catch",
+      "species": "Fish caught",
+      "variant": "Colour / variant",
+      "region": "Where",
+      "when": "When",
+      "boat": "Boat",
+      "shore": "Shore",
+      "catchCount": "How many",
+      "notes": "Quick note (optional)",
+      "notesPlaceholder": "e.g. dawn, rocky point, fast retrieve",
+      "submit": "Submit report",
+      "submitting": "Sending…",
+      "success": "Thanks — your report is pending review.",
+      "error": "Could not submit. Try again."
+    }
   },
   "LureDetail": {
     "pageLandmark": "Lure detail",

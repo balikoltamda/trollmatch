@@ -114,6 +114,24 @@ enum CatalogAuditAction {
   @@map("catalog_audit_action")
 }
 
+/// Status of an angler-submitted catch report in the moderation pipeline.
+enum CatchReportVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  MERGED
+
+  @@map("catch_report_verification_status")
+}
+
+/// Where the angler was fishing when the catch occurred.
+enum BoatOrShore {
+  BOAT
+  SHORE
+
+  @@map("boat_or_shore")
+}
+
 /// Provenance of a catalog suggestion awaiting editorial verification.
 enum SuggestionSource {
   IMPORTER
@@ -289,6 +307,7 @@ model LureVariant {
   lureModel LureModel @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
   color     Color     @relation(fields: [colorId], references: [id], onDelete: Restrict)
   images    Image[]
+  catchReports CatchReport[]
 
   @@unique([lureModelId, slug])
   @@index([lureModelId])
@@ -342,6 +361,7 @@ model FishSpecies {
   scientificNameRecord SpeciesScientificName?
   commonNames     SpeciesCommonName[]
   aliases         SpeciesAlias[]
+  catchReports    CatchReport[]
 
   @@index([parentId])
   @@index([deletedAt])
@@ -362,6 +382,7 @@ model Technique {
   parent         Technique?      @relation("TechniqueHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   children       Technique[]     @relation("TechniqueHierarchy")
   lureTechniques LureTechnique[]
+  catchReports   CatchReport[]
 
   @@index([parentId])
   @@index([deletedAt])
@@ -709,4 +730,46 @@ model CatalogAuditEntry {
   @@index([action])
   @@index([createdAt(sort: Desc)])
   @@map("catalog_audit_entries")
+}
+
+// ---------------------------------------------------------------------------
+// Catch Reports (Sprint 7.3 — angler field experiences)
+// ---------------------------------------------------------------------------
+
+/// Angler-submitted catch report — real fishing experience, not editorial content.
+model CatchReport {
+  id                 String                        @id @default(uuid()) @db.Uuid
+  userId             String?                       @map("user_id") @db.Uuid
+  fishSpeciesId      String                        @map("fish_species_id") @db.Uuid
+  lureVariantId      String                        @map("lure_variant_id") @db.Uuid
+  techniqueId        String?                       @map("technique_id") @db.Uuid
+  country            String                        @db.Char(2)
+  region             String                        @db.VarChar(128)
+  location           String?                       @db.VarChar(256)
+  month              Int
+  year               Int
+  boatOrShore        BoatOrShore                   @map("boat_or_shore")
+  waterDepthM        Decimal?                      @map("water_depth_m") @db.Decimal(6, 2)
+  lureDepthM         Decimal?                      @map("lure_depth_m") @db.Decimal(6, 2)
+  trollingSpeedKn    Decimal?                      @map("trolling_speed_kn") @db.Decimal(5, 2)
+  catchCount         Int                           @default(1) @map("catch_count")
+  largestLengthCm    Decimal?                      @map("largest_length_cm") @db.Decimal(6, 2)
+  largestWeightG     Decimal?                      @map("largest_weight_g") @db.Decimal(8, 2)
+  photoCount         Int                           @default(0) @map("photo_count")
+  notes              String?                       @db.Text
+  verificationStatus CatchReportVerificationStatus @default(PENDING) @map("verification_status")
+  mergedIntoId       String?                       @map("merged_into_id") @db.Uuid
+  createdAt          DateTime                      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  fishSpecies  FishSpecies   @relation(fields: [fishSpeciesId], references: [id], onDelete: Restrict)
+  lureVariant  LureVariant   @relation(fields: [lureVariantId], references: [id], onDelete: Restrict)
+  technique    Technique?    @relation(fields: [techniqueId], references: [id], onDelete: SetNull)
+  mergedInto   CatchReport?  @relation("CatchReportMerge", fields: [mergedIntoId], references: [id], onDelete: SetNull)
+  mergedFrom   CatchReport[] @relation("CatchReportMerge")
+
+  @@index([verificationStatus, createdAt(sort: Desc)])
+  @@index([fishSpeciesId, verificationStatus])
+  @@index([lureVariantId, verificationStatus])
+  @@index([mergedIntoId])
+  @@map("catch_reports")
 }

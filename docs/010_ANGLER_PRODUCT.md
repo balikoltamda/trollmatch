@@ -89,7 +89,27 @@ UI · Search · AI summaries · Importers · Studio · Public pages · APIs
 
 ---
 
-## Sprint 7.3 — Community reports (next)
+## Sprint 7.3 — Catch Reports (shipped)
+
+**Goal:** Anglers submit real fishing experiences; editors verify; data surfaces on lure and fish pages.
+
+### Delivered
+
+| Area | Feature |
+|------|---------|
+| **Schema** | `catch_reports` — species, variant, technique, region, catch count, verification status |
+| **Public lure pages** | Real Catch Reports section + 30-second submit form |
+| **Public fish pages** | Most successful lures from approved reports |
+| **Studio** | `/studio/community/reports` — approve, reject, merge duplicates |
+
+### Not in scope
+
+- Reputation system
+- AI summarization of reports
+
+---
+
+## Sprint 7.4 — Community reports (next)
 
 **Goal:** Anglers submit catch/effectiveness reports; platform learns; editors validate in Studio.
 
