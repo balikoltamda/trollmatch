@@ -36,13 +36,22 @@ export type PublicLureListResult = {
   speciesSlug: string | null;
 };
 
+export type HomeManufacturerData = {
+  slug: string;
+  name: string;
+  countryCode: string | null;
+  productCount: number;
+};
+
 export type HomeDiscoveryData = {
   species: SpeciesCardData[];
   latestLures: LureCardData[];
+  manufacturers: HomeManufacturerData[];
   stats: {
     lureCount: number;
     speciesCount: number;
     manufacturerCount: number;
+    importBatchCount: number;
   };
   fromDatabase: boolean;
 };

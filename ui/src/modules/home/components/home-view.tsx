@@ -23,7 +23,6 @@ import {
 } from "@/modules/discovery/data/home-feed";
 import {
   HOME_COLLECTIONS,
-  HOME_MANUFACTURERS,
   HOME_STATISTICS,
   pickLocalized,
 } from "@/modules/home/data/home-content";
@@ -40,7 +39,7 @@ function formatStatValue(id: string, value: number, fromDatabase: boolean): stri
     return HOME_STATISTICS.find((s) => s.id === id)?.value ?? String(value);
   }
   if (id === "imports") {
-    return HOME_STATISTICS.find((s) => s.id === "imports")?.value ?? "12";
+    return String(value);
   }
   return value.toLocaleString();
 }
@@ -68,6 +67,12 @@ export async function HomeView({ locale }: HomeViewProps) {
         value = formatStatValue(
           "species",
           discovery.stats.speciesCount,
+          true,
+        );
+      } else if (stat.id === "imports") {
+        value = formatStatValue(
+          "imports",
+          discovery.stats.importBatchCount,
           true,
         );
       }
@@ -213,16 +218,17 @@ export async function HomeView({ locale }: HomeViewProps) {
             </p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {HOME_MANUFACTURERS.map((manufacturer) => (
+            {discovery.manufacturers.map((manufacturer) => (
               <ManufacturerCard
-                key={manufacturer.id}
+                key={manufacturer.slug}
+                slug={manufacturer.slug}
                 name={manufacturer.name}
-                country={manufacturer.country}
-                status={manufacturer.status}
+                country={manufacturer.countryCode ?? "—"}
+                status={manufacturer.productCount > 0 ? "active" : "importing"}
                 statusLabel={
-                  manufacturer.status === "importing"
-                    ? t("manufacturers.importing")
-                    : manufacturer.country
+                  manufacturer.productCount > 0
+                    ? manufacturer.countryCode ?? "—"
+                    : t("manufacturers.importing")
                 }
                 productLabel={t("manufacturers.models", {
                   count: manufacturer.productCount,

@@ -1,0 +1,60 @@
+{
+  "recordId": "jackson-artist-storm-lure-90",
+  "source": {
+    "type": "json_export",
+    "url": "https://www.jackson.co.jp/products/artist-storm-lure-90",
+    "documentTitle": "Jackson Artist Storm Lure 90 catalog entry"
+  },
+  "manufacturer": {
+    "slug": "jackson",
+    "name": { "en": "Jackson", "tr": "Jackson", "default": "Jackson" },
+    "countryCode": "JP",
+    "website": "https://www.jackson.co.jp"
+  },
+  "productLine": {
+    "slug": "artist-storm",
+    "name": { "en": "Artist Storm", "tr": "Artist Storm" }
+  },
+  "model": {
+    "slug": "artist-storm-lure-90",
+    "name": { "en": "Artist Storm Lure 90", "tr": "Artist Storm Lure 90" },
+    "modelCode": "ASL90",
+    "formFactorTerm": "sinking minnow",
+    "size": { "lengthMm": 90 },
+    "weight": { "weightG": 14 },
+    "buoyancy": {
+      "slug": "sinking",
+      "manufacturerTerm": "Sinking",
+      "label": { "en": "Sinking", "tr": "Batan" }
+    },
+    "tags": [
+      { "kind": "technique", "value": "shore-casting", "locale": "any" },
+      { "kind": "species", "value": "european-seabass", "locale": "any" }
+    ],
+    "images": [
+      {
+        "url": "/lures/jackson-artist-storm.svg",
+        "role": "hero",
+        "alt": { "en": "Artist Storm Lure 90", "tr": "Artist Storm Lure 90" }
+      }
+    ]
+  },
+  "variant": {
+    "slug": "ayu-real",
+    "name": { "en": "90 mm · Ayu Real", "tr": "90 mm · Ayu Real" },
+    "sku": "ASL90-AR",
+    "color": {
+      "code": "AR",
+      "name": { "en": "Ayu Real", "tr": "Ayu Real" }
+    },
+    "size": { "lengthMm": 90 },
+    "weight": { "weightG": 14 },
+    "images": [
+      {
+        "url": "/lures/jackson-artist-storm.svg",
+        "role": "product",
+        "colorCode": "AR"
+      }
+    ]
+  }
+}

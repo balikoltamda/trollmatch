@@ -1,0 +1,92 @@
+{
+  "recordId": "halco-laser-pro-190-h70",
+  "source": {
+    "type": "json_export",
+    "url": "https://www.halco.com.au/products/laser-pro-190-dd",
+    "documentTitle": "Halco Laser Pro 190 DD catalog entry"
+  },
+  "manufacturer": {
+    "slug": "halco",
+    "name": { "en": "Halco", "tr": "Halco", "default": "Halco" },
+    "countryCode": "AU",
+    "website": "https://www.halco.com.au"
+  },
+  "productLine": {
+    "slug": "laser-pro",
+    "name": { "en": "Laser Pro series", "tr": "Laser Pro serisi" },
+    "description": {
+      "en": "Large bibbed minnows for offshore trolling.",
+      "tr": "Offshore trolling için büyük bib minnow yemler."
+    }
+  },
+  "model": {
+    "slug": "laser-pro-190-dd",
+    "name": { "en": "Laser Pro 190 DD", "tr": "Laser Pro 190 DD" },
+    "modelCode": "LP190DD",
+    "description": {
+      "en": "Deep-diving minnow for offshore trolling and pelagic species.",
+      "tr": "Offshore trolling ve pelagik türler için derin dalar minnow."
+    },
+    "formFactorTerm": "deep-diving minnow",
+    "size": { "lengthMm": 190 },
+    "weight": { "weightG": 119 },
+    "divingDepth": {
+      "minMeters": 5,
+      "maxMeters": 7,
+      "lipType": "large bib",
+      "manufacturerLabel": { "en": "5–7 m", "tr": "5–7 m" }
+    },
+    "buoyancy": {
+      "slug": "floating",
+      "manufacturerTerm": "Floating",
+      "label": { "en": "Floating", "tr": "Yüzen" }
+    },
+    "actions": [
+      {
+        "manufacturerTerm": "Wide rolling action",
+        "label": { "en": "Wide rolling action", "tr": "Geniş yuvarlanma" }
+      }
+    ],
+    "hooks": [
+      {
+        "hookCount": 3,
+        "hookType": "treble",
+        "hookSize": "4/0",
+        "factoryDefault": true
+      }
+    ],
+    "tags": [
+      { "kind": "technique", "value": "offshore-trolling", "locale": "any" },
+      { "kind": "species", "value": "yellowfin-tuna", "locale": "any" }
+    ],
+    "images": [
+      {
+        "url": "/lures/halco-laser-pro-190-dd.svg",
+        "role": "hero",
+        "alt": { "en": "Laser Pro 190 DD", "tr": "Laser Pro 190 DD" }
+      }
+    ]
+  },
+  "variant": {
+    "slug": "h70-redhead",
+    "name": { "en": "190 mm · H70 Redhead", "tr": "190 mm · H70 Redhead" },
+    "sku": "LP190DD-H70",
+    "color": {
+      "code": "H70",
+      "name": { "en": "Redhead", "tr": "Redhead" },
+      "aliases": [{ "kind": "manufacturer_code", "value": "H70" }]
+    },
+    "size": { "lengthMm": 190 },
+    "weight": { "weightG": 119 },
+    "externalIdentifiers": [
+      { "scheme": "manufacturer_sku", "value": "LP190DD-H70" }
+    ],
+    "images": [
+      {
+        "url": "/lures/halco-laser-pro-190-dd.svg",
+        "role": "product",
+        "colorCode": "H70"
+      }
+    ]
+  }
+}

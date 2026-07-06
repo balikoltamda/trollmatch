@@ -256,6 +256,25 @@ Every information block shows its source. No database changes — presentation a
 
 ---
 
+## Working Product — Studio imports & live catalog (shipped)
+
+**Goal:** Behave like a real product — every visible action performs real work.
+
+### Delivered
+
+| Area | Change |
+|------|--------|
+| **Import Center** | Real importer execution with feedback, batch report links, Running/Completed/Failed status, duration and counts |
+| **Static importers** | Halco, Yo-Zuri, Maria, Shimano, Daiwa, Jackson product catalogs in `research/manufacturers/` |
+| **DUEL** | Live crawl importer unchanged; Studio enables image download |
+| **Dashboard** | Live DB stats + recent import batches on `/studio` |
+| **Import history** | Report, errors, and products links per batch |
+| **Homepage** | Live manufacturer grid from DB; import batch count in statistics |
+| **Species visuals** | Hero photography on cards and detail pages for featured species |
+| **Manufacturer cards** | Link to public manufacturer pages |
+
+---
+
 ## Evolutionary domain design (platform law)
 
 **Goal:** Keep fishing knowledge models simple — extensible, not premature.

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { manufacturerRegistry } from "@/modules/import/registry/registered-manufacturers";
+import { resolveImporterSlug } from "@/modules/import/registry/manufacturer-slugs";
 import type { ImportManufacturerRow } from "@/modules/studio/types";
 
 export async function getImportCenterRows(): Promise<ImportManufacturerRow[]> {
@@ -14,6 +15,7 @@ export async function getImportCenterRows(): Promise<ImportManufacturerRow[]> {
       durationMs: true,
       createdCount: true,
       updatedCount: true,
+      skippedCount: true,
       missingCount: true,
       status: true,
       reportPath: true,
@@ -58,12 +60,13 @@ export async function getImportCenterRows(): Promise<ImportManufacturerRow[]> {
             durationMs: lastImport.durationMs,
             createdCount: lastImport.createdCount,
             updatedCount: lastImport.updatedCount,
+            skippedCount: lastImport.skippedCount,
             missingCount: lastImport.missingCount,
             status: lastImport.status,
             reportPath: lastImport.reportPath,
           }
         : null,
-      productCount: countBySlug.get(entry.code) ?? 0,
+      productCount: countBySlug.get(resolveImporterSlug(entry.code)) ?? 0,
     };
   });
 }

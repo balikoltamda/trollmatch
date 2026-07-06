@@ -1,0 +1,60 @@
+{
+  "recordId": "daiwa-saltiga-dorado-slider-14",
+  "source": {
+    "type": "json_export",
+    "url": "https://www.daiwa.com/product/saltiga-dorado-slider-14",
+    "documentTitle": "Daiwa Saltiga Dorado Slider 14 catalog entry"
+  },
+  "manufacturer": {
+    "slug": "daiwa",
+    "name": { "en": "Daiwa", "tr": "Daiwa", "default": "Daiwa" },
+    "countryCode": "JP",
+    "website": "https://www.daiwa.com"
+  },
+  "productLine": {
+    "slug": "saltiga",
+    "name": { "en": "Saltiga", "tr": "Saltiga" }
+  },
+  "model": {
+    "slug": "saltiga-dorado-slider-14",
+    "name": { "en": "Saltiga Dorado Slider 14", "tr": "Saltiga Dorado Slider 14" },
+    "modelCode": "SDS14",
+    "formFactorTerm": "surface slider",
+    "size": { "lengthMm": 140 },
+    "weight": { "weightG": 42 },
+    "buoyancy": {
+      "slug": "floating",
+      "manufacturerTerm": "Floating",
+      "label": { "en": "Floating", "tr": "Yüzen" }
+    },
+    "tags": [
+      { "kind": "technique", "value": "topwater", "locale": "any" },
+      { "kind": "species", "value": "bluefish", "locale": "any" }
+    ],
+    "images": [
+      {
+        "url": "/lures/daiwa-saltiga-slider.svg",
+        "role": "hero",
+        "alt": { "en": "Saltiga Dorado Slider 14", "tr": "Saltiga Dorado Slider 14" }
+      }
+    ]
+  },
+  "variant": {
+    "slug": "dorado-pearl",
+    "name": { "en": "14 cm · Dorado Pearl", "tr": "14 cm · Dorado Pearl" },
+    "sku": "SDS14-DP",
+    "color": {
+      "code": "DP",
+      "name": { "en": "Dorado Pearl", "tr": "Dorado Pearl" }
+    },
+    "size": { "lengthMm": 140 },
+    "weight": { "weightG": 42 },
+    "images": [
+      {
+        "url": "/lures/daiwa-saltiga-slider.svg",
+        "role": "product",
+        "colorCode": "DP"
+      }
+    ]
+  }
+}

@@ -1,25 +1,17 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import {
-  StudioPageBody,
-  StudioPageHeader,
-} from "@/modules/studio/components/studio-page";
-import {
+  StudioStatCard,
   StudioTable,
   StudioTd,
   StudioTh,
 } from "@/modules/studio/components/studio-ui";
-import { getImportHistory } from "@/modules/studio/data/import-center";
-import { manufacturerRegistry } from "@/modules/import/registry/registered-manufacturers";
+import {
+  getDashboardStats,
+  getLatestImports,
+} from "@/modules/studio/data/dashboard";
 import { resolveImporterSlug } from "@/modules/import/registry/manufacturer-slugs";
 import { cn } from "@/lib/utils";
-
-export const dynamic = "force-dynamic";
-
-type PageProps = {
-  params: Promise<{ code: string }>;
-};
 
 function batchStatusClass(status: string): string {
   switch (status) {
@@ -34,53 +26,67 @@ function batchStatusClass(status: string): string {
   }
 }
 
-export default async function StudioImportHistoryPage({ params }: PageProps) {
-  const { code } = await params;
-  const entry = manufacturerRegistry.list().find((m) => m.code === code);
-  if (!entry) notFound();
-
-  const history = await getImportHistory(code);
-  const manufacturerSlug = resolveImporterSlug(code);
+export async function StudioDashboardPanel() {
+  const [stats, imports] = await Promise.all([
+    getDashboardStats(),
+    getLatestImports(8),
+  ]);
 
   return (
-    <>
-      <StudioPageHeader
-        title={`${entry.displayName} import history`}
-        description="Every import batch — open the report, errors, or affected products."
-        actions={
+    <div className="space-y-10">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StudioStatCard label="Lure models" value={stats.lureModels} />
+        <StudioStatCard label="Published" value={stats.published} />
+        <StudioStatCard label="Pending review" value={stats.pendingReview} />
+        <StudioStatCard label="Product images" value={stats.images} />
+        <StudioStatCard label="Manufacturers" value={stats.manufacturers} />
+        <StudioStatCard label="Fish species" value={stats.fishSpecies} />
+        <StudioStatCard label="Review queue" value={stats.reviewQueue} />
+        <StudioStatCard
+          label="Import diffs pending"
+          value={stats.pendingImportDiffs}
+        />
+      </div>
+
+      <section>
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <h2 className="text-foreground text-sm font-semibold">
+            Recent imports
+          </h2>
           <Link
             href="/studio/import"
             className={buttonVariants({ size: "sm", variant: "outline" })}
           >
-            Back to Import Center
+            Import Center
           </Link>
-        }
-      />
-      <StudioPageBody>
+        </div>
         <StudioTable>
           <thead>
             <tr>
+              <StudioTh>Manufacturer</StudioTh>
               <StudioTh>Started</StudioTh>
               <StudioTh>Status</StudioTh>
               <StudioTh>Imported</StudioTh>
               <StudioTh>Updated</StudioTh>
-              <StudioTh>Skipped</StudioTh>
               <StudioTh>Errors</StudioTh>
               <StudioTh>Duration</StudioTh>
               <StudioTh>Actions</StudioTh>
             </tr>
           </thead>
           <tbody>
-            {history.length === 0 ? (
+            {imports.length === 0 ? (
               <tr>
                 <StudioTd colSpan={8} className="text-muted-foreground">
-                  No import batches recorded yet. Run Import now from Import Center.
+                  No import batches yet. Run an import from Import Center.
                 </StudioTd>
               </tr>
             ) : (
-              history.map((batch) => (
+              imports.map((batch) => (
                 <tr key={batch.id} className="hover:bg-muted/30">
-                  <StudioTd>{batch.startedAt.toLocaleString()}</StudioTd>
+                  <StudioTd className="font-medium">{batch.displayName}</StudioTd>
+                  <StudioTd className="text-muted-foreground text-xs">
+                    {batch.startedAt.toLocaleString()}
+                  </StudioTd>
                   <StudioTd>
                     <span
                       className={cn(
@@ -93,7 +99,6 @@ export default async function StudioImportHistoryPage({ params }: PageProps) {
                   </StudioTd>
                   <StudioTd>{batch.createdCount}</StudioTd>
                   <StudioTd>{batch.updatedCount}</StudioTd>
-                  <StudioTd>{batch.skippedCount}</StudioTd>
                   <StudioTd>{batch.errorCount}</StudioTd>
                   <StudioTd>
                     {batch.durationMs
@@ -117,7 +122,7 @@ export default async function StudioImportHistoryPage({ params }: PageProps) {
                         </Link>
                       ) : null}
                       <Link
-                        href={`/studio/products?manufacturer=${encodeURIComponent(manufacturerSlug)}`}
+                        href={`/studio/products?manufacturer=${encodeURIComponent(resolveImporterSlug(batch.manufacturerCode))}`}
                         className="text-muted-foreground text-sm hover:underline"
                       >
                         Products
@@ -129,7 +134,7 @@ export default async function StudioImportHistoryPage({ params }: PageProps) {
             )}
           </tbody>
         </StudioTable>
-      </StudioPageBody>
-    </>
+      </section>
+    </div>
   );
 }

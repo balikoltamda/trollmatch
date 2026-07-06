@@ -1,0 +1,60 @@
+{
+  "recordId": "yozuri-crystal-3d-minnow-130",
+  "source": {
+    "type": "json_export",
+    "url": "https://www.yo-zuri.com/products/crystal-3d-minnow-130",
+    "documentTitle": "Yo-Zuri Crystal 3D Minnow 130 catalog entry"
+  },
+  "manufacturer": {
+    "slug": "yo-zuri",
+    "name": { "en": "Yo-Zuri", "tr": "Yo-Zuri", "default": "Yo-Zuri" },
+    "countryCode": "JP",
+    "website": "https://www.yo-zuri.com"
+  },
+  "productLine": {
+    "slug": "crystal-3d",
+    "name": { "en": "Crystal 3D", "tr": "Crystal 3D" }
+  },
+  "model": {
+    "slug": "crystal-3d-minnow-130",
+    "name": { "en": "Crystal 3D Minnow 130", "tr": "Crystal 3D Minnow 130" },
+    "modelCode": "C3D130",
+    "formFactorTerm": "sinking minnow",
+    "size": { "lengthMm": 130 },
+    "weight": { "weightG": 24 },
+    "buoyancy": {
+      "slug": "sinking",
+      "manufacturerTerm": "Sinking",
+      "label": { "en": "Sinking", "tr": "Batan" }
+    },
+    "tags": [
+      { "kind": "technique", "value": "shore-casting", "locale": "any" },
+      { "kind": "species", "value": "bluefish", "locale": "any" }
+    ],
+    "images": [
+      {
+        "url": "/lures/yozuri-crystal-minnow.svg",
+        "role": "hero",
+        "alt": { "en": "Crystal 3D Minnow 130", "tr": "Crystal 3D Minnow 130" }
+      }
+    ]
+  },
+  "variant": {
+    "slug": "hbs-blue-sardine",
+    "name": { "en": "130 mm · Blue Sardine", "tr": "130 mm · Blue Sardine" },
+    "sku": "C3D130-HBS",
+    "color": {
+      "code": "HBS",
+      "name": { "en": "Blue Sardine", "tr": "Blue Sardine" }
+    },
+    "size": { "lengthMm": 130 },
+    "weight": { "weightG": 24 },
+    "images": [
+      {
+        "url": "/lures/yozuri-crystal-minnow.svg",
+        "role": "product",
+        "colorCode": "HBS"
+      }
+    ]
+  }
+}

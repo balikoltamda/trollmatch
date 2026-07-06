@@ -34,6 +34,7 @@ export type ImportManufacturerRow = {
     durationMs: number | null;
     createdCount: number;
     updatedCount: number;
+    skippedCount: number;
     missingCount: number;
     status: ImportBatchStatus;
     reportPath: string | null;

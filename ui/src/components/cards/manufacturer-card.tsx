@@ -1,9 +1,11 @@
+import { Link } from "@/i18n/navigation";
 import { Building2 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 type ManufacturerCardProps = {
+  slug?: string;
   name: string;
   country: string;
   status?: "active" | "importing";
@@ -13,6 +15,7 @@ type ManufacturerCardProps = {
 };
 
 export function ManufacturerCard({
+  slug,
   name,
   country,
   status = "active",
@@ -22,7 +25,7 @@ export function ManufacturerCard({
 }: ManufacturerCardProps) {
   const badgeText = statusLabel ?? (status === "importing" ? "Importing" : country);
 
-  return (
+  const card = (
     <Card interactive className={cn("h-full", className)}>
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4">
@@ -46,4 +49,14 @@ export function ManufacturerCard({
       </CardContent>
     </Card>
   );
+
+  if (slug) {
+    return (
+      <Link href={`/manufacturers/${slug}`} className="group block">
+        {card}
+      </Link>
+    );
+  }
+
+  return card;
 }

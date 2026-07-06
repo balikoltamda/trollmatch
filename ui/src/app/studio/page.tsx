@@ -3,6 +3,7 @@ import {
   StudioPageHeader,
 } from "@/modules/studio/components/studio-page";
 import { AttentionInbox } from "@/modules/studio/components/attention-inbox";
+import { StudioDashboardPanel } from "@/modules/studio/components/studio-dashboard-panel";
 import {
   countAttentionItems,
   getAttentionInbox,
@@ -19,16 +20,22 @@ export default async function StudioDashboardPage() {
   return (
     <>
       <StudioPageHeader
-        title="Editorial inbox"
-        description="Items needing review before publication — manufacturer source, catch reports, and Balık Oltamda verification status."
+        title="Studio"
+        description="Live catalog health, import activity, and editorial items needing review."
       />
       <StudioPageBody>
-        <p className="text-muted-foreground mb-6 text-sm">
-          {total} item{total === 1 ? "" : "s"} need your attention today — verify
-          to raise trust scores before publishing.
-        </p>
+        <StudioDashboardPanel />
 
-        <AttentionInbox items={items} />
+        <div className="mt-12 border-t border-border/50 pt-10">
+          <h2 className="text-foreground mb-2 text-lg font-semibold">
+            Editorial inbox
+          </h2>
+          <p className="text-muted-foreground mb-6 text-sm">
+            {total} item{total === 1 ? "" : "s"} need your attention — verify
+            before publishing.
+          </p>
+          <AttentionInbox items={items} />
+        </div>
       </StudioPageBody>
     </>
   );

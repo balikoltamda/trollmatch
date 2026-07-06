@@ -34,28 +34,32 @@ function parseReportJson(json: unknown): ImportReportSection[] {
 
   const report = json as Record<string, unknown>;
   const sections: ImportReportSection[] = [];
+  const summary =
+    report.summary && typeof report.summary === "object"
+      ? (report.summary as Record<string, unknown>)
+      : null;
 
-  const created = asStringArray(report.created);
+  const created = asStringArray(summary?.created ?? report.created);
   if (created.length > 0) {
-    sections.push({ title: "Created", items: created });
+    sections.push({ title: "Imported", items: created });
   }
 
-  const updated = asStringArray(report.updated);
+  const updated = asStringArray(summary?.updated ?? report.updated);
   if (updated.length > 0) {
     sections.push({ title: "Updated", items: updated });
   }
 
-  const skipped = asStringArray(report.skipped);
+  const skipped = asStringArray(summary?.skipped ?? report.skipped);
   if (skipped.length > 0) {
     sections.push({ title: "Skipped", items: skipped });
   }
 
-  const removed = asStringArray(report.removed);
+  const removed = asStringArray(summary?.removed ?? report.removed);
   if (removed.length > 0) {
     sections.push({ title: "Removed", items: removed });
   }
 
-  const missing = asStringArray(report.missing);
+  const missing = asStringArray(summary?.missing ?? report.missing);
   if (missing.length > 0) {
     sections.push({ title: "Missing from feed", items: missing });
   }

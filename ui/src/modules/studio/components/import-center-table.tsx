@@ -1,7 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { runManufacturerImport } from "@/modules/studio/actions/import-actions";
 import {
@@ -25,17 +26,31 @@ function formatDate(date: Date | null | undefined): string {
   }).format(date);
 }
 
+function batchStatusClass(status: string | undefined): string {
+  switch (status) {
+    case "COMPLETED":
+      return "bg-ocean/10 text-ocean";
+    case "RUNNING":
+      return "bg-turquoise/15 text-[color-mix(in_oklch,var(--turquoise),var(--navy)_40%)]";
+    case "FAILED":
+      return "bg-coral/12 text-[color-mix(in_oklch,var(--coral),var(--navy)_35%)]";
+    default:
+      return "bg-muted text-muted-foreground";
+  }
+}
+
 export function ImportCenterTable({ rows }: { rows: ImportManufacturerRow[] }) {
   return (
     <StudioTable>
       <thead>
         <tr>
           <StudioTh>Manufacturer</StudioTh>
+          <StudioTh>Importer</StudioTh>
+          <StudioTh>Last run</StudioTh>
           <StudioTh>Status</StudioTh>
-          <StudioTh>Last import</StudioTh>
-          <StudioTh>New</StudioTh>
+          <StudioTh>Imported</StudioTh>
           <StudioTh>Updated</StudioTh>
-          <StudioTh>Missing</StudioTh>
+          <StudioTh>Skipped</StudioTh>
           <StudioTh>Duration</StudioTh>
           <StudioTh className="text-right">Actions</StudioTh>
         </tr>
@@ -50,7 +65,13 @@ export function ImportCenterTable({ rows }: { rows: ImportManufacturerRow[] }) {
 }
 
 function ImportRow({ row }: { row: ImportManufacturerRow }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [feedback, setFeedback] = useState<{
+    tone: "error" | "success";
+    message: string;
+    batchId?: string;
+  } | null>(null);
 
   return (
     <tr className="hover:bg-muted/30">
@@ -58,7 +79,7 @@ function ImportRow({ row }: { row: ImportManufacturerRow }) {
         <div>
           <p className="font-medium">{row.displayName}</p>
           <p className="text-muted-foreground text-xs">
-            {row.code} · {row.productCount} products
+            {row.code} · {row.productCount} products in catalog
           </p>
         </div>
       </StudioTd>
@@ -77,39 +98,80 @@ function ImportRow({ row }: { row: ImportManufacturerRow }) {
       <StudioTd className="text-muted-foreground text-xs">
         {formatDate(row.lastImport?.startedAt)}
       </StudioTd>
+      <StudioTd>
+        {row.lastImport ? (
+          <span
+            className={cn(
+              "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
+              batchStatusClass(row.lastImport.status),
+            )}
+          >
+            {row.lastImport.status}
+          </span>
+        ) : (
+          <span className="text-muted-foreground text-xs">—</span>
+        )}
+      </StudioTd>
       <StudioTd>{row.lastImport?.createdCount ?? "—"}</StudioTd>
       <StudioTd>{row.lastImport?.updatedCount ?? "—"}</StudioTd>
-      <StudioTd>{row.lastImport?.missingCount ?? "—"}</StudioTd>
+      <StudioTd>{row.lastImport?.skippedCount ?? "—"}</StudioTd>
       <StudioTd>{formatDuration(row.lastImport?.durationMs)}</StudioTd>
       <StudioTd>
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            disabled={pending}
-            className={buttonVariants({ size: "sm" })}
-            onClick={() =>
-              startTransition(async () => {
-                await runManufacturerImport(row.code);
-              })
-            }
-          >
-            {pending ? "Importing…" : "Import now"}
-          </button>
-          {row.lastImport?.reportPath ? (
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              disabled={pending}
+              className={buttonVariants({ size: "sm" })}
+              onClick={() => {
+                setFeedback(null);
+                startTransition(async () => {
+                  const result = await runManufacturerImport(row.code);
+                  if (result.ok) {
+                    setFeedback({
+                      tone: "success",
+                      message: "Import completed.",
+                      batchId: result.batchId,
+                    });
+                    router.refresh();
+                  } else {
+                    setFeedback({
+                      tone: "error",
+                      message: result.error,
+                    });
+                  }
+                });
+              }}
+            >
+              {pending ? "Running…" : "Import now"}
+            </button>
             <Link
               href={`/studio/import/${row.code}`}
               className={buttonVariants({ size: "sm", variant: "outline" })}
             >
               History
             </Link>
-          ) : (
-            <Link
-              href={`/studio/import/${row.code}`}
-              className={buttonVariants({ size: "sm", variant: "outline" })}
+          </div>
+          {feedback ? (
+            <p
+              className={cn(
+                "max-w-xs text-right text-xs",
+                feedback.tone === "error"
+                  ? "text-coral"
+                  : "text-ocean",
+              )}
             >
-              History
-            </Link>
-          )}
+              {feedback.message}{" "}
+              {feedback.batchId ? (
+                <Link
+                  href={`/studio/import/batch/${feedback.batchId}`}
+                  className="font-medium hover:underline"
+                >
+                  Open report
+                </Link>
+              ) : null}
+            </p>
+          ) : null}
         </div>
       </StudioTd>
     </tr>

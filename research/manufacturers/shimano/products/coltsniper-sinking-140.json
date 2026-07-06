@@ -1,0 +1,60 @@
+{
+  "recordId": "shimano-coltsniper-sinking-140",
+  "source": {
+    "type": "json_export",
+    "url": "https://fish.shimano.com/product/coltsniper-sinking-140",
+    "documentTitle": "Shimano Coltsniper Sinking 140 catalog entry"
+  },
+  "manufacturer": {
+    "slug": "shimano",
+    "name": { "en": "Shimano", "tr": "Shimano", "default": "Shimano" },
+    "countryCode": "JP",
+    "website": "https://fish.shimano.com"
+  },
+  "productLine": {
+    "slug": "coltsniper",
+    "name": { "en": "Coltsniper", "tr": "Coltsniper" }
+  },
+  "model": {
+    "slug": "coltsniper-sinking-140",
+    "name": { "en": "Coltsniper Sinking 140", "tr": "Coltsniper Sinking 140" },
+    "modelCode": "CS140S",
+    "formFactorTerm": "sinking stickbait",
+    "size": { "lengthMm": 140 },
+    "weight": { "weightG": 30 },
+    "buoyancy": {
+      "slug": "sinking",
+      "manufacturerTerm": "Sinking",
+      "label": { "en": "Sinking", "tr": "Batan" }
+    },
+    "tags": [
+      { "kind": "technique", "value": "shore-casting", "locale": "any" },
+      { "kind": "species", "value": "european-seabass", "locale": "any" }
+    ],
+    "images": [
+      {
+        "url": "/lures/shimano-coltsniper.svg",
+        "role": "hero",
+        "alt": { "en": "Coltsniper Sinking 140", "tr": "Coltsniper Sinking 140" }
+      }
+    ]
+  },
+  "variant": {
+    "slug": "jet-boost-ivory",
+    "name": { "en": "140 mm · Jet Boost Ivory", "tr": "140 mm · Jet Boost Ivory" },
+    "sku": "CS140S-JBIV",
+    "color": {
+      "code": "JBIV",
+      "name": { "en": "Jet Boost Ivory", "tr": "Jet Boost Ivory" }
+    },
+    "size": { "lengthMm": 140 },
+    "weight": { "weightG": 30 },
+    "images": [
+      {
+        "url": "/lures/shimano-coltsniper.svg",
+        "role": "product",
+        "colorCode": "JBIV"
+      }
+    ]
+  }
+}

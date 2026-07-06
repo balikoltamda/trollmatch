@@ -17,6 +17,7 @@ import {
 } from "../../reporting/import-report";
 import { validateCanonicalLureImport } from "../../validators/canonical-lure-validator";
 import { upsertDuelCanonicalImport } from "../duel/duel-persister";
+import { normalizeProductRecord } from "./normalize-product-record";
 import type {
   ManufacturerImporter,
   ManufacturerImportResult,
@@ -34,6 +35,7 @@ export type StaticJsonImporterConfig = {
 
 async function loadCanonicalRecords(
   productsDir: string,
+  providerCode: string,
 ): Promise<CanonicalLureImport[]> {
   let entries: string[];
 
@@ -51,7 +53,10 @@ async function loadCanonicalRecords(
     }
 
     const raw = await readFile(join(productsDir, entry), "utf8");
-    records.push(JSON.parse(raw) as CanonicalLureImport);
+    const parsed = JSON.parse(raw) as Parameters<typeof normalizeProductRecord>[0];
+    records.push(
+      normalizeProductRecord(parsed, join(productsDir, entry), providerCode),
+    );
   }
 
   return records;
@@ -63,7 +68,7 @@ export function createStaticJsonImporter(
   return {
     code: config.code,
     displayName: config.displayName,
-    status: "stub",
+    status: "active",
 
     async run(options: ManufacturerImportRunOptions): Promise<ManufacturerImportResult> {
       const startedAt = new Date();
@@ -71,7 +76,7 @@ export function createStaticJsonImporter(
       const observedLureModelIds: string[] = [];
       const productsDir = join(config.repoRoot, config.productsDir);
 
-      const records = await loadCanonicalRecords(productsDir);
+      const records = await loadCanonicalRecords(productsDir, config.code);
 
       if (records.length === 0) {
         summary.warnings.push(
@@ -87,7 +92,7 @@ export function createStaticJsonImporter(
 
         if (!validation.valid) {
           summary.errors.push(
-            `${record.recordKey}: ${validation.errors.map((issue: { code: string }) => issue.code).join(", ")}`,
+            `${record.recordKey}: ${validation.errors.map((issue) => issue.code).join(", ")}`,
           );
           continue;
         }

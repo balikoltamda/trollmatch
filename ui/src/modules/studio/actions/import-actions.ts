@@ -31,8 +31,8 @@ export async function runManufacturerImport(
   try {
     const result = await importer.run({
       prisma,
-      offline: importer.status === "stub",
-      downloadImages: false,
+      offline: false,
+      downloadImages: true,
     });
 
     const report = buildImportReport({

@@ -1,0 +1,60 @@
+{
+  "recordId": "maria-mucho-lucir-15",
+  "source": {
+    "type": "json_export",
+    "url": "https://www.maria.co.jp/products/mucho-lucir-15",
+    "documentTitle": "Maria Mucho Lucir 15 catalog entry"
+  },
+  "manufacturer": {
+    "slug": "maria",
+    "name": { "en": "Maria", "tr": "Maria", "default": "Maria" },
+    "countryCode": "JP",
+    "website": "https://www.maria.co.jp"
+  },
+  "productLine": {
+    "slug": "mucho-lucir",
+    "name": { "en": "Mucho Lucir", "tr": "Mucho Lucir" }
+  },
+  "model": {
+    "slug": "mucho-lucir-15",
+    "name": { "en": "Mucho Lucir 15", "tr": "Mucho Lucir 15" },
+    "modelCode": "ML15",
+    "formFactorTerm": "metal jig",
+    "size": { "lengthMm": 65 },
+    "weight": { "weightG": 15 },
+    "buoyancy": {
+      "slug": "sinking",
+      "manufacturerTerm": "Sinking",
+      "label": { "en": "Sinking", "tr": "Batan" }
+    },
+    "tags": [
+      { "kind": "technique", "value": "vertical-jigging", "locale": "any" },
+      { "kind": "species", "value": "bonito", "locale": "any" }
+    ],
+    "images": [
+      {
+        "url": "/lures/maria-mucho-lucir.svg",
+        "role": "hero",
+        "alt": { "en": "Mucho Lucir 15", "tr": "Mucho Lucir 15" }
+      }
+    ]
+  },
+  "variant": {
+    "slug": "silver-blue",
+    "name": { "en": "15 g · Silver Blue", "tr": "15 g · Silver Blue" },
+    "sku": "ML15-SB",
+    "color": {
+      "code": "SB",
+      "name": { "en": "Silver Blue", "tr": "Silver Blue" }
+    },
+    "size": { "lengthMm": 65 },
+    "weight": { "weightG": 15 },
+    "images": [
+      {
+        "url": "/lures/maria-mucho-lucir.svg",
+        "role": "product",
+        "colorCode": "SB"
+      }
+    ]
+  }
+}
