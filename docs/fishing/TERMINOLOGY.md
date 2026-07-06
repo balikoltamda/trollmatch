@@ -33,8 +33,29 @@ Every future feature that displays or indexes fishing vocabulary **must** refere
 2. **Preferred term** is the only label shown in primary UI for each locale.
 3. **Aliases** power search and importer matching — never replace preferred labels without editorial action.
 4. **Deprecated terms** must not appear in UI copy. They may remain searchable with a redirect to the preferred term.
-5. **Regional terms** are scoped (country/region). They do not override scientific taxonomy (see `TAXONOMY_POLICY.md`).
-6. **Notes** carry full conceptual documentation. Do not simplify rigging or biological concepts for UI convenience.
+5. **Regional terms** are scoped to **country or major region only** — never city-level (see `TAXONOMY_POLICY.md`).
+6. **Frequently confused species** are a separate relation — never stored as aliases.
+7. **Scientific names** are canonical for species identity — never overridden by regional popularity.
+8. **Notes** carry full conceptual documentation. Do not simplify rigging or biological concepts for UI convenience.
+
+---
+
+## 2.1 Fish species naming (Sprint 7.4.1)
+
+Species names are **long-term platform assets**. Rules:
+
+| Layer | Example (*Lichia amia*) |
+|-------|-------------------------|
+| Scientific (canonical) | *Lichia amia* |
+| Preferred Turkish | Akya |
+| English | Leerfish |
+| Aliases (same species) | Liça, Litsa, Çatal Kuyruk |
+| Regional (KKTC) | Litsa |
+| Confused with | *Seriola dumerili* — not an alias |
+
+Do **not** use a name belonging to species A as an alias on species B when anglers confuse them. Document the confusion in `SpeciesConfusion` with an editorial reason.
+
+Do **not** rely on internet consensus. Scientific taxonomy always wins.
 
 ---
 

@@ -128,6 +128,14 @@
     },
     "missingSection": "This section is temporarily unavailable."
   },
+  "Taxonomy": {
+    "sectionTitle": "Names & taxonomy",
+    "aliases": "Also known as",
+    "regional": "Regional names",
+    "confusedWith": "Frequently confused with",
+    "searchTitle": "Fish species",
+    "disambiguation": "Note: {correct} is the correct species for this name."
+  },
   "Lures": {
     "meta": {
       "title": "Browse lures",

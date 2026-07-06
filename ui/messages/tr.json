@@ -128,6 +128,14 @@
     },
     "missingSection": "Bu bölüm geçici olarak kullanılamıyor."
   },
+  "Taxonomy": {
+    "sectionTitle": "Adlar ve taksonomi",
+    "aliases": "Diğer adlar",
+    "regional": "Bölgesel adlar",
+    "confusedWith": "Sık karıştırılan türler",
+    "searchTitle": "Balık türleri",
+    "disambiguation": "Not: Bu ad için doğru tür {correct}."
+  },
   "Lures": {
     "meta": {
       "title": "Yemlere göz at",

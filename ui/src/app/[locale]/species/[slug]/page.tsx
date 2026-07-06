@@ -5,6 +5,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AppMain } from "@/components/layout/app-shell";
 import { getSpeciesDetailResult } from "@/modules/discovery/data/species";
 import { SpeciesDetailView } from "@/modules/discovery/components/species-detail-view";
+import {
+  ensureTaxonomyReferenceSeeds,
+  getSpeciesTaxonomyProfile,
+} from "@/modules/taxonomy";
 import { UnavailablePage } from "@/modules/stability/components/unavailable-page";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { pickLocalized } from "@/modules/home/data/home-content";
@@ -52,6 +56,8 @@ export default async function SpeciesDetailPage({
 
   setRequestLocale(locale);
 
+  await ensureTaxonomyReferenceSeeds();
+
   const result = await getSpeciesDetailResult(slug);
 
   if (result.status === "not_found") {
@@ -74,9 +80,15 @@ export default async function SpeciesDetailPage({
     );
   }
 
+  const taxonomy = await getSpeciesTaxonomyProfile(slug);
+
   return (
     <AppMain>
-      <SpeciesDetailView locale={locale as AppLocale} species={result.data} />
+      <SpeciesDetailView
+        locale={locale as AppLocale}
+        species={result.data}
+        taxonomy={taxonomy}
+      />
     </AppMain>
   );
 }

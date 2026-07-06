@@ -5,19 +5,23 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SpeciesTopLuresSection } from "@/modules/catch-report/components/species-top-lures-section";
 import { RelatedKnowledgeSection } from "@/modules/knowledge-pipeline/components/related-knowledge-section";
+import { SpeciesTaxonomySection } from "@/modules/taxonomy/components/species-taxonomy-section";
 import { SafeSection } from "@/modules/stability/components/safe-section";
 import type { SpeciesDetailData } from "@/modules/discovery/types";
+import type { SpeciesTaxonomyProfile } from "@/modules/taxonomy/types";
 import type { AppLocale } from "@/i18n/routing";
 import { pickLocalized } from "@/modules/home/data/home-content";
 
 type SpeciesDetailViewProps = {
   locale: AppLocale;
   species: SpeciesDetailData;
+  taxonomy?: SpeciesTaxonomyProfile | null;
 };
 
 export async function SpeciesDetailView({
   locale,
   species,
+  taxonomy,
 }: SpeciesDetailViewProps) {
   const t = await getTranslations("Species");
   const name = pickLocalized(species.name, locale);
@@ -60,6 +64,10 @@ export async function SpeciesDetailView({
             {t("viewAllLures")}
           </Link>
         </div>
+
+        {taxonomy ? (
+          <SpeciesTaxonomySection locale={locale} taxonomy={taxonomy} />
+        ) : null}
 
         <SafeSection
           page="/[locale]/species/[slug]"

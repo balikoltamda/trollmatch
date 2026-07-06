@@ -1,8 +1,8 @@
 # Balık Oltamda Fishing Lexicon — Taxonomy Policy
 
 **Document:** `docs/fishing/TAXONOMY_POLICY.md`  
-**Status:** Authoritative reference (Sprint 7.2)  
-**Scope:** Fish species naming — relationship between scientific, regional, and common names
+**Status:** Authoritative reference (Sprint 7.2, refined 7.4.1)  
+**Scope:** Fish species naming — scientific, preferred, aliases, regional, confusion
 
 ---
 
@@ -10,156 +10,163 @@
 
 **Scientific taxonomy is always canonical.**
 
+Do **not** rely on internet consensus. Do **not** use search popularity as truth.
+
 Regional common names must **never** replace scientific taxonomy in the data model, APIs, or species identity.
 
 ```
 CANONICAL IDENTITY          DISPLAY / SEARCH LAYER
 ──────────────────          ──────────────────────
-FishSpecies.slug            preferred name (tr/en)
-scientificName              regional aliases
-parent hierarchy            community slang (search only)
+FishSpecies.slug            preferred Turkish / English name
+scientificName              aliases (same species)
+parent hierarchy            regional names (country/region scope)
+                            frequently confused species (separate relation)
+                            editorial notes
 ```
 
-A fish is **one** `FishSpecies` record. It has exactly one scientific name. It may have many regional names — all subordinate to the scientific identity.
+A fish is **one** `FishSpecies` record. It has exactly one scientific name. It may have many regional names and aliases — all subordinate to the scientific identity.
 
 ---
 
-## 2. Hierarchy of names
+## 2. Required fields per species
 
-| Layer | Authority | Example (European seabass) |
-|-------|-----------|----------------------------|
-| **Scientific** | Canonical identity | *Dicentrarchus labrax* |
-| **Platform preferred** | Lexicon / `FishSpecies.nameEn/Tr` | European seabass · Levrek |
-| **Regional common** | `SpeciesCommonName`, `regionalTerms` | Levrek (TR), Levrek (CY), Lubina (ES) |
-| **Search aliases** | `SpeciesAlias` | lüfer ≠ seabass — different species |
-| **Deprecated** | Must not be primary label | — |
+Every fish species record must support:
+
+| Field | Storage | Rule |
+|-------|---------|------|
+| **Scientific name** | `FishSpecies.scientificName` + `SpeciesScientificName` | Canonical identity — always wins |
+| **Preferred Turkish name** | `FishSpecies.nameTr` | Angler-natural TR label — Fishing Lexicon aligned |
+| **English name** | `FishSpecies.nameEn` | Internationally accepted fishing terminology |
+| **Other common names** | `SpeciesAlias` (kind `SYNONYM`, `SEARCH_TERM`) | Same species only — never cross-species |
+| **Regional names** | `SpeciesCommonName` + `SpeciesAlias` (`REGIONAL_NAME`) | Country / major region scope only |
+| **Frequently confused species** | `SpeciesConfusion` | Different species — **not** aliases |
+| **Editorial notes** | `FishSpecies.editorialNotesEn/Tr` | Taxonomy guidance for editors and UI |
 
 ---
 
-## 3. Rules
+## 3. Regional names — country and major region only
 
-### 3.1 Scientific name
+**Do NOT model regional names per city.** City-level naming is impossible to maintain.
 
-- Stored on `FishSpecies.scientificName`
-- Used in species detail headings (italic presentation)
-- Used in AI citations and trust evidence
-- **Never** overwritten by regional import text
-- Changes require taxonomic review — not importer automation
+Regional names are stored only at:
 
-### 3.2 Regional names
+| Scope | Examples |
+|-------|----------|
+| Country | `TR`, `GR`, `IT`, `ES` |
+| Major region | `KKTC`, `global` |
+| **Forbidden** | Istanbul, Izmir, Bodrum, Athens, … |
 
-- Stored in `SpeciesCommonName` and `SpeciesAlias` (kind `REGIONAL_NAME`)
-- Scoped by `locale` and `countryScope` (`TR`, `CY`, `global`, …)
-- Valid for **display** and **search** in that region
-- **Invalid** as the sole identity key — two regions saying "levrek" must still resolve to one species id
+`countryScope` on `SpeciesCommonName` and `SpeciesAlias` enforces this boundary.
 
-### 3.3 Regional names never replace scientific taxonomy
+---
+
+## 4. Aliases vs frequently confused species
+
+### 4.1 Aliases
+
+Aliases are names commonly used for the **same** species. They never replace canonical taxonomy.
+
+**Example — *Lichia amia***
+
+| Layer | Value |
+|-------|-------|
+| Scientific | *Lichia amia* |
+| Preferred Turkish | Akya |
+| English | Leerfish |
+| Aliases | Liça, Litsa, Çatal Kuyruk, Çıplak |
+| Regional (KKTC) | Litsa |
+
+### 4.2 Frequently confused species
+
+Different species that anglers confuse must **not** become aliases. Use `SpeciesConfusion` instead.
+
+**Example**
+
+| Species | Relation |
+|---------|----------|
+| *Lichia amia* (Akya) | Frequently confused with *Seriola dumerili* |
+| Reason | Some regions incorrectly use "Akya" for *Seriola dumerili* |
+
+**Example — *Seriola dumerili***
+
+| Layer | Value |
+|-------|-------|
+| Scientific | *Seriola dumerili* |
+| Preferred Turkish | Kuzu |
+| English | Greater amberjack |
+| Regional (KKTC) | Mineri |
+| Alias | Sarı Kuyruk |
+| **Do NOT** | Use "Akya" as alias — document only in confusion explanation |
+
+---
+
+## 5. Search behaviour
+
+Search matches:
+
+- Scientific names
+- Preferred Turkish and English names
+- Aliases
+- Regional names
+- Misapplied names on confusion records (with disambiguation)
+
+When a confused or misapplied name is searched:
+
+1. Show the **correct** species for that name (preferred match)
+2. If the query matches a misapplied confusion label, show the confused species **with explicit reason**
+3. Never silently merge two species because names overlap
+
+Module: `ui/src/modules/taxonomy/data/species-search.ts`
+
+---
+
+## 6. Localization
+
+- Do **not** translate names literally
+- English names use internationally accepted fishing terminology
+- Turkish names follow the Fishing Lexicon (`TERMINOLOGY.md`)
+- Regional names inform search and display — they do not override `nameTr` / `nameEn` without editorial action
+
+---
+
+## 7. Rules summary
 
 | Allowed | Forbidden |
 |---------|-----------|
-| Show "Levrek" as Turkish preferred common name for *D. labrax* | Create separate species record per regional name |
-| Search "lüfer" → bluefish (*Pomatomus saltatrix*) | Merge levrek and lüfer because both are "popular fish" |
-| Note in editorial copy: "called levrek in the Aegean" | Store scientific name as optional metadata |
-
-### 3.4 Homonyms and false friends
-
-Turkish and English regional names can collide across species:
-
-| Name | Species A | Species B |
-|------|-----------|-----------|
-| Bluefish context | *Pomatomus saltatrix* (lüfer) | — |
-| Seabass context | *Dicentrarchus labrax* (levrek) | — |
-
-Disambiguation:
-
-1. Scientific name in trust/species UI when homonym risk exists
-2. Habitat/region context in species page copy
-3. Search ranks by curated species links + lexicon — not raw string match alone
+| Show "Akya" as Turkish preferred for *Lichia amia* | Create separate species per regional name |
+| Store KKTC regional "Litsa" on *Lichia amia* | City-level regional names |
+| `SpeciesConfusion` between *Lichia* and *Seriola* | Add "Akya" as alias on *Seriola* |
+| Search disambiguation with editorial reason | Internet popularity as truth source |
+| Change scientific assignment via taxonomic review | Importer auto-overwrites scientific name |
 
 ---
 
-## 4. Relationship to Fishing Lexicon
+## 8. Schema reference
 
-| System | Scope |
-|--------|-------|
-| **Fishing Lexicon** (`terminology` module) | Tackle, rigging, technique, measurement vocabulary |
-| **Fish taxonomy** (`FishSpecies` schema) | Biological species identity |
+| Model | Purpose |
+|-------|---------|
+| `FishSpecies` | Core record + preferred names + editorial notes |
+| `SpeciesScientificName` | Canonical Latin name (1:1) |
+| `SpeciesCommonName` | Locale + countryScope regional names |
+| `SpeciesAlias` | Search synonyms, misspellings, regional slang |
+| `SpeciesConfusion` | Cross-species confusion with reason + misapplied name |
 
-Species **display names** will eventually align with lexicon patterns (`preferred`, `aliases`, `deprecated`, `regional`, `scientific`, `notes`) but species identity remains in `fish_species` tables — not merged into tackle lexicon.
+Migration: `ui/prisma/migrations/20250706200000_taxonomy_refinement/`
 
-Cross-links:
+Module: `ui/src/modules/taxonomy/`
 
-- Lure → species associations reference `FishSpecies.id`
-- Lexicon term domain `species` is for **vocabulary** (e.g. "target species", "bycatch") — not species records themselves
-
----
-
-## 5. Importer behavior (current and future)
-
-When manufacturer or community text mentions a fish:
-
-1. Match against `SpeciesAlias` + `SpeciesCommonName` for locale/region
-2. Resolve to `FishSpecies.id`
-3. If no match → suggestion with confidence — never auto-create species from regional name alone
-4. Scientific name from import is **evidence**, not override — editor confirms
+Seed reference: `ensureTaxonomyReferenceSeeds()` — *Lichia amia* / *Seriola dumerili* exemplar pair.
 
 ---
 
-## 6. Public UI behavior (future)
-
-Species pages (`/species/[slug]`):
-
-- **H1:** preferred common name for locale
-- **Subtitle:** scientific name (always visible)
-- **Regional variants:** shown as "Also known as …" when scoped to user's region
-- **Never:** hide scientific name to simplify for local audience
-
-Fish pages and lure species links use `FishSpecies.slug` — stable URL identity tied to taxonomy.
-
----
-
-## 7. AI and trust
-
-AI summaries and trust evidence must:
-
-- Cite scientific name when stating species compatibility
-- Use regional names only with region scope explicit
-- Never claim two species are the same because regional names overlap
-
----
-
-## 8. Eastern Mediterranean default lens
-
-Platform default region: **Aegean & Eastern Mediterranean** (Türkiye, Northern Cyprus).
-
-- Turkish preferred common names reflect TR/CY angler usage
-- Scientific names remain global canonical
-- Regional names from other countries (Greece, Italy, …) are aliases — not preferred tr labels unless editorially adopted for that locale
-
----
-
-## 9. Editorial workflow
-
-| Action | Who |
-|--------|-----|
-| Add regional alias | Editor + evidence |
-| Change preferred common name | Senior editor |
-| Change scientific name assignment | Taxonomic review |
-| Deprecate misleading regional name | Editor with documented reason |
-
-Studio species reference (`/studio/species`) remains taxonomy tooling — lexicon docs govern **how names are used**, schema governs **what exists**.
-
----
-
-## 10. Related documents
+## 9. Related documents
 
 | Document | Role |
 |----------|------|
-| `TERMINOLOGY.md` | Tackle and rigging terms |
-| `LOCALIZATION_GUIDE.md` | tr/en authoring rules |
-| `docs/domain/LURE_DOMAIN_MODEL.md` | Lure–species associations |
-| `ui/prisma/schema.prisma` | `FishSpecies`, `SpeciesAlias`, `SpeciesCommonName` |
+| `TERMINOLOGY.md` | Tackle vocabulary + species naming rules |
+| `LOCALIZATION_GUIDE.md` | tr/en authoring |
+| `docs/010_ANGLER_PRODUCT.md` | Sprint delivery record |
 
 ---
 
-*Regional names inform anglers. Scientific taxonomy identifies fish. The platform never confuses the two.*
+*Scientific taxonomy identifies fish. Regional names help anglers search. Confusion is documented — never aliased.*

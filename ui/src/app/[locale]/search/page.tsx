@@ -7,6 +7,8 @@ import { listPublicLures } from "@/modules/discovery/data/browse-lures";
 import { LureResultsView } from "@/modules/discovery/components/lure-results-view";
 import { KnowledgeSearchResults } from "@/modules/knowledge-pipeline/components/knowledge-search-results";
 import { searchPublicKnowledge } from "@/modules/knowledge-pipeline/data/public-knowledge";
+import { SpeciesSearchResults } from "@/modules/taxonomy/components/species-search-results";
+import { searchSpeciesByTaxonomy } from "@/modules/taxonomy/data/species-search";
 import { routing, type AppLocale } from "@/i18n/routing";
 
 export const dynamic = "force-dynamic";
@@ -50,13 +52,14 @@ export default async function SearchPage({
   setRequestLocale(locale);
 
   const pageNum = Math.max(1, Number(page) || 1);
-  const [result, knowledgeResult] = await Promise.all([
+  const [result, knowledgeResult, speciesResult] = await Promise.all([
     listPublicLures({
       q: q ?? null,
       species: species ?? null,
       page: pageNum,
     }),
     searchPublicKnowledge({ q: q ?? null, page: pageNum }),
+    searchSpeciesByTaxonomy(q ?? ""),
   ]);
 
   const t = await getTranslations("Discovery");
@@ -73,6 +76,10 @@ export default async function SearchPage({
 
   return (
     <AppMain>
+      <SpeciesSearchResults
+        locale={locale as AppLocale}
+        result={speciesResult}
+      />
       <KnowledgeSearchResults
         locale={locale as AppLocale}
         result={knowledgeResult}

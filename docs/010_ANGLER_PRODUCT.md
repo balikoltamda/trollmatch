@@ -153,6 +153,29 @@ See `docs/013_KNOWLEDGE_PIPELINE.md` for full architecture.
 
 ---
 
+## Sprint 7.4.1 — Taxonomy & Naming Standard (shipped)
+
+**Goal:** Lock scientific taxonomy as canonical truth; separate aliases from confused species.
+
+### Delivered
+
+| Area | Feature |
+|------|---------|
+| **Schema** | `SpeciesConfusion`, `editorialNotes` on `FishSpecies` |
+| **Module** | `ui/src/modules/taxonomy/` — search, profile, reference seeds |
+| **Search** | Species matches + disambiguation for misapplied names |
+| **Species pages** | Taxonomy section — aliases, regional names, confusions |
+| **Docs** | `TAXONOMY_POLICY.md`, `TERMINOLOGY.md` updated |
+| **Reference** | *Lichia amia* (Akya) ↔ *Seriola dumerili* (Kuzu) exemplar |
+
+### Rules locked
+
+- No city-level regional names
+- Scientific taxonomy always wins
+- Confused species ≠ aliases
+
+---
+
 ## Sprint 7.5 — Knowledge Hub & Source Intelligence (shipped)
 
 **Goal:** Central hub for verified fishing knowledge — indexed, connected, never mirrored.

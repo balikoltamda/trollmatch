@@ -434,6 +434,9 @@ model FishSpecies {
   scientificName  String    @map("scientific_name") @db.VarChar(256)
   nameEn          String    @map("name_en") @db.VarChar(256)
   nameTr          String    @map("name_tr") @db.VarChar(256)
+  /// Editorial taxonomy notes — not shown as primary label.
+  editorialNotesEn String?  @map("editorial_notes_en") @db.Text
+  editorialNotesTr String?  @map("editorial_notes_tr") @db.Text
   parentId        String?   @map("parent_id") @db.Uuid
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -445,6 +448,8 @@ model FishSpecies {
   scientificNameRecord SpeciesScientificName?
   commonNames     SpeciesCommonName[]
   aliases         SpeciesAlias[]
+  confusions      SpeciesConfusion[] @relation("SpeciesConfusionPrimary")
+  confusedBy      SpeciesConfusion[] @relation("SpeciesConfusionTarget")
   catchReports    CatchReport[]
   knowledgeItems  KnowledgeItem[]
 
@@ -664,6 +669,30 @@ model SpeciesAlias {
   @@index([kind])
   @@index([deletedAt])
   @@map("species_aliases")
+}
+
+/// Frequently confused species — NOT aliases. Different species anglers mix up.
+model SpeciesConfusion {
+  id                    String    @id @default(uuid()) @db.Uuid
+  fishSpeciesId         String    @map("fish_species_id") @db.Uuid
+  confusedWithSpeciesId String    @map("confused_with_species_id") @db.Uuid
+  /// Name wrongly applied to confusedWith species (search disambiguation only).
+  misappliedNameEn      String?   @map("misapplied_name_en") @db.VarChar(256)
+  misappliedNameTr      String?   @map("misapplied_name_tr") @db.VarChar(256)
+  reasonEn              String    @map("reason_en") @db.Text
+  reasonTr              String    @map("reason_tr") @db.Text
+  /// Country or major region scope: TR, KKTC, GR, IT, ES, global — never city-level.
+  countryScope          String    @default("global") @map("country_scope") @db.VarChar(8)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  fishSpecies         FishSpecies @relation("SpeciesConfusionPrimary", fields: [fishSpeciesId], references: [id], onDelete: Cascade)
+  confusedWithSpecies FishSpecies @relation("SpeciesConfusionTarget", fields: [confusedWithSpeciesId], references: [id], onDelete: Cascade)
+
+  @@unique([fishSpeciesId, confusedWithSpeciesId, countryScope])
+  @@index([fishSpeciesId])
+  @@index([confusedWithSpeciesId])
+  @@map("species_confusions")
 }
 
 // ---------------------------------------------------------------------------
