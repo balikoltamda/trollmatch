@@ -109,7 +109,30 @@ UI · Search · AI summaries · Importers · Studio · Public pages · APIs
 
 ---
 
-## Sprint 7.4 — Regional experience (next)
+## Sprint 7.4 — Knowledge Acquisition Pipeline (shipped)
+
+**Goal:** Platform learns from trustworthy sources without depending on voluntary user submissions.
+
+### Delivered
+
+| Area | Feature |
+|------|---------|
+| **Schema** | `KnowledgeSource`, `KnowledgeItem`, `KnowledgeEvidence`, `KnowledgeSuggestion`, `KnowledgeGraphLink`, `KnowledgeAuditEntry` |
+| **Studio** | `/studio/knowledge` — editor inbox sorted by confidence |
+| **Actions** | Approve, reject, merge, ignore, open source (all audited) |
+| **Architecture** | Vision pipeline interfaces, knowledge graph prep, multi-source type design |
+
+### Not in scope
+
+- Crawlers, scrapers, external APIs
+- AI summarization or vision implementation
+- Facebook / Instagram sources
+
+See `docs/013_KNOWLEDGE_PIPELINE.md` for full architecture.
+
+---
+
+## Sprint 7.5 — Regional experience (next)
 
 **Goal:** Every lure page answers “how does this work *here*?”
 
@@ -120,7 +143,7 @@ UI · Search · AI summaries · Importers · Studio · Public pages · APIs
 
 ---
 
-## Sprint 7.5 — AI summaries (angler-facing)
+## Sprint 7.6 — AI summaries (angler-facing)
 
 **Goal:** “At a glance” blocks with real cited sources — not empty shells.
 

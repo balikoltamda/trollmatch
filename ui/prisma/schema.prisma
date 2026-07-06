@@ -132,6 +132,80 @@ enum BoatOrShore {
   @@map("boat_or_shore")
 }
 
+/// Knowledge acquisition source type (Sprint 7.4 — no crawlers yet).
+enum KnowledgeSourceType {
+  MANUFACTURER
+  COMMUNITY
+  YOUTUBE
+  FISHING_FORUM
+  PUBLIC_ARTICLE
+  SCIENTIFIC_PUBLICATION
+  OTHER
+
+  @@map("knowledge_source_type")
+}
+
+/// Lifecycle of a discovered knowledge item in the editorial inbox.
+enum KnowledgeItemStatus {
+  DISCOVERED
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  MERGED
+  IGNORED
+  DUPLICATE
+
+  @@map("knowledge_item_status")
+}
+
+enum KnowledgeEditorDecision {
+  NONE
+  APPROVED
+  REJECTED
+  MERGED
+  IGNORED
+
+  @@map("knowledge_editor_decision")
+}
+
+enum KnowledgeConfidence {
+  LOW
+  MEDIUM
+  HIGH
+
+  @@map("knowledge_confidence")
+}
+
+enum KnowledgeAuditAction {
+  APPROVE
+  REJECT
+  MERGE
+  IGNORE
+  OPEN_SOURCE
+
+  @@map("knowledge_audit_action")
+}
+
+enum KnowledgeGraphEntityType {
+  SPECIES
+  LURE_MODEL
+  MANUFACTURER
+  TECHNIQUE
+  KNOWLEDGE_ITEM
+
+  @@map("knowledge_graph_entity_type")
+}
+
+enum KnowledgeGraphRelationKind {
+  MENTIONS
+  SUPPORTS
+  CONFLICTS_WITH
+  DUPLICATE_OF
+  RELATED_TO
+
+  @@map("knowledge_graph_relation_kind")
+}
+
 /// Provenance of a catalog suggestion awaiting editorial verification.
 enum SuggestionSource {
   IMPORTER
@@ -198,6 +272,7 @@ model Manufacturer {
   productAliases ProductAlias[]
   colorAliases  ColorAlias[]
   importBatches ImportBatch[]
+  knowledgeItems KnowledgeItem[]
 
   @@index([deletedAt])
   @@map("manufacturers")
@@ -279,6 +354,7 @@ model LureModel {
   auditEntries        CatalogAuditEntry[]
   importFieldChanges  ImportFieldChange[]
   catalogSuggestions  CatalogSuggestion[]
+  knowledgeItems      KnowledgeItem[]
 
   @@index([manufacturerId])
   @@index([productLineId])
@@ -362,6 +438,7 @@ model FishSpecies {
   commonNames     SpeciesCommonName[]
   aliases         SpeciesAlias[]
   catchReports    CatchReport[]
+  knowledgeItems  KnowledgeItem[]
 
   @@index([parentId])
   @@index([deletedAt])
@@ -383,6 +460,7 @@ model Technique {
   children       Technique[]     @relation("TechniqueHierarchy")
   lureTechniques LureTechnique[]
   catchReports   CatchReport[]
+  knowledgeItems KnowledgeItem[]
 
   @@index([parentId])
   @@index([deletedAt])
@@ -772,4 +850,149 @@ model CatchReport {
   @@index([lureVariantId, verificationStatus])
   @@index([mergedIntoId])
   @@map("catch_reports")
+}
+
+// ---------------------------------------------------------------------------
+// Knowledge Pipeline (Sprint 7.4 — acquisition architecture, no crawlers)
+// ---------------------------------------------------------------------------
+
+/// Registry of trustworthy knowledge sources — manufacturers, forums, publications, etc.
+model KnowledgeSource {
+  id         String              @id @default(uuid()) @db.Uuid
+  slug       String              @unique @db.VarChar(128)
+  sourceType KnowledgeSourceType @map("source_type")
+  nameEn     String              @map("name_en") @db.VarChar(256)
+  nameTr     String              @map("name_tr") @db.VarChar(256)
+  baseUrl    String?             @map("base_url") @db.VarChar(1024)
+  /// Editorial trust tier 1 (lowest) – 5 (highest).
+  trustTier  Int                 @default(3) @map("trust_tier")
+  active     Boolean             @default(true)
+  createdAt  DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  items KnowledgeItem[]
+
+  @@index([sourceType])
+  @@index([active])
+  @@map("knowledge_sources")
+}
+
+/// Discovered knowledge awaiting editorial verification.
+model KnowledgeItem {
+  id                String                  @id @default(uuid()) @db.Uuid
+  knowledgeSourceId String                  @map("knowledge_source_id") @db.Uuid
+  externalKey       String?                 @map("external_key") @db.VarChar(256)
+  url               String                  @db.VarChar(2048)
+  titleEn           String?                 @map("title_en") @db.VarChar(512)
+  titleTr           String?                 @map("title_tr") @db.VarChar(512)
+  rawSnippetEn      String?                 @map("raw_snippet_en") @db.Text
+  rawSnippetTr      String?                 @map("raw_snippet_tr") @db.Text
+  discoveredAt      DateTime                @map("discovered_at") @db.Timestamptz(6)
+  confidence        KnowledgeConfidence     @default(MEDIUM)
+  status            KnowledgeItemStatus     @default(PENDING_REVIEW)
+  editorDecision    KnowledgeEditorDecision @default(NONE) @map("editor_decision")
+  /// Reserved for future AI summarization — null in Sprint 7.4.
+  aiSummaryEn       String?                 @map("ai_summary_en") @db.Text
+  aiSummaryTr       String?                 @map("ai_summary_tr") @db.Text
+  country           String?                 @db.Char(2)
+  region            String?                 @db.VarChar(128)
+  fishSpeciesId     String?                 @map("fish_species_id") @db.Uuid
+  lureModelId       String?                 @map("lure_model_id") @db.Uuid
+  techniqueId       String?                 @map("technique_id") @db.Uuid
+  manufacturerId    String?                 @map("manufacturer_id") @db.Uuid
+  mergedIntoId      String?                 @map("merged_into_id") @db.Uuid
+  reviewedAt        DateTime?               @map("reviewed_at") @db.Timestamptz(6)
+  reviewedBy        String?                 @map("reviewed_by") @db.VarChar(128)
+  createdAt         DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  source       KnowledgeSource       @relation(fields: [knowledgeSourceId], references: [id], onDelete: Restrict)
+  fishSpecies  FishSpecies?          @relation(fields: [fishSpeciesId], references: [id], onDelete: SetNull)
+  lureModel    LureModel?            @relation(fields: [lureModelId], references: [id], onDelete: SetNull)
+  technique    Technique?            @relation(fields: [techniqueId], references: [id], onDelete: SetNull)
+  manufacturer Manufacturer?       @relation(fields: [manufacturerId], references: [id], onDelete: SetNull)
+  mergedInto   KnowledgeItem?        @relation("KnowledgeItemMerge", fields: [mergedIntoId], references: [id], onDelete: SetNull)
+  mergedFrom   KnowledgeItem[]       @relation("KnowledgeItemMerge")
+  evidence     KnowledgeEvidence[]
+  suggestions  KnowledgeSuggestion[]
+  graphLinks   KnowledgeGraphLink[]
+  auditEntries KnowledgeAuditEntry[]
+
+  @@index([status, confidence, discoveredAt(sort: Desc)])
+  @@index([knowledgeSourceId])
+  @@index([fishSpeciesId])
+  @@index([lureModelId])
+  @@index([mergedIntoId])
+  @@map("knowledge_items")
+}
+
+/// Supporting evidence excerpt for a knowledge item.
+model KnowledgeEvidence {
+  id              String               @id @default(uuid()) @db.Uuid
+  knowledgeItemId String               @map("knowledge_item_id") @db.Uuid
+  label           String               @db.VarChar(256)
+  excerptEn       String               @map("excerpt_en") @db.Text
+  excerptTr       String?              @map("excerpt_tr") @db.Text
+  sourceUrl       String?              @map("source_url") @db.VarChar(2048)
+  confidence      KnowledgeConfidence?
+  sortOrder       Int                  @default(0) @map("sort_order")
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  knowledgeItem KnowledgeItem @relation(fields: [knowledgeItemId], references: [id], onDelete: Cascade)
+
+  @@index([knowledgeItemId])
+  @@map("knowledge_evidence")
+}
+
+/// Editorial suggestion derived from a knowledge item (catalog impact).
+model KnowledgeSuggestion {
+  id               String              @id @default(uuid()) @db.Uuid
+  knowledgeItemId  String              @map("knowledge_item_id") @db.Uuid
+  kind             String              @db.VarChar(64)
+  proposedValueEn  String?             @map("proposed_value_en") @db.Text
+  proposedValueTr  String?             @map("proposed_value_tr") @db.Text
+  targetEntityType String?             @map("target_entity_type") @db.VarChar(64)
+  targetEntityId   String?             @map("target_entity_id") @db.Uuid
+  status           KnowledgeItemStatus @default(PENDING_REVIEW)
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  knowledgeItem KnowledgeItem @relation(fields: [knowledgeItemId], references: [id], onDelete: Cascade)
+
+  @@index([knowledgeItemId])
+  @@index([status])
+  @@map("knowledge_suggestions")
+}
+
+/// Knowledge graph edge — preparation for future AI reasoning.
+model KnowledgeGraphLink {
+  id              String                     @id @default(uuid()) @db.Uuid
+  knowledgeItemId String                     @map("knowledge_item_id") @db.Uuid
+  entityType      KnowledgeGraphEntityType   @map("entity_type")
+  entityId        String                     @map("entity_id") @db.Uuid
+  relationKind    KnowledgeGraphRelationKind @map("relation_kind")
+  weight          Decimal?                   @db.Decimal(4, 3)
+  createdAt       DateTime                   @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  knowledgeItem KnowledgeItem @relation(fields: [knowledgeItemId], references: [id], onDelete: Cascade)
+
+  @@index([knowledgeItemId])
+  @@index([entityType, entityId])
+  @@map("knowledge_graph_links")
+}
+
+/// Append-only audit log for knowledge inbox editorial actions.
+model KnowledgeAuditEntry {
+  id              String               @id @default(uuid()) @db.Uuid
+  knowledgeItemId String?              @map("knowledge_item_id") @db.Uuid
+  action          KnowledgeAuditAction
+  actor           String               @default("local-admin") @db.VarChar(128)
+  summary         String               @db.VarChar(512)
+  metadata        Json?
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  knowledgeItem KnowledgeItem? @relation(fields: [knowledgeItemId], references: [id], onDelete: SetNull)
+
+  @@index([knowledgeItemId, createdAt(sort: Desc)])
+  @@index([action])
+  @@map("knowledge_audit_entries")
 }
