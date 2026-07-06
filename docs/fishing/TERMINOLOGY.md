@@ -308,7 +308,8 @@ leader (Leader / Leader)
 |----------|------|
 | `LOCALIZATION_GUIDE.md` | How tr/en labels are authored |
 | `TAXONOMY_POLICY.md` | Scientific vs regional names for species |
-| `docs/010_ANGLER_PRODUCT.md` | Sprint 7.2 delivery record |
+| `SPECIES_TECHNIQUE_LURE_POLICY.md` | Species → Technique → Lure relationship law |
+| `docs/010_ANGLER_PRODUCT.md` | Sprint delivery record |
 
 ---
 

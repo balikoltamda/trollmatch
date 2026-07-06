@@ -1,4 +1,4 @@
-import type { SpeciesTopLureFromReports } from "@/modules/catch-report/types";
+import type { SpeciesTechniqueLureGroup } from "@/modules/catch-report/types";
 
 export type LocalizedPair = { en: string; tr: string };
 
@@ -24,7 +24,7 @@ export type SpeciesDetailData = {
   scientificName: string;
   lureCount: number;
   lures: LureCardData[];
-  topLuresFromReports: SpeciesTopLureFromReports[];
+  topLuresByTechnique: SpeciesTechniqueLureGroup[];
 };
 
 export type PublicLureListResult = {

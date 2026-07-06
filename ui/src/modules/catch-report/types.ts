@@ -67,10 +67,19 @@ export type SpeciesTopLureFromReports = {
   totalCatches: number;
 };
 
+/** Approved catch reports aggregated per technique — Species → Technique → Lure. */
+export type SpeciesTechniqueLureGroup = {
+  technique: {
+    slug: string;
+    name: { en: string; tr: string };
+  };
+  lures: SpeciesTopLureFromReports[];
+};
+
 export type SubmitCatchReportInput = {
   fishSpeciesId: string;
   lureVariantId: string;
-  techniqueId?: string | null;
+  techniqueId: string;
   country: string;
   region: string;
   location?: string | null;

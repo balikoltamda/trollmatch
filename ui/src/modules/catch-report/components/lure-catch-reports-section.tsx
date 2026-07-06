@@ -90,6 +90,7 @@ export async function LureCatchReportsSection({
               title: t("form.title"),
               species: t("form.species"),
               variant: t("form.variant"),
+              technique: t("form.technique"),
               region: t("form.region"),
               when: t("form.when"),
               boat: t("form.boat"),

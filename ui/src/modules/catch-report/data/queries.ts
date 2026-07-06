@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import { PUBLIC_LURE_WHERE } from "@/modules/discovery/lib/public-visibility";
+import {
+  isPubliclyVisibleLifecycle,
+  PUBLIC_LURE_WHERE,
+} from "@/modules/discovery/lib/public-visibility";
 import type {
   CatchReportFormContext,
+  SpeciesTechniqueLureGroup,
   SpeciesTopLureFromReports,
 } from "@/modules/catch-report/types";
 
@@ -44,6 +48,25 @@ export async function getCatchReportFormContext(
       return null;
     }
 
+    let techniques = model.lureTechniques.map((link) => ({
+      id: link.technique.id,
+      slug: link.technique.slug,
+      name: { en: link.technique.nameEn, tr: link.technique.nameTr },
+    }));
+
+    if (techniques.length === 0) {
+      const allTechniques = await prisma.technique.findMany({
+        where: { deletedAt: null },
+        orderBy: { nameEn: "asc" },
+        select: { id: true, slug: true, nameEn: true, nameTr: true },
+      });
+      techniques = allTechniques.map((t) => ({
+        id: t.id,
+        slug: t.slug,
+        name: { en: t.nameEn, tr: t.nameTr },
+      }));
+    }
+
     return {
       lureModelId: model.id,
       lureSlug: model.slug,
@@ -57,21 +80,17 @@ export async function getCatchReportFormContext(
         slug: v.slug,
         label: { en: v.labelEn, tr: v.labelTr },
       })),
-      techniques: model.lureTechniques.map((link) => ({
-        id: link.technique.id,
-        slug: link.technique.slug,
-        name: { en: link.technique.nameEn, tr: link.technique.nameTr },
-      })),
+      techniques,
     };
   } catch {
     return null;
   }
 }
 
-export async function getTopLuresForSpeciesFromReports(
+export async function getTopLuresByTechniqueForSpeciesFromReports(
   speciesSlug: string,
-  limit = 8,
-): Promise<SpeciesTopLureFromReports[]> {
+  limitPerTechnique = 4,
+): Promise<SpeciesTechniqueLureGroup[]> {
   try {
     const species = await prisma.fishSpecies.findFirst({
       where: { slug: speciesSlug, deletedAt: null },
@@ -82,92 +101,155 @@ export async function getTopLuresForSpeciesFromReports(
       return [];
     }
 
-    const groups = await prisma.catchReport.groupBy({
-      by: ["lureVariantId"],
+    const reports = await prisma.catchReport.findMany({
       where: {
         fishSpeciesId: species.id,
         verificationStatus: "APPROVED",
         mergedIntoId: null,
-      },
-      _count: { _all: true },
-      _sum: { catchCount: true },
-      orderBy: { _count: { lureVariantId: "desc" } },
-      take: limit * 2,
-    });
-
-    if (groups.length === 0) {
-      return [];
-    }
-
-    const variantIds = groups.map((g) => g.lureVariantId);
-    const variants = await prisma.lureVariant.findMany({
-      where: {
-        id: { in: variantIds },
-        deletedAt: null,
-        lureModel: PUBLIC_LURE_WHERE,
+        techniqueId: { not: null },
       },
       select: {
-        id: true,
-        lureModel: {
+        lureVariantId: true,
+        catchCount: true,
+        technique: {
+          select: { id: true, slug: true, nameEn: true, nameTr: true },
+        },
+        lureVariant: {
           select: {
-            slug: true,
-            nameEn: true,
-            nameTr: true,
-            bodyTypeEn: true,
-            bodyTypeTr: true,
-            manufacturer: { select: { nameEn: true, nameTr: true } },
-            images: {
-              where: { deletedAt: null },
-              take: 1,
-              orderBy: [{ role: "asc" }, { sortOrder: "asc" }],
-              select: { url: true, role: true },
+            id: true,
+            deletedAt: true,
+            lureModel: {
+              select: {
+                slug: true,
+                nameEn: true,
+                nameTr: true,
+                bodyTypeEn: true,
+                bodyTypeTr: true,
+                deletedAt: true,
+                lifecycleState: true,
+                manufacturer: { select: { nameEn: true, nameTr: true } },
+                images: {
+                  where: { deletedAt: null },
+                  take: 1,
+                  orderBy: [{ role: "asc" }, { sortOrder: "asc" }],
+                  select: { url: true, role: true },
+                },
+              },
             },
           },
         },
       },
     });
 
-    const variantById = new Map(variants.map((v) => [v.id, v]));
+    type BucketKey = string;
+    const buckets = new Map<
+      BucketKey,
+      {
+        technique: { slug: string; name: { en: string; tr: string } };
+        lureVariantId: string;
+        reportCount: number;
+        totalCatches: number;
+        lure: SpeciesTopLureFromReports | null;
+      }
+    >();
 
-    const results: SpeciesTopLureFromReports[] = [];
+    for (const report of reports) {
+      if (!report.technique || !report.lureVariant?.lureModel) continue;
+      const model = report.lureVariant.lureModel;
+      if (model.deletedAt || !isPubliclyVisibleLifecycle(model.lifecycleState)) {
+        continue;
+      }
 
-    for (const group of groups) {
-      const variant = variantById.get(group.lureVariantId);
-      if (!variant) continue;
+      const key = `${report.technique.id}:${report.lureVariantId}`;
+      const existing = buckets.get(key);
+      if (existing) {
+        existing.reportCount += 1;
+        existing.totalCatches += report.catchCount;
+        continue;
+      }
 
       const hero =
-        variant.lureModel.images.find((img) => img.role === "HERO") ??
-        variant.lureModel.images[0];
+        model.images.find((img) => img.role === "HERO") ?? model.images[0];
 
-      results.push({
-        slug: variant.lureModel.slug,
-        manufacturer: {
-          en: variant.lureModel.manufacturer.nameEn,
-          tr: variant.lureModel.manufacturer.nameTr,
+      buckets.set(key, {
+        technique: {
+          slug: report.technique.slug,
+          name: { en: report.technique.nameEn, tr: report.technique.nameTr },
         },
-        modelName: {
-          en: variant.lureModel.nameEn,
-          tr: variant.lureModel.nameTr,
+        lureVariantId: report.lureVariantId,
+        reportCount: 1,
+        totalCatches: report.catchCount,
+        lure: {
+          slug: model.slug,
+          manufacturer: {
+            en: model.manufacturer.nameEn,
+            tr: model.manufacturer.nameTr,
+          },
+          modelName: { en: model.nameEn, tr: model.nameTr },
+          formFactor: {
+            en: model.bodyTypeEn ?? "",
+            tr: model.bodyTypeTr ?? model.bodyTypeEn ?? "",
+          },
+          imageSrc: hero?.url ?? PLACEHOLDER_IMAGE,
+          reportCount: 1,
+          totalCatches: report.catchCount,
         },
-        formFactor: {
-          en: variant.lureModel.bodyTypeEn ?? "",
-          tr: variant.lureModel.bodyTypeTr ?? variant.lureModel.bodyTypeEn ?? "",
-        },
-        imageSrc: hero?.url ?? PLACEHOLDER_IMAGE,
-        reportCount: group._count._all,
-        totalCatches: group._sum.catchCount ?? 0,
       });
-
-      if (results.length >= limit) break;
     }
 
-    return results.sort(
-      (a, b) =>
-        b.reportCount - a.reportCount || b.totalCatches - a.totalCatches,
-    );
+    const byTechnique = new Map<string, SpeciesTechniqueLureGroup>();
+
+    for (const bucket of buckets.values()) {
+      if (!bucket.lure) continue;
+
+      const lureEntry: SpeciesTopLureFromReports = {
+        ...bucket.lure,
+        reportCount: bucket.reportCount,
+        totalCatches: bucket.totalCatches,
+      };
+
+      const group = byTechnique.get(bucket.technique.slug);
+      if (group) {
+        group.lures.push(lureEntry);
+      } else {
+        byTechnique.set(bucket.technique.slug, {
+          technique: bucket.technique,
+          lures: [lureEntry],
+        });
+      }
+    }
+
+    return [...byTechnique.values()]
+      .map((group) => ({
+        ...group,
+        lures: group.lures
+          .sort(
+            (a, b) =>
+              b.reportCount - a.reportCount || b.totalCatches - a.totalCatches,
+          )
+          .slice(0, limitPerTechnique),
+      }))
+      .filter((group) => group.lures.length > 0)
+      .sort(
+        (a, b) =>
+          b.lures.reduce((sum, lure) => sum + lure.reportCount, 0) -
+          a.lures.reduce((sum, lure) => sum + lure.reportCount, 0),
+      );
   } catch {
     return [];
   }
+}
+
+/** @deprecated Use getTopLuresByTechniqueForSpeciesFromReports */
+export async function getTopLuresForSpeciesFromReports(
+  speciesSlug: string,
+  limit = 8,
+): Promise<SpeciesTopLureFromReports[]> {
+  const groups = await getTopLuresByTechniqueForSpeciesFromReports(
+    speciesSlug,
+    limit,
+  );
+  return groups.flatMap((group) => group.lures).slice(0, limit);
 }
 
 export async function listSpeciesForCatchForm(): Promise<

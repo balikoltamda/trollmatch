@@ -26,6 +26,7 @@ type CatchReportQuickFormProps = {
     variant: string;
     region: string;
     when: string;
+    technique: string;
     boat: string;
     shore: string;
     catchCount: string;
@@ -63,6 +64,7 @@ export function CatchReportQuickForm({
 
   const [speciesId, setSpeciesId] = useState(context.species[0]?.id ?? "");
   const [variantId, setVariantId] = useState(defaultVariant?.id ?? "");
+  const [techniqueId, setTechniqueId] = useState(context.techniques[0]?.id ?? "");
   const [region, setRegion] = useState<string>(REGIONS[0].id);
   const [boatOrShore, setBoatOrShore] = useState<"BOAT" | "SHORE">("SHORE");
   const [catchCount, setCatchCount] = useState(1);
@@ -78,6 +80,7 @@ export function CatchReportQuickForm({
       const result = await submitCatchReport({
         fishSpeciesId: speciesId,
         lureVariantId: variantId,
+        techniqueId,
         country: "TR",
         region,
         month: monthYear.month,
@@ -128,6 +131,24 @@ export function CatchReportQuickForm({
             {context.species.map((s) => (
               <option key={s.id} value={s.id}>
                 {pickLocalized(s.name, locale)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block space-y-1.5">
+          <span className="text-muted-foreground text-xs font-medium">
+            {labels.technique}
+          </span>
+          <select
+            value={techniqueId}
+            onChange={(e) => setTechniqueId(e.target.value)}
+            className="border-input bg-background h-10 w-full rounded-md border px-3 text-sm"
+            required
+          >
+            {context.techniques.map((tech) => (
+              <option key={tech.id} value={tech.id}>
+                {pickLocalized(tech.name, locale)}
               </option>
             ))}
           </select>
@@ -224,7 +245,7 @@ export function CatchReportQuickForm({
         <p className="text-destructive text-sm">{error || labels.errorGeneric}</p>
       ) : null}
 
-      <Button type="submit" disabled={pending || !speciesId || !variantId}>
+      <Button type="submit" disabled={pending || !speciesId || !variantId || !techniqueId}>
         {pending ? labels.submitting : labels.submit}
       </Button>
     </form>

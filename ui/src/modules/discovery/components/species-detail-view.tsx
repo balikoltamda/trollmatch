@@ -76,7 +76,7 @@ export async function SpeciesDetailView({
         >
           <SpeciesTopLuresSection
             locale={locale}
-            lures={species.topLuresFromReports}
+            groups={species.topLuresByTechnique}
           />
         </SafeSection>
 
@@ -90,10 +90,13 @@ export async function SpeciesDetailView({
           </SafeSection>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-6 space-y-2">
           <h2 className="text-foreground text-xl font-semibold">
             {t("catalogLuresTitle")}
           </h2>
+          <p className="text-muted-foreground max-w-2xl text-sm">
+            {t("catalogLuresDescription")}
+          </p>
         </div>
 
         {species.lures.length === 0 ? (

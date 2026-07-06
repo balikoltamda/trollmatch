@@ -18,6 +18,9 @@ function validateSubmitInput(
   if (!input.lureVariantId?.trim()) {
     return { ok: false, error: "Lure variant is required" };
   }
+  if (!input.techniqueId?.trim()) {
+    return { ok: false, error: "Fishing technique is required" };
+  }
   if (!input.country?.trim() || input.country.length !== 2) {
     return { ok: false, error: "Country is required" };
   }
@@ -54,11 +57,20 @@ export async function submitCatchReport(
       return { ok: false, error: "Lure not found" };
     }
 
+    const technique = await prisma.technique.findFirst({
+      where: { id: input.techniqueId, deletedAt: null },
+      select: { id: true },
+    });
+
+    if (!technique) {
+      return { ok: false, error: "Fishing technique is required" };
+    }
+
     await prisma.catchReport.create({
       data: {
         fishSpeciesId: input.fishSpeciesId,
         lureVariantId: input.lureVariantId,
-        techniqueId: input.techniqueId || null,
+        techniqueId: input.techniqueId,
         country: input.country.toUpperCase(),
         region: input.region.trim(),
         location: input.location?.trim() || null,

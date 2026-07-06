@@ -178,6 +178,21 @@ See `docs/013_KNOWLEDGE_PIPELINE.md` for full architecture.
 
 ---
 
+## Species → Technique → Lure (platform law)
+
+**Goal:** Never generalize lure recommendations to a species without fishing technique.
+
+### Rules locked
+
+- **Species → Technique → Lure** — not Species → Lure for effectiveness
+- Catch reports require `techniqueId`
+- Species page rankings grouped by technique
+- `LureSpecies` = catalog metadata only — not effectiveness UI
+
+See `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`.
+
+---
+
 ## Sprint 7.5 — Knowledge Hub & Source Intelligence (shipped)
 
 **Goal:** Central hub for verified fishing knowledge — indexed, connected, never mirrored.

@@ -3,7 +3,7 @@ import { logServerError } from "@/lib/log-server-error";
 import { prisma } from "@/lib/prisma";
 import { PUBLIC_LURE_WHERE } from "@/modules/discovery/lib/public-visibility";
 import { listPublicLures } from "@/modules/discovery/data/browse-lures";
-import { getTopLuresForSpeciesFromReports } from "@/modules/catch-report/data/queries";
+import { getTopLuresByTechniqueForSpeciesFromReports } from "@/modules/catch-report/data/queries";
 import type { SpeciesCardData, SpeciesDetailData } from "@/modules/discovery/types";
 
 async function publishedLureCountsBySpecies(): Promise<Map<string, number>> {
@@ -73,9 +73,9 @@ export async function getSpeciesDetailResult(
       return { status: "not_found" };
     }
 
-    const [lureList, topLuresFromReports] = await Promise.all([
+    const [lureList, topLuresByTechnique] = await Promise.all([
       listPublicLures({ species: slug, page: 1, pageSize: 48 }),
-      getTopLuresForSpeciesFromReports(slug, 8),
+      getTopLuresByTechniqueForSpeciesFromReports(slug, 4),
     ]);
 
     return {
@@ -86,7 +86,7 @@ export async function getSpeciesDetailResult(
         scientificName: species.scientificName,
         lureCount: lureList.total,
         lures: lureList.rows,
-        topLuresFromReports,
+        topLuresByTechnique,
       },
     };
   } catch (error) {

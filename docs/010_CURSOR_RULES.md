@@ -36,10 +36,13 @@ Before **domain terminology** in user-facing copy or types:
 
 9. `docs/fishing/TERMINOLOGY.md` — **mandatory**; lexicon-first gate applies
 10. `docs/fishing/TAXONOMY_POLICY.md` — when adding or changing species names
-11. `docs/fishing/LOCALIZATION_GUIDE.md` — when authoring tr/en labels
-12. `docs/011_GLOSSARY.md` (when populated)
+11. `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md` — species–lure relationships and recommendations
+12. `docs/fishing/LOCALIZATION_GUIDE.md` — when authoring tr/en labels
+13. `docs/011_GLOSSARY.md` (when populated)
 
 **Lexicon-first law:** No fishing terminology or taxonomy in production code without a Fishing Lexicon entry first. See `.cursor/rules/terminology.md`.
+
+**Species–technique–lure law:** Effectiveness and recommendations require Species → Technique → Lure. See `.cursor/rules/compatibility.md`.
 
 **Task prompts must name the module** (e.g., `platform/trust`, `lure-atlas`, `moderation`) and explicit non-goals.
 

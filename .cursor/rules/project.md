@@ -11,4 +11,6 @@ Before every task:
 
 **Lexicon gate (terminology & taxonomy):** No fishing terminology or taxonomy may be introduced without being added to the Fishing Lexicon first (`docs/fishing/TERMINOLOGY.md`, `ui/src/modules/terminology/data/`). Species names also require `TAXONOMY_POLICY.md` alignment. Lexicon entry → docs → integration. Never the reverse.
 
+**Compatibility gate (species–lure):** Every species–lure relationship for recommendations or effectiveness must be qualified by fishing technique — **Species → Technique → Lure**, never Species → Lure alone. See `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`.
+
 Then execute the task.

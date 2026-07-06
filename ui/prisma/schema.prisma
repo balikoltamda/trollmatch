@@ -504,6 +504,8 @@ model LureTechnique {
 }
 
 /// Lure ↔ species target link with association kind (007 §4.5 catalog tag semantics).
+/// Catalog/metadata only — NOT an effectiveness recommendation. Effectiveness requires
+/// Species → Technique → Lure (see docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md).
 model LureSpecies {
   id               String                     @id @default(uuid()) @db.Uuid
   lureModelId      String                     @map("lure_model_id") @db.Uuid
