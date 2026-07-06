@@ -7,6 +7,8 @@ import {
   type LureVariant,
 } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import type { DataFetchResult } from "@/lib/data-result";
+import { logServerError } from "@/lib/log-server-error";
 import { getLureDetailEnrichment } from "@/modules/lure/data/lure-detail-enrichment";
 import {
   PUBLIC_LURE_WHERE,
@@ -468,11 +470,19 @@ async function findLureModelBySlug(
 }
 
 export const prismaLureRepository: LureRepository = {
-  async getBySlug({ slug, variantId }: LureDetailParams) {
+  async getBySlug(params: LureDetailParams) {
+    const result = await prismaLureRepository.getBySlugResult(params);
+    return result.status === "ok" ? result.data : null;
+  },
+
+  async getBySlugResult({
+    slug,
+    variantId,
+  }: LureDetailParams): Promise<DataFetchResult<LureDetail>> {
     try {
       const record = await findLureModelBySlug(slug);
       if (!record || record.variants.length === 0) {
-        return null;
+        return { status: "not_found" };
       }
 
       const trustContext = await loadTrustContext(record.id);
@@ -480,15 +490,24 @@ export const prismaLureRepository: LureRepository = {
       const activeVariant = resolveActiveVariant(lure, variantId);
 
       return {
-        ...lure,
-        specifications: {
-          ...lure.specifications,
-          lengthMm: activeVariant.lengthMm,
-          weightG: activeVariant.weightG,
+        status: "ok",
+        data: {
+          ...lure,
+          specifications: {
+            ...lure.specifications,
+            lengthMm: activeVariant.lengthMm,
+            weightG: activeVariant.weightG,
+          },
         },
       };
-    } catch {
-      return null;
+    } catch (error) {
+      await logServerError({
+        page: "/[locale]/lures/[slug]",
+        slug,
+        operation: "getLureDetail",
+        error,
+      });
+      return { status: "unavailable" };
     }
   },
 

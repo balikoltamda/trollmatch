@@ -5,10 +5,11 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AppMain } from "@/components/layout/app-shell";
 import { LureDetailView } from "@/modules/lure/components/lure-detail-view";
 import {
-  getLureDetail,
   getLureSlugs,
   localize,
 } from "@/modules/lure/services/get-lure-detail";
+import { getLureDetailResult } from "@/modules/lure/services/get-lure-detail-safe";
+import { UnavailablePage } from "@/modules/stability/components/unavailable-page";
 import { routing, type AppLocale } from "@/i18n/routing";
 
 type LureDetailPageProps = {
@@ -35,12 +36,16 @@ export async function generateMetadata({
     return {};
   }
 
-  const lure = await getLureDetail({ slug, locale: locale as AppLocale });
+  const result = await getLureDetailResult({
+    slug,
+    locale: locale as AppLocale,
+  });
 
-  if (!lure) {
+  if (result.status !== "ok") {
     return {};
   }
 
+  const lure = result.data;
   const title = localize(lure.modelName, locale as AppLocale);
   const description = localize(lure.shortDescription, locale as AppLocale);
   const manufacturer = localize(lure.manufacturer, locale as AppLocale);
@@ -82,17 +87,34 @@ export default async function LureDetailPage({
 
   setRequestLocale(locale);
 
-  const lure = await getLureDetail({
+  const result = await getLureDetailResult({
     slug,
     locale: locale as AppLocale,
     variantId: variant,
   });
 
-  if (!lure) {
+  if (result.status === "not_found") {
     notFound();
   }
 
-  const t = await getTranslations("LureDetail");
+  const t = await getTranslations("Stability");
+
+  if (result.status === "unavailable") {
+    return (
+      <AppMain>
+        <UnavailablePage
+          title={t("unavailable.title")}
+          description={t("unavailable.description")}
+          homeLabel={t("notFound.home")}
+          retryLabel={t("error.retry")}
+          retryHref={`/lures/${slug}`}
+        />
+      </AppMain>
+    );
+  }
+
+  const lure = result.data;
+  const tDetail = await getTranslations("LureDetail");
 
   return (
     <AppMain>
@@ -117,7 +139,7 @@ export default async function LureDetailPage({
         locale={locale as AppLocale}
         variantId={variant}
       />
-      <p className="text-muted-foreground sr-only">{t("pageLandmark")}</p>
+      <p className="text-muted-foreground sr-only">{tDetail("pageLandmark")}</p>
     </AppMain>
   );
 }

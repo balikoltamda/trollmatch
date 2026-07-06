@@ -88,6 +88,46 @@
     "previous": "Önceki",
     "next": "Sonraki"
   },
+  "Stability": {
+    "notFound": {
+      "title": "Sayfa bulunamadı",
+      "description": "Bu sayfa yok veya taşınmış olabilir.",
+      "home": "Ana sayfa",
+      "browseLures": "Yemlere göz at",
+      "browseSpecies": "Türlere göz at"
+    },
+    "lureNotFound": {
+      "title": "Yem bulunamadı",
+      "description": "Bu yem rehberde yok — ya da bağlantı hatalı olabilir."
+    },
+    "speciesNotFound": {
+      "title": "Tür bulunamadı",
+      "description": "Bu balık türü rehberde yok — ya da bağlantı hatalı olabilir."
+    },
+    "manufacturerNotFound": {
+      "title": "Üretici bulunamadı",
+      "description": "Bu marka rehberde yok — ya da bağlantı hatalı olabilir."
+    },
+    "unavailable": {
+      "title": "Geçici olarak kullanılamıyor",
+      "description": "Bu sayfa şu an yüklenemedi. Bağlantın sorunsuz — biraz sonra tekrar dene."
+    },
+    "error": {
+      "title": "Bir şeyler ters gitti",
+      "description": "Beklenmeyen bir sorun oluştu. Rehberin geri kalanı hâlâ erişilebilir.",
+      "home": "Ana sayfa",
+      "retry": "Tekrar dene"
+    },
+    "manufacturer": {
+      "lureCount": "{count, plural, =0 {Listelenen yem yok} one {# yem rehberde} other {# yem rehberde}}",
+      "noLures": "Bu marka için henüz yayınlanmış yem yok."
+    },
+    "empty": {
+      "title": "Henüz bir şey yok",
+      "description": "Yakında tekrar bak."
+    },
+    "missingSection": "Bu bölüm geçici olarak kullanılamıyor."
+  },
   "Lures": {
     "meta": {
       "title": "Yemlere göz at",

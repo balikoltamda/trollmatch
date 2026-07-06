@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -33,7 +34,7 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
   const { locale } = await params;
 
   if (!hasLocale(routing.locales, locale)) {
-    return null;
+    notFound();
   }
 
   setRequestLocale(locale);

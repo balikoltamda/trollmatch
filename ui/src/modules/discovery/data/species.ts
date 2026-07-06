@@ -1,3 +1,5 @@
+import type { DataFetchResult } from "@/lib/data-result";
+import { logServerError } from "@/lib/log-server-error";
 import { prisma } from "@/lib/prisma";
 import { PUBLIC_LURE_WHERE } from "@/modules/discovery/lib/public-visibility";
 import { listPublicLures } from "@/modules/discovery/data/browse-lures";
@@ -43,14 +45,19 @@ export async function listPublicSpecies(limit = 100): Promise<SpeciesCardData[]>
         lureCount: counts.get(row.id) ?? 0,
       }))
       .sort((a, b) => b.lureCount - a.lureCount || a.name.en.localeCompare(b.name.en));
-  } catch {
+  } catch (error) {
+    await logServerError({
+      page: "/[locale]/species",
+      operation: "listPublicSpecies",
+      error,
+    });
     return [];
   }
 }
 
-export async function getSpeciesDetail(
+export async function getSpeciesDetailResult(
   slug: string,
-): Promise<SpeciesDetailData | null> {
+): Promise<DataFetchResult<SpeciesDetailData>> {
   try {
     const species = await prisma.fishSpecies.findFirst({
       where: { slug, deletedAt: null },
@@ -63,7 +70,7 @@ export async function getSpeciesDetail(
     });
 
     if (!species) {
-      return null;
+      return { status: "not_found" };
     }
 
     const [lureList, topLuresFromReports] = await Promise.all([
@@ -72,16 +79,33 @@ export async function getSpeciesDetail(
     ]);
 
     return {
-      slug: species.slug,
-      name: { en: species.nameEn, tr: species.nameTr },
-      scientificName: species.scientificName,
-      lureCount: lureList.total,
-      lures: lureList.rows,
-      topLuresFromReports,
+      status: "ok",
+      data: {
+        slug: species.slug,
+        name: { en: species.nameEn, tr: species.nameTr },
+        scientificName: species.scientificName,
+        lureCount: lureList.total,
+        lures: lureList.rows,
+        topLuresFromReports,
+      },
     };
-  } catch {
-    return null;
+  } catch (error) {
+    await logServerError({
+      page: "/[locale]/species/[slug]",
+      slug,
+      operation: "getSpeciesDetail",
+      error,
+    });
+    return { status: "unavailable" };
   }
+}
+
+/** @deprecated Use getSpeciesDetailResult — returns null for both not_found and errors. */
+export async function getSpeciesDetail(
+  slug: string,
+): Promise<SpeciesDetailData | null> {
+  const result = await getSpeciesDetailResult(slug);
+  return result.status === "ok" ? result.data : null;
 }
 
 export async function countPublicSpeciesWithLures(): Promise<number> {

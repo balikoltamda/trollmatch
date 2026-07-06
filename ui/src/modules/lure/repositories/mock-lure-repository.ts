@@ -21,18 +21,26 @@ function resolveVariant(
 }
 
 export const mockLureRepository: LureRepository = {
-  async getBySlug({ slug, variantId }: LureDetailParams) {
+  async getBySlug(params: LureDetailParams) {
+    const result = await mockLureRepository.getBySlugResult(params);
+    return result.status === "ok" ? result.data : null;
+  },
+
+  async getBySlugResult({ slug, variantId }: LureDetailParams) {
     const lure = MOCK_LURES[slug];
-    if (!lure) return null;
+    if (!lure) return { status: "not_found" };
 
     const variant = resolveVariant(lure, variantId);
 
     return {
-      ...lure,
-      specifications: {
-        ...lure.specifications,
-        lengthMm: variant.lengthMm,
-        weightG: variant.weightG,
+      status: "ok",
+      data: {
+        ...lure,
+        specifications: {
+          ...lure.specifications,
+          lengthMm: variant.lengthMm,
+          weightG: variant.weightG,
+        },
       },
     };
   },

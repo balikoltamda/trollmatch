@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { SpeciesTopLuresSection } from "@/modules/catch-report/components/species-top-lures-section";
 import { RelatedKnowledgeSection } from "@/modules/knowledge-pipeline/components/related-knowledge-section";
+import { SafeSection } from "@/modules/stability/components/safe-section";
 import type { SpeciesDetailData } from "@/modules/discovery/types";
 import type { AppLocale } from "@/i18n/routing";
 import { pickLocalized } from "@/modules/home/data/home-content";
@@ -60,13 +61,25 @@ export async function SpeciesDetailView({
           </Link>
         </div>
 
-        <SpeciesTopLuresSection
-          locale={locale}
-          lures={species.topLuresFromReports}
-        />
+        <SafeSection
+          page="/[locale]/species/[slug]"
+          section="top-lures-reports"
+          slug={species.slug}
+        >
+          <SpeciesTopLuresSection
+            locale={locale}
+            lures={species.topLuresFromReports}
+          />
+        </SafeSection>
 
         <div className="mb-10">
-          <RelatedKnowledgeSection speciesSlug={species.slug} locale={locale} />
+          <SafeSection
+            page="/[locale]/species/[slug]"
+            section="related-knowledge"
+            slug={species.slug}
+          >
+            <RelatedKnowledgeSection speciesSlug={species.slug} locale={locale} />
+          </SafeSection>
         </div>
 
         <div className="mb-6">

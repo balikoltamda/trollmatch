@@ -1014,3 +1014,24 @@ model KnowledgeAuditEntry {
   @@index([action])
   @@map("knowledge_audit_entries")
 }
+
+// ---------------------------------------------------------------------------
+// Production stability — runtime error log (Studio /studio/errors)
+// ---------------------------------------------------------------------------
+
+model RuntimeErrorLog {
+  id         String    @id @default(uuid()) @db.Uuid
+  page       String    @db.VarChar(512)
+  slug       String?   @db.VarChar(256)
+  operation  String?   @map("operation") @db.VarChar(128)
+  message    String    @db.VarChar(1024)
+  stack      String?   @db.Text
+  resolved   Boolean   @default(false)
+  resolvedAt DateTime? @map("resolved_at") @db.Timestamptz(6)
+  resolvedBy String?   @map("resolved_by") @db.VarChar(128)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([resolved, createdAt(sort: Desc)])
+  @@index([page])
+  @@map("runtime_error_logs")
+}

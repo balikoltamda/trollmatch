@@ -7,6 +7,7 @@ import { LureTrollingInfo } from "@/modules/lure/components/sections/lure-trolli
 import { LureCommunityStatistics } from "@/modules/lure/components/sections/lure-community-statistics";
 import { LureCatchReportsSection } from "@/modules/catch-report/components/lure-catch-reports-section";
 import { RelatedKnowledgeSection } from "@/modules/knowledge-pipeline/components/related-knowledge-section";
+import { SafeSection } from "@/modules/stability/components/safe-section";
 import { LureAiInsights } from "@/modules/lure/components/sections/lure-ai-insights";
 import { LureRelatedLures } from "@/modules/lure/components/sections/lure-related-lures";
 import { LureSponsoredLinks } from "@/modules/lure/components/sections/lure-sponsored-links";
@@ -45,12 +46,24 @@ export async function LureDetailView({
         statistics={lure.communityStatistics}
         locale={locale}
       />
-      <LureCatchReportsSection
-        lureSlug={lure.slug}
-        locale={locale}
-        variantSlug={activeVariant.id}
-      />
-      <RelatedKnowledgeSection lureSlug={lure.slug} locale={locale} />
+      <SafeSection
+        page="/[locale]/lures/[slug]"
+        section="catch-reports"
+        slug={lure.slug}
+      >
+        <LureCatchReportsSection
+          lureSlug={lure.slug}
+          locale={locale}
+          variantSlug={activeVariant.id}
+        />
+      </SafeSection>
+      <SafeSection
+        page="/[locale]/lures/[slug]"
+        section="related-knowledge"
+        slug={lure.slug}
+      >
+        <RelatedKnowledgeSection lureSlug={lure.slug} locale={locale} />
+      </SafeSection>
       <LureAiInsights insights={lure.aiInsights} locale={locale} />
       <LureRelatedLures related={lure.relatedLures} locale={locale} />
       <LureSponsoredLinks links={lure.sponsoredLinks} locale={locale} />

@@ -77,7 +77,13 @@ export async function listPublicLures(options: {
       query: q,
       speciesSlug,
     };
-  } catch {
+  } catch (error) {
+    const { logServerError } = await import("@/lib/log-server-error");
+    await logServerError({
+      page: "/[locale]/lures",
+      operation: "listPublicLures",
+      error,
+    });
     return {
       rows: [],
       total: 0,

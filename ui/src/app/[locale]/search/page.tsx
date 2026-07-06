@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -43,7 +44,7 @@ export default async function SearchPage({
   const { q, species, page } = await searchParams;
 
   if (!hasLocale(routing.locales, locale)) {
-    return null;
+    notFound();
   }
 
   setRequestLocale(locale);

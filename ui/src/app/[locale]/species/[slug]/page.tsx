@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AppMain } from "@/components/layout/app-shell";
-import { getSpeciesDetail } from "@/modules/discovery/data/species";
+import { getSpeciesDetailResult } from "@/modules/discovery/data/species";
 import { SpeciesDetailView } from "@/modules/discovery/components/species-detail-view";
+import { UnavailablePage } from "@/modules/stability/components/unavailable-page";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { pickLocalized } from "@/modules/home/data/home-content";
 
@@ -23,19 +24,19 @@ export async function generateMetadata({
     return {};
   }
 
-  const species = await getSpeciesDetail(slug);
-  if (!species) {
+  const result = await getSpeciesDetailResult(slug);
+  if (result.status !== "ok") {
     return {};
   }
 
-  const name = pickLocalized(species.name, locale as AppLocale);
+  const name = pickLocalized(result.data.name, locale as AppLocale);
   const t = await getTranslations({ locale, namespace: "Species" });
 
   return {
     title: t("meta.detailTitle", { name }),
     description: t("meta.detailDescription", {
       name,
-      count: species.lureCount,
+      count: result.data.lureCount,
     }),
   };
 }
@@ -51,15 +52,31 @@ export default async function SpeciesDetailPage({
 
   setRequestLocale(locale);
 
-  const species = await getSpeciesDetail(slug);
+  const result = await getSpeciesDetailResult(slug);
 
-  if (!species) {
+  if (result.status === "not_found") {
     notFound();
+  }
+
+  const t = await getTranslations("Stability");
+
+  if (result.status === "unavailable") {
+    return (
+      <AppMain>
+        <UnavailablePage
+          title={t("unavailable.title")}
+          description={t("unavailable.description")}
+          homeLabel={t("notFound.home")}
+          retryLabel={t("error.retry")}
+          retryHref={`/species/${slug}`}
+        />
+      </AppMain>
+    );
   }
 
   return (
     <AppMain>
-      <SpeciesDetailView locale={locale as AppLocale} species={species} />
+      <SpeciesDetailView locale={locale as AppLocale} species={result.data} />
     </AppMain>
   );
 }

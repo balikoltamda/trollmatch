@@ -22,6 +22,26 @@ Every new feature should make anglers **return to the site**, not just improve t
 
 Studio work continues only when it unblocks an angler-facing loop.
 
+### Feature gate
+
+Before implementing any feature, ask:
+
+> **Will this feature make TrollMatch more valuable than ChatGPT for anglers?**
+
+If the answer is **no**, redesign the feature.
+
+### Competitive advantage
+
+The advantage is **not** AI.
+
+| What wins | What does not |
+|-----------|----------------|
+| Verified fishing knowledge | Generic chat answers |
+| Structured relationships (species ↔ lure ↔ technique ↔ source) | Unstructured text dumps |
+| Editorial trust (Balık Oltamda verifies) | Ungrounded model output |
+
+AI may assist summarization and discovery, but only when it **surfaces verified, cited, structured knowledge** that ChatGPT cannot replicate.
+
 ---
 
 ## Priority stack

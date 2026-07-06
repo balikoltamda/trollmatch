@@ -14,6 +14,7 @@ import {
   Users,
   Wrench,
   Brain,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { StudioNavItem } from "@/modules/studio/types";
@@ -21,6 +22,7 @@ import type { StudioNavItem } from "@/modules/studio/types";
 const NAV_ITEMS: StudioNavItem[] = [
   { href: "/studio", label: "Attention", icon: "dashboard" },
   { href: "/studio/knowledge", label: "Knowledge Hub", icon: "knowledge" },
+  { href: "/studio/errors", label: "Errors", icon: "errors" },
   { href: "/studio/review", label: "Verify", icon: "review" },
   { href: "/studio/community", label: "Community", icon: "community" },
   { href: "/studio/community/reports", label: "Catch reports", icon: "notes" },
@@ -36,6 +38,7 @@ const NAV_ITEMS: StudioNavItem[] = [
 const ICONS = {
   dashboard: LayoutDashboard,
   knowledge: Brain,
+  errors: AlertTriangle,
   review: ClipboardList,
   import: Ship,
   products: Package,

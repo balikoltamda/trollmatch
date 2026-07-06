@@ -88,6 +88,46 @@
     "previous": "Previous",
     "next": "Next"
   },
+  "Stability": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "This page doesn't exist or may have moved.",
+      "home": "Home",
+      "browseLures": "Browse lures",
+      "browseSpecies": "Browse species"
+    },
+    "lureNotFound": {
+      "title": "Lure not found",
+      "description": "We don't have this lure in the guide yet — or the link may be wrong."
+    },
+    "speciesNotFound": {
+      "title": "Species not found",
+      "description": "We don't have this fish species in the guide yet — or the link may be wrong."
+    },
+    "manufacturerNotFound": {
+      "title": "Manufacturer not found",
+      "description": "We don't have this brand in the guide yet — or the link may be wrong."
+    },
+    "unavailable": {
+      "title": "Temporarily unavailable",
+      "description": "We couldn't load this page right now. Your connection is fine — try again in a moment."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "We hit an unexpected problem. The rest of the guide is still available.",
+      "home": "Home",
+      "retry": "Try again"
+    },
+    "manufacturer": {
+      "lureCount": "{count, plural, =0 {No lures listed} one {# lure in guide} other {# lures in guide}}",
+      "noLures": "No published lures for this brand yet."
+    },
+    "empty": {
+      "title": "Nothing here yet",
+      "description": "Check back soon."
+    },
+    "missingSection": "This section is temporarily unavailable."
+  },
   "Lures": {
     "meta": {
       "title": "Browse lures",
