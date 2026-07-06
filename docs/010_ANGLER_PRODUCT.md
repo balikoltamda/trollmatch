@@ -62,7 +62,34 @@ Studio work continues only when it unblocks an angler-facing loop.
 
 ---
 
-## Sprint 7.2 — Community reports (next)
+## Sprint 7.2 — Fishing Lexicon foundation (shipped)
+
+**Goal:** Establish canonical terminology standards — not a translation dictionary.
+
+### Delivered
+
+| Artifact | Purpose |
+|----------|---------|
+| `docs/fishing/TERMINOLOGY.md` | Authoritative term definitions (Fishing Line, Leader, …) |
+| `docs/fishing/LOCALIZATION_GUIDE.md` | Independent tr/en angler localization rules |
+| `docs/fishing/TAXONOMY_POLICY.md` | Scientific taxonomy vs regional names |
+| `ui/src/modules/terminology/` | Types + seed registry (`LEXICON_REGISTRY`) |
+
+### Rules locked
+
+- Never translate fishing terminology literally
+- Turkish = angler language of Türkiye / Northern Cyprus
+- English = internationally accepted fishing terminology
+- Regional names never replace scientific taxonomy
+- Application **not wired yet** — standards first, integration in later sprints
+
+### Consumers (future)
+
+UI · Search · AI summaries · Importers · Studio · Public pages · APIs
+
+---
+
+## Sprint 7.3 — Community reports (next)
 
 **Goal:** Anglers submit catch/effectiveness reports; platform learns; editors validate in Studio.
 
@@ -73,7 +100,7 @@ Studio work continues only when it unblocks an angler-facing loop.
 
 ---
 
-## Sprint 7.3 — Regional experience
+## Sprint 7.4 — Regional experience
 
 **Goal:** Every lure page answers “how does this work *here*?”
 
@@ -83,13 +110,14 @@ Studio work continues only when it unblocks an angler-facing loop.
 
 ---
 
-## Sprint 7.4 — AI summaries (angler-facing)
+## Sprint 7.5 — AI summaries (angler-facing)
 
 **Goal:** “At a glance” blocks with real cited sources — not empty shells.
 
 - Promote verified editor notes into AI section when no generated summary
 - Generate summaries from box specs + community reports + regional notes
 - Always show citations and corpus date
+- AI must resolve vocabulary through Fishing Lexicon term ids
 
 ---
 
