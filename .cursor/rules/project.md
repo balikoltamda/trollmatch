@@ -13,4 +13,6 @@ Before every task:
 
 **Compatibility gate (species–lure):** Every species–lure relationship for recommendations or effectiveness must be qualified by fishing technique — **Species → Technique → Lure**, never Species → Lure alone. See `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`.
 
+**Simplicity gate (domain modeling):** Do not over-model fishing knowledge. Model only what the current product requires; design entities to be extensible; add sub-techniques, advanced rigging, presentations, and other future detail only when a sprint needs them. See `docs/002_ENGINEERING_PRINCIPLES.md` §2.
+
 Then execute the task.

@@ -73,6 +73,8 @@ The business model organizes into layers documented fully in `007_DATABASE_VISIO
 
 **Rule:** Modules own catalog aggregates (e.g., LureAtlas Model). The platform owns taxonomies and trust primitives. Modules **reference** platform ids; they never fork species or technique lists.
 
+**Evolutionary design:** `007` describes the long-horizon model. The running product implements **only what current sprints require**. Do not over-model fishing knowledge — sub-techniques, advanced rigging, and presentation matrices wait until product need. See `002_ENGINEERING_PRINCIPLES.md` §2.
+
 ---
 
 ## 5. First Module: LureAtlas

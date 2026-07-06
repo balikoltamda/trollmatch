@@ -97,7 +97,7 @@ A lure effective for *Lichia amia* on **trolling** at 4 kn is not the same claim
 | `CatchReport` | species + lure variant + **technique** (required) |
 | `UsageAssertion` (future) | species + lure + **technique** + geographic/temporal scope |
 
-Future: `SpeciesTechniqueLure` aggregate or materialized view for ranked triples.
+Future: `SpeciesTechniqueLure` aggregate or materialized view for ranked triples — **add only when product ranking workflows require it** (evolutionary design; see `002_ENGINEERING_PRINCIPLES.md` §2).
 
 ---
 

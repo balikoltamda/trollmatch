@@ -4,7 +4,7 @@
 **Project (internal):** TrollMatch  
 **Platform (public):** Balık Oltamda Guide  
 **Status:** Sprint 0 — Agent and developer rules for Cursor IDE  
-**Extends:** `.cursor/rules/project.md` and specialized rule files under `.cursor/rules/` (including `terminology.md` for vocabulary work)
+**Extends:** `.cursor/rules/project.md` and specialized rule files under `.cursor/rules/` (including `terminology.md`, `compatibility.md`, `domain-design.md`)
 
 ---
 
@@ -43,6 +43,8 @@ Before **domain terminology** in user-facing copy or types:
 **Lexicon-first law:** No fishing terminology or taxonomy in production code without a Fishing Lexicon entry first. See `.cursor/rules/terminology.md`.
 
 **Species–technique–lure law:** Effectiveness and recommendations require Species → Technique → Lure. See `.cursor/rules/compatibility.md`.
+
+**Domain simplicity law:** Do not over-model fishing knowledge — model only what the current product requires; prefer evolutionary design. See `docs/002_ENGINEERING_PRINCIPLES.md` §2 and `.cursor/rules/domain-design.md`.
 
 **Task prompts must name the module** (e.g., `platform/trust`, `lure-atlas`, `moderation`) and explicit non-goals.
 

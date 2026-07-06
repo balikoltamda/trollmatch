@@ -193,6 +193,21 @@ See `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`.
 
 ---
 
+## Evolutionary domain design (platform law)
+
+**Goal:** Keep fishing knowledge models simple — extensible, not premature.
+
+### Rules locked
+
+- Model only concepts **required by the current product**
+- Design entities for extension; defer sub-techniques, advanced rigging, presentations until needed
+- `007_DATABASE_VISION.md` is long-horizon — not a build-everything checklist
+- Platform must stay understandable for anglers and developers
+
+See `docs/002_ENGINEERING_PRINCIPLES.md` §2.
+
+---
+
 ## Sprint 7.5 — Knowledge Hub & Source Intelligence (shipped)
 
 **Goal:** Central hub for verified fishing knowledge — indexed, connected, never mirrored.
