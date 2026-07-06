@@ -10,6 +10,7 @@ import {
   getDashboardStats,
   getLatestImports,
 } from "@/modules/studio/data/dashboard";
+import { ImportBatchStatusPoller } from "@/modules/studio/components/import-batch-status-poller";
 import { resolveImporterSlug } from "@/modules/import/registry/manufacturer-slugs";
 import { cn } from "@/lib/utils";
 
@@ -19,8 +20,12 @@ function batchStatusClass(status: string): string {
       return "bg-ocean/10 text-ocean";
     case "RUNNING":
       return "bg-turquoise/15 text-[color-mix(in_oklch,var(--turquoise),var(--navy)_40%)]";
+    case "QUEUED":
+      return "bg-muted text-muted-foreground";
     case "FAILED":
       return "bg-coral/12 text-[color-mix(in_oklch,var(--coral),var(--navy)_35%)]";
+    case "CANCELLED":
+      return "bg-muted/60 text-muted-foreground";
     default:
       return "bg-muted text-muted-foreground";
   }
@@ -34,6 +39,7 @@ export async function StudioDashboardPanel() {
 
   return (
     <div className="space-y-10">
+      <ImportBatchStatusPoller statuses={imports.map((batch) => batch.status)} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StudioStatCard label="Lure models" value={stats.lureModels} />
         <StudioStatCard label="Published" value={stats.published} />

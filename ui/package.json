@@ -18,6 +18,7 @@
     "db:check": "tsx scripts/verify-db.ts",
     "db:status": "prisma migrate status",
     "import": "tsx scripts/run-import.ts",
+    "import:batch": "tsx scripts/run-import-batch.ts",
     "import:demo": "tsx src/modules/import/providers/demo/demo-importer.ts",
     "import:duel:fetch": "tsx src/modules/import/providers/duel/duel-fetcher.ts",
     "import:duel:parse": "tsx src/modules/import/providers/duel/duel-parser.ts",

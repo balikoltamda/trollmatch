@@ -309,6 +309,40 @@ See `docs/013_KNOWLEDGE_PIPELINE.md`.
 
 ---
 
+## Production Stability — Async Import Center (shipped)
+
+**Goal:** Imports never block HTTP requests — no more 504 Gateway Timeout.
+
+### Workflow
+
+1. **Import now** → creates `ImportBatch` with status `QUEUED`
+2. Server returns **HTTP 200 immediately**
+3. Detached worker (`scripts/run-import-batch.ts`) claims batch → `RUNNING` → runs importer
+4. UI polls every **2 seconds** until terminal status
+
+### Statuses
+
+| Status | Meaning |
+|--------|---------|
+| `QUEUED` | Waiting for worker; can cancel |
+| `RUNNING` | Importer executing |
+| `COMPLETED` | Success |
+| `FAILED` | Importer or worker error |
+| `CANCELLED` | User cancelled while queued |
+
+### Survives navigation
+
+- Browser can navigate anywhere while imports continue
+- Page refresh does not interrupt the worker
+- Closing the browser does not interrupt the worker (process is detached)
+
+### API
+
+- `GET /api/studio/import/batch/[id]` — JSON status for polling
+- `npm run import:batch -- <batch-id>` — manual worker entry
+
+---
+
 ## Sprint 7.6 — Regional experience (next)
 
 **Goal:** Every lure page answers “how does this work *here*?”

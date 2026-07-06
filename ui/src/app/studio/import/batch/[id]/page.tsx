@@ -7,6 +7,7 @@ import {
 } from "@/modules/studio/components/studio-page";
 import { StudioStatCard } from "@/modules/studio/components/studio-ui";
 import { getImportBatchReport } from "@/modules/studio/data/import-batch-report";
+import { ImportBatchStatusPoller } from "@/modules/studio/components/import-batch-status-poller";
 import { resolveImporterSlug } from "@/modules/import/registry/manufacturer-slugs";
 import { cn } from "@/lib/utils";
 
@@ -22,8 +23,12 @@ function batchStatusClass(status: string): string {
       return "bg-ocean/10 text-ocean";
     case "RUNNING":
       return "bg-turquoise/15 text-[color-mix(in_oklch,var(--turquoise),var(--navy)_40%)]";
+    case "QUEUED":
+      return "bg-muted text-muted-foreground";
     case "FAILED":
       return "bg-coral/12 text-[color-mix(in_oklch,var(--coral),var(--navy)_35%)]";
+    case "CANCELLED":
+      return "bg-muted/60 text-muted-foreground";
     default:
       return "bg-muted text-muted-foreground";
   }
@@ -41,6 +46,7 @@ export default async function StudioImportBatchReportPage({
 
   return (
     <>
+      <ImportBatchStatusPoller statuses={[report.status]} />
       <StudioPageHeader
         title={`${report.displayName} import report`}
         description={`${report.startedAt.toLocaleString()} · ${report.status}`}

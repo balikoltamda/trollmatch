@@ -87,9 +87,11 @@ enum EditorNoteConfidence {
 
 /// Import batch lifecycle for Studio Import Center.
 enum ImportBatchStatus {
+  QUEUED
   RUNNING
   COMPLETED
   FAILED
+  CANCELLED
 
   @@map("import_batch_status")
 }
@@ -752,7 +754,7 @@ model ImportBatch {
   manufacturerId     String?           @map("manufacturer_id") @db.Uuid
   manufacturerCode   String            @map("manufacturer_code") @db.VarChar(64)
   displayName        String            @map("display_name") @db.VarChar(128)
-  status             ImportBatchStatus @default(RUNNING)
+  status             ImportBatchStatus @default(QUEUED)
   startedAt          DateTime          @map("started_at") @db.Timestamptz(6)
   completedAt        DateTime?         @map("completed_at") @db.Timestamptz(6)
   durationMs         Int?              @map("duration_ms")
