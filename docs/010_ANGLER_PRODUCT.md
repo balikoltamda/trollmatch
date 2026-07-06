@@ -101,6 +101,7 @@ AI may assist summarization and discovery, but only when it **surfaces verified,
 - Turkish = angler language of Türkiye / Northern Cyprus
 - English = internationally accepted fishing terminology
 - Regional names never replace scientific taxonomy
+- **Lexicon-first:** no terminology or taxonomy without Fishing Lexicon entry
 - Application **not wired yet** — standards first, integration in later sprints
 
 ### Consumers (future)
@@ -167,6 +168,7 @@ See `docs/013_KNOWLEDGE_PIPELINE.md` for full architecture.
 | **Species pages** | Taxonomy section — aliases, regional names, confusions |
 | **Docs** | `TAXONOMY_POLICY.md`, `TERMINOLOGY.md` updated |
 | **Reference** | *Lichia amia* (Akya) ↔ *Seriola dumerili* (Kuzu) exemplar |
+| **Lexicon** | Reference species registered in `terminology/data/reference-species.ts`; taxonomy seeds derive from lexicon term ids |
 
 ### Rules locked
 

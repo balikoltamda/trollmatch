@@ -4,7 +4,7 @@
 **Project (internal):** TrollMatch  
 **Platform (public):** Balık Oltamda Guide  
 **Status:** Sprint 0 — Agent and developer rules for Cursor IDE  
-**Extends:** `.cursor/rules/project.md` and specialized rule files under `.cursor/rules/`
+**Extends:** `.cursor/rules/project.md` and specialized rule files under `.cursor/rules/` (including `terminology.md` for vocabulary work)
 
 ---
 
@@ -34,7 +34,12 @@ Before **database, API, or LureAtlas** work, also read:
 
 Before **domain terminology** in user-facing copy or types:
 
-9. `docs/011_GLOSSARY.md` (when populated)
+9. `docs/fishing/TERMINOLOGY.md` — **mandatory**; lexicon-first gate applies
+10. `docs/fishing/TAXONOMY_POLICY.md` — when adding or changing species names
+11. `docs/fishing/LOCALIZATION_GUIDE.md` — when authoring tr/en labels
+12. `docs/011_GLOSSARY.md` (when populated)
+
+**Lexicon-first law:** No fishing terminology or taxonomy in production code without a Fishing Lexicon entry first. See `.cursor/rules/terminology.md`.
 
 **Task prompts must name the module** (e.g., `platform/trust`, `lure-atlas`, `moderation`) and explicit non-goals.
 

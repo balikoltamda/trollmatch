@@ -9,4 +9,6 @@ Before every task:
 
 **Feature gate (angler-facing work):** Will this make TrollMatch more valuable than ChatGPT for anglers? If no, redesign. Advantage = verified knowledge + structured relationships + editorial trust — not AI.
 
+**Lexicon gate (terminology & taxonomy):** No fishing terminology or taxonomy may be introduced without being added to the Fishing Lexicon first (`docs/fishing/TERMINOLOGY.md`, `ui/src/modules/terminology/data/`). Species names also require `TAXONOMY_POLICY.md` alignment. Lexicon entry → docs → integration. Never the reverse.
+
 Then execute the task.

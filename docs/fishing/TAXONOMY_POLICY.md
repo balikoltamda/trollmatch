@@ -26,6 +26,8 @@ parent hierarchy            regional names (country/region scope)
 
 A fish is **one** `FishSpecies` record. It has exactly one scientific name. It may have many regional names and aliases — all subordinate to the scientific identity.
 
+**Lexicon-first:** Preferred Turkish and English species names, aliases, and regional names must be authored in the Fishing Lexicon (`TERMINOLOGY.md` + `ui/src/modules/terminology/data/`) **before** they appear in `FishSpecies`, seeds, UI, or search. Scientific names follow taxonomic authority; display-layer vocabulary still requires lexicon registration.
+
 ---
 
 ## 2. Required fields per species
@@ -138,6 +140,7 @@ Module: `ui/src/modules/taxonomy/data/species-search.ts`
 | `SpeciesConfusion` between *Lichia* and *Seriola* | Add "Akya" as alias on *Seriola* |
 | Search disambiguation with editorial reason | Internet popularity as truth source |
 | Change scientific assignment via taxonomic review | Importer auto-overwrites scientific name |
+| Lexicon entry before species name in UI/seeds | Ad hoc species labels without lexicon registration |
 
 ---
 

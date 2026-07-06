@@ -25,10 +25,31 @@ It is **not** a translation dictionary.
 
 Every future feature that displays or indexes fishing vocabulary **must** reference lexicon term ids — not ad hoc strings.
 
+### Lexicon-first gate (mandatory)
+
+**No fishing terminology or taxonomy may be introduced without being added to the Fishing Lexicon first.**
+
+| Applies to | Examples |
+|------------|----------|
+| Tackle & rigging vocabulary | Leader, misina, jig head |
+| Technique labels | Trolling, jigging, surf casting |
+| Species display names | Akya, Kuzu, Leerfish |
+| Aliases & regional names | Litsa, Mineri, Sarı Kuyruk |
+| Taxonomy editorial copy | Confusion reasons, species notes |
+
+**Order of work:**
+
+1. Add or update the term in `ui/src/modules/terminology/data/` (or species lexicon entry per `TAXONOMY_POLICY.md`)
+2. Update this document (`TERMINOLOGY.md`) and, for species, `TAXONOMY_POLICY.md`
+3. Only then wire into UI, search, seeds, importers, AI prompts, or database content
+
+Forbidden: inventing labels in components, seed files, migrations, or copy without a lexicon entry first.
+
 ---
 
 ## 2. Core rules
 
+0. **Lexicon first.** No fishing terminology or taxonomy in code, copy, seeds, or data without a Fishing Lexicon entry (see §1).
 1. **Never translate fishing terminology literally.** Turkish and English are independently localized angler language.
 2. **Preferred term** is the only label shown in primary UI for each locale.
 3. **Aliases** power search and importer matching — never replace preferred labels without editorial action.
@@ -186,7 +207,69 @@ Metal section for toothy species — distinct rigging purpose from mono/fluoro l
 
 ---
 
-## 6. Hierarchy diagram
+## 6. Lichia amia (reference species)
+
+**Term id:** `lichia-amia`  
+**Domain:** `species`  
+**Scientific:** *Lichia amia*
+
+### Preferred labels
+
+| Locale | Preferred term |
+|--------|----------------|
+| English | Leerfish |
+| Turkish | Akya |
+
+### Aliases (same species)
+
+Liça · Litsa · Çatal Kuyruk · Çıplak
+
+### Regional terms
+
+| Label | Locale | Region |
+|-------|--------|--------|
+| Litsa | tr | KKTC |
+
+### Frequently confused with
+
+*Seriola dumerili* — see `SpeciesConfusion` in taxonomy; not an alias.
+
+Seed: `ui/src/modules/terminology/data/reference-species.ts` → taxonomy via `lexiconTermToSpeciesSeed()`.
+
+---
+
+## 7. Seriola dumerili (reference species)
+
+**Term id:** `seriola-dumerili`  
+**Domain:** `species`  
+**Scientific:** *Seriola dumerili*
+
+### Preferred labels
+
+| Locale | Preferred term |
+|--------|----------------|
+| English | Greater amberjack |
+| Turkish | Kuzu |
+
+### Aliases
+
+Sarı Kuyruk
+
+### Deprecated — never use as alias
+
+| Label | Locale | Reason |
+|-------|--------|--------|
+| Akya | tr | Belongs to *Lichia amia*. Document confusion only in `SpeciesConfusion`. |
+
+### Regional terms
+
+| Label | Locale | Region |
+|-------|--------|--------|
+| Mineri | tr | KKTC |
+
+---
+
+## 8. Hierarchy diagram
 
 ```
 fishing-line (Misina / Fishing Line)
@@ -205,7 +288,9 @@ leader (Leader / Leader)
 
 ---
 
-## 7. Adding new terms
+## 9. Adding new terms
+
+**Prerequisite:** Nothing ships until the lexicon entry exists. No exceptions for “temporary” UI copy or seed data.
 
 1. Author **preferred.en** and **preferred.tr** independently (see `LOCALIZATION_GUIDE.md`).
 2. Add aliases from manufacturer catalogs, forums, and import evidence.
@@ -217,7 +302,7 @@ leader (Leader / Leader)
 
 ---
 
-## 8. Related documents
+## 10. Related documents
 
 | Document | Role |
 |----------|------|

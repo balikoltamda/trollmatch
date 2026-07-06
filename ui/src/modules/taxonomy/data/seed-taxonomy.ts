@@ -1,64 +1,24 @@
-import type { SpeciesAliasKind } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  getLexiconTermById,
+  lexiconTermToSpeciesSeed,
+  REFERENCE_SPECIES_LEXICON_IDS,
+  type SpeciesSeedFromLexicon,
+} from "@/modules/terminology";
 import { normalizeSpeciesLabel } from "@/modules/taxonomy/lib/normalize-species-label";
 
-type SpeciesSeed = {
-  slug: string;
-  scientificName: string;
-  nameEn: string;
-  nameTr: string;
-  editorialNotesEn?: string;
-  editorialNotesTr?: string;
-  aliases: Array<{
-    alias: string;
-    kind: SpeciesAliasKind;
-    locale?: string;
-    countryScope?: string;
-  }>;
-  regionalNames: Array<{
-    name: string;
-    locale: string;
-    countryScope: string;
-  }>;
-};
-
-const REFERENCE_SPECIES: SpeciesSeed[] = [
-  {
-    slug: "lichia-amia",
-    scientificName: "Lichia amia",
-    nameEn: "Leerfish",
-    nameTr: "Akya",
-    editorialNotesEn:
-      "Canonical owner of the Turkish name Akya. Not to be confused with greater amberjack.",
-    editorialNotesTr:
-      "Türkçe Akya adının doğru türü. Sarı kuyruk (Seriola) ile karıştırılmamalı.",
-    aliases: [
-      { alias: "Liça", kind: "SYNONYM", locale: "tr" },
-      { alias: "Litsa", kind: "SYNONYM", locale: "tr" },
-      { alias: "Çatal Kuyruk", kind: "SEARCH_TERM", locale: "tr" },
-      { alias: "Çıplak", kind: "SEARCH_TERM", locale: "tr" },
-    ],
-    regionalNames: [{ name: "Litsa", locale: "tr", countryScope: "KKTC" }],
-  },
-  {
-    slug: "seriola-dumerili",
-    scientificName: "Seriola dumerili",
-    nameEn: "Greater amberjack",
-    nameTr: "Kuzu",
-    editorialNotesEn:
-      "Do not use Akya as an alias — that name belongs to Lichia amia. KKTC anglers may say Mineri.",
-    editorialNotesTr:
-      "Akya takma ad olarak kullanılmaz — Akya Lichia amia türüne aittir. KKTC'de Mineri denir.",
-    aliases: [
-      { alias: "Sarı Kuyruk", kind: "SEARCH_TERM", locale: "tr" },
-    ],
-    regionalNames: [{ name: "Mineri", locale: "tr", countryScope: "KKTC" }],
-  },
-];
+const REFERENCE_SPECIES: SpeciesSeedFromLexicon[] =
+  REFERENCE_SPECIES_LEXICON_IDS.map((id) => {
+    const term = getLexiconTermById(id);
+    if (!term) {
+      throw new Error(`Missing lexicon entry for reference species: ${id}`);
+    }
+    return lexiconTermToSpeciesSeed(term);
+  });
 
 const CONFUSION_SEED = {
-  primarySlug: "lichia-amia",
-  confusedSlug: "seriola-dumerili",
+  primaryLexiconTermId: "lichia-amia",
+  confusedLexiconTermId: "seriola-dumerili",
   misappliedNameTr: "Akya",
   reasonEn:
     "Some regions incorrectly use the name Akya for Seriola dumerili. Akya is the preferred Turkish name for Lichia amia.",
@@ -67,7 +27,7 @@ const CONFUSION_SEED = {
   countryScope: "TR",
 };
 
-async function upsertSpecies(seed: SpeciesSeed) {
+async function upsertSpecies(seed: SpeciesSeedFromLexicon) {
   const species = await prisma.fishSpecies.upsert({
     where: { slug: seed.slug },
     create: {
@@ -75,15 +35,15 @@ async function upsertSpecies(seed: SpeciesSeed) {
       scientificName: seed.scientificName,
       nameEn: seed.nameEn,
       nameTr: seed.nameTr,
-      editorialNotesEn: seed.editorialNotesEn ?? null,
-      editorialNotesTr: seed.editorialNotesTr ?? null,
+      editorialNotesEn: seed.editorialNotesEn,
+      editorialNotesTr: seed.editorialNotesTr,
     },
     update: {
       scientificName: seed.scientificName,
       nameEn: seed.nameEn,
       nameTr: seed.nameTr,
-      editorialNotesEn: seed.editorialNotesEn ?? null,
-      editorialNotesTr: seed.editorialNotesTr ?? null,
+      editorialNotesEn: seed.editorialNotesEn,
+      editorialNotesTr: seed.editorialNotesTr,
       deletedAt: null,
     },
   });
@@ -161,15 +121,17 @@ async function upsertSpecies(seed: SpeciesSeed) {
 
 export async function ensureTaxonomyReferenceSeeds(): Promise<void> {
   try {
-    const speciesBySlug = new Map<string, string>();
+    const speciesByLexiconId = new Map<string, string>();
 
     for (const seed of REFERENCE_SPECIES) {
       const species = await upsertSpecies(seed);
-      speciesBySlug.set(seed.slug, species.id);
+      speciesByLexiconId.set(seed.lexiconTermId, species.id);
     }
 
-    const primaryId = speciesBySlug.get(CONFUSION_SEED.primarySlug);
-    const confusedId = speciesBySlug.get(CONFUSION_SEED.confusedSlug);
+    const primaryId = speciesByLexiconId.get(CONFUSION_SEED.primaryLexiconTermId);
+    const confusedId = speciesByLexiconId.get(
+      CONFUSION_SEED.confusedLexiconTermId,
+    );
 
     if (primaryId && confusedId) {
       await prisma.speciesConfusion.upsert({

@@ -27,4 +27,16 @@ export {
   LEXICON_SEED_TERMS,
 } from "@/modules/terminology/data";
 
+export {
+  LICHIA_AMIA_TERM,
+  REFERENCE_SPECIES_LEXICON_IDS,
+  REFERENCE_SPECIES_TERMS,
+  SERIOLA_DUMERILI_TERM,
+} from "@/modules/terminology/data/reference-species";
+
+export {
+  lexiconTermToSpeciesSeed,
+  type SpeciesSeedFromLexicon,
+} from "@/modules/terminology/lib/species-seed";
+
 export { normalizeTermLabel } from "@/modules/terminology/lib/normalize-label";
