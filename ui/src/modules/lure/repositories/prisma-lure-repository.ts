@@ -27,6 +27,10 @@ import type {
   LureTechnique,
   LureVariant as UiLureVariant,
 } from "@/modules/lure/types/lure-detail";
+import {
+  BALIK_OLTAMDA_EDITORIAL_SLUG,
+} from "@/modules/editorial/data/authors";
+import type { EditorialNotePreview } from "@/modules/editorial/types";
 
 const PLACEHOLDER_IMAGE = "/lures/placeholder.svg";
 
@@ -35,6 +39,10 @@ type LureModelRecord = LureModel & {
   editorNote: {
     confidence: import("@/generated/prisma/client").EditorNoteConfidence;
     updatedAt: Date;
+    currentRecommendationEn: string | null;
+    currentRecommendationTr: string | null;
+    shortRecommendationEn: string | null;
+    shortRecommendationTr: string | null;
   } | null;
   manufacturer: {
     nameEn: string;
@@ -288,6 +296,30 @@ function resolveActiveVariant(
   );
 }
 
+function mapEditorialNote(
+  editorNote: LureModelRecord["editorNote"],
+): EditorialNotePreview | null {
+  if (!editorNote) return null;
+
+  const en =
+    editorNote.currentRecommendationEn?.trim() ||
+    editorNote.shortRecommendationEn?.trim() ||
+    "";
+  const tr =
+    editorNote.currentRecommendationTr?.trim() ||
+    editorNote.shortRecommendationTr?.trim() ||
+    "";
+
+  if (!en && !tr) return null;
+
+  return {
+    summary: { en, tr },
+    confidence: editorNote.confidence,
+    updatedAt: editorNote.updatedAt.toISOString(),
+    authorSlug: BALIK_OLTAMDA_EDITORIAL_SLUG,
+  };
+}
+
 function mapRecordToLureDetail(
   record: LureModelRecord,
   trustContext: { pendingSuggestions: number; publishedAt: Date | null },
@@ -312,13 +344,6 @@ function mapRecordToLureDetail(
   );
   const dbDivingDepth = mapDbDivingDepth(record);
 
-  const verificationStatus = derivePublicVerificationStatus({
-    lifecycleState: record.lifecycleState,
-    editorConfidence: record.editorNote?.confidence ?? null,
-    lastImportedAt: record.lastImportedAt,
-    pendingSuggestions: trustContext.pendingSuggestions,
-  });
-
   const lastVerifiedAt = deriveLastVerifiedAt({
     lifecycleState: record.lifecycleState,
     publishedAt: trustContext.publishedAt,
@@ -334,6 +359,14 @@ function mapRecordToLureDetail(
     pendingSuggestions: trustContext.pendingSuggestions,
     manufacturerName: record.manufacturer.nameEn,
     publishedAt: trustContext.publishedAt,
+    lastVerifiedAt,
+  });
+
+  const verificationStatus = derivePublicVerificationStatus({
+    lifecycleState: record.lifecycleState,
+    editorConfidence: record.editorNote?.confidence ?? null,
+    lastImportedAt: record.lastImportedAt,
+    pendingSuggestions: trustContext.pendingSuggestions,
   });
 
   return {
@@ -394,6 +427,7 @@ function mapRecordToLureDetail(
     sponsoredLinks: enrichment.sponsoredLinks,
     changeHistory: enrichment.changeHistory,
     trust,
+    editorialNote: mapEditorialNote(record.editorNote),
   };
 }
 
@@ -437,7 +471,14 @@ const lureModelInclude = {
     include: { technique: true },
   },
   editorNote: {
-    select: { confidence: true, updatedAt: true },
+    select: {
+      confidence: true,
+      updatedAt: true,
+      currentRecommendationEn: true,
+      currentRecommendationTr: true,
+      shortRecommendationEn: true,
+      shortRecommendationTr: true,
+    },
   },
 } satisfies Prisma.LureModelInclude;
 

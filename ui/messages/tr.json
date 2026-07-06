@@ -28,18 +28,21 @@
   "Home": {
     "meta": {
       "title": "TrollMatch — Gerçek avlarla doğrulanmış balıkçılık rehberi",
-      "description": "Gerçek av tecrübeleriyle doğrulanmış balıkçılık platformu. Üretici bilgileri, doğrulanmış av raporları ve Balık Oltamda kontrolü — Türkiye, Kıbrıs ve Ege-Akdeniz."
+      "description": "Üretici verileri, gerçek av tecrübeleri ve Balık Oltamda doğrulaması — tek yerde."
     },
     "hero": {
-      "eyebrow": "Balık Oltamda · Ege ve Akdeniz",
-      "regionScope": "Türkiye · Kıbrıs · Ege",
-      "title": "TrollMatch",
-      "brandStatement": "Gerçek av tecrübeleriyle doğrulanmış balıkçılık platformu.",
-      "description": "Üretici bilgileri, balıkçıların gerçek av deneyimleri ve Balık Oltamda doğrulaması — hepsi bir arada.",
+      "title": "Yılların balıkçılık tecrübesini, teknik analizlerle ve yapay zekânın gücüyle bir araya getirdik.",
+      "description": "Üretici verilerini, gerçek av tecrübelerini ve Balık Oltamda'nın yıllara dayanan deneyimini tek yerde buluşturuyoruz.",
       "searchPlaceholder": "Yem, marka veya balık türü ara…",
       "searchAria": "Yem ara",
       "ctaPrimary": "Yem ekle",
       "ctaSecondary": "Yemlere bak"
+    },
+    "trust": {
+      "developedBy": "Geliştiren",
+      "developerAria": "Balık Oltamda — yeni sekmede açılır",
+      "editorialReview": "Editör doğrulaması",
+      "verifiedSources": "Doğrulanmış kaynaklar"
     },
     "species": {
       "title": "Bu sularda sık aranan türler",
@@ -133,6 +136,7 @@
   },
   "Taxonomy": {
     "sectionTitle": "Adlar",
+    "editorialTitle": "Editör notu",
     "aliases": "Diğer adlar",
     "regional": "Bölgesel adlar",
     "confusedWith": "Sık karıştırılan türler",
@@ -174,6 +178,7 @@
     "breadcrumbSpecies": "Balıklar",
     "detailDescription": "{count, plural, =0 {Henüz bağlı yem yok} one {# yem kayıtlı} other {# yem kayıtlı}} — üretici bilgisi ve av raporları.",
     "viewAllLures": "Bu tür için tüm yemler",
+    "editorialAttribution": "Tür notları ve taksonomi Balık Oltamda editör ekibi tarafından doğrulanır.",
     "catalogLuresTitle": "Kayıtlı yemler",
     "catalogLuresDescription": "Üretici ve editoryal etiketlerden katalog kayıtları — av tekniği olmadan etkinlik önerisi değildir.",
     "noLuresYet": "Bu türe henüz yem bağlanmadı.",
@@ -299,13 +304,43 @@
       "source": "Doğrulanmış balıkçı raporları — üretici önerisi değil."
     },
     "ai": {
-      "assistedLabel": "Özet",
+      "assistedLabel": "Yapay zekâ özeti",
       "citations": "Kaynaklar",
       "corpusDate": "Notların tarihi"
+    },
+    "editorial": {
+      "title": "Editör notu",
+      "description": "Balık Oltamda editör ekibinin sahadan notları — av raporlarıyla doğrulanır.",
+      "confidence": "{level} güven"
     },
     "sponsored": {
       "disclaimer": "Satıcı linkleri listeyi etkilemez. Mağazaları ancak sen bakmak istediğinde gösteririz.",
       "findRetailers": "Satıcı bul"
+    }
+  },
+  "Editorial": {
+    "writtenBy": "Yazan",
+    "reviewed": "Doğrulama",
+    "sources": {
+      "manufacturer": "Üretici",
+      "editorial": "Editör",
+      "community": "Topluluk",
+      "ai": "Yapay zekâ özeti"
+    },
+    "trust": {
+      "lastVerification": "Son doğrulama",
+      "verificationStatus": "Doğrulama durumu",
+      "editorialReview": "Editör incelemesi",
+      "sourceCount": "Kaynak sayısı",
+      "notYet": "Henüz yok",
+      "editorialPublished": "Yayında",
+      "editorialPending": "İnceleme bekliyor"
+    },
+    "authorPage": {
+      "metaTitle": "Editör profili",
+      "breadcrumbLabel": "Konum",
+      "breadcrumbHome": "Ana sayfa",
+      "futureNotes": "Yem ve tür sayfalarındaki editör notları, bireysel yazar profilleri eklendikçe buraya bağlanacak."
     }
   },
   "AddLure": {

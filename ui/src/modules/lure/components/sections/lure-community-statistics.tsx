@@ -35,6 +35,7 @@ export async function LureCommunityStatistics({
       id="community"
       title={t("sections.community")}
       description={t("sections.communityDescription")}
+      sourceType="community"
     >
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="border-border rounded-lg border p-4 text-center">

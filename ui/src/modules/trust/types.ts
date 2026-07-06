@@ -54,4 +54,7 @@ export type PublicTrustSummary = {
   communityConsensus: CommunityConsensus | null;
   evidence: string[];
   provenance: TrustProvenanceItem[];
+  lastVerifiedAt: string | null;
+  editorialReviewPublished: boolean;
+  sourceCount: number;
 };

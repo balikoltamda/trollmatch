@@ -72,6 +72,9 @@ export async function SpeciesDetailView({
           >
             {t("viewAllLures")}
           </Link>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            {t("editorialAttribution")}
+          </p>
         </header>
 
         <div className="section-stack">

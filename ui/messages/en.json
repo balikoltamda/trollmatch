@@ -28,18 +28,21 @@
   "Home": {
     "meta": {
       "title": "TrollMatch — Fishing guide verified by real catches",
-      "description": "Fishing platform verified by real catch experiences. Manufacturer specs, verified angler reports, and Balık Oltamda review — Turkey, Cyprus, and the Eastern Mediterranean."
+      "description": "Manufacturer data, real catch experiences, and Balık Oltamda editorial review — all in one place."
     },
     "hero": {
-      "eyebrow": "Balık Oltamda · Aegean & Eastern Mediterranean",
-      "regionScope": "Turkey · Northern Cyprus · Aegean",
-      "title": "TrollMatch",
-      "brandStatement": "Fishing platform verified by real catch experiences.",
-      "description": "Manufacturer specs, verified angler catch reports, and Balık Oltamda editorial review — all in one place.",
+      "title": "We've brought years of fishing experience together with technical analysis and the power of artificial intelligence.",
+      "description": "Manufacturer data, real catch experiences, and Balık Oltamda's decades of expertise — united in one place.",
       "searchPlaceholder": "Search lure, brand, or species…",
       "searchAria": "Search lures",
       "ctaPrimary": "Add a lure",
       "ctaSecondary": "Browse lures"
+    },
+    "trust": {
+      "developedBy": "Developed by",
+      "developerAria": "Balık Oltamda — opens in new tab",
+      "editorialReview": "Editorial review",
+      "verifiedSources": "Verified sources"
     },
     "species": {
       "title": "Commonly targeted here",
@@ -133,6 +136,7 @@
   },
   "Taxonomy": {
     "sectionTitle": "Names",
+    "editorialTitle": "Editorial note",
     "aliases": "Also known as",
     "regional": "Regional names",
     "confusedWith": "Frequently confused with",
@@ -174,6 +178,7 @@
     "breadcrumbSpecies": "Fish",
     "detailDescription": "{count, plural, =0 {No lures linked yet} one {# lure linked} other {# lures linked}} — manufacturer specs and catch reports.",
     "viewAllLures": "All lures for this species",
+    "editorialAttribution": "Species notes and taxonomy are reviewed by the Balık Oltamda editorial team.",
     "catalogLuresTitle": "Recorded lures",
     "catalogLuresDescription": "Catalog entries from manufacturer and editorial tags — not effectiveness advice without a fishing technique.",
     "noLuresYet": "No lures linked to this species yet.",
@@ -299,13 +304,43 @@
       "source": "Verified angler reports — not the manufacturer's suggestion alone."
     },
     "ai": {
-      "assistedLabel": "Summary",
+      "assistedLabel": "AI summary",
       "citations": "Sources",
       "corpusDate": "Notes from"
+    },
+    "editorial": {
+      "title": "Editorial note",
+      "description": "Field-tested guidance from the Balık Oltamda editorial team — verified against catch reports.",
+      "confidence": "{level} confidence"
     },
     "sponsored": {
       "disclaimer": "Shop links don't change how lures are listed. Retailers only show when you choose to look.",
       "findRetailers": "Find retailers"
+    }
+  },
+  "Editorial": {
+    "writtenBy": "Written by",
+    "reviewed": "Reviewed",
+    "sources": {
+      "manufacturer": "Manufacturer",
+      "editorial": "Editorial",
+      "community": "Community",
+      "ai": "AI summary"
+    },
+    "trust": {
+      "lastVerification": "Last verification",
+      "verificationStatus": "Verification status",
+      "editorialReview": "Editorial review",
+      "sourceCount": "Source count",
+      "notYet": "Not yet",
+      "editorialPublished": "Published",
+      "editorialPending": "Pending review"
+    },
+    "authorPage": {
+      "metaTitle": "Editorial profile",
+      "breadcrumbLabel": "You are here",
+      "breadcrumbHome": "Home",
+      "futureNotes": "Editorial notes on lure and species pages will link here as individual author profiles are added."
     }
   },
   "AddLure": {

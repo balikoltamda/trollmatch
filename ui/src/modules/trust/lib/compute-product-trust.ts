@@ -267,6 +267,7 @@ export function buildPublicTrustSummary(input: {
   pendingSuggestions: number;
   manufacturerName: string;
   publishedAt: Date | null;
+  lastVerifiedAt: string | null;
 }): PublicTrustSummary {
   const community = communityFromSlug(input.slug);
   const score = computeTrustScore({
@@ -313,6 +314,14 @@ export function buildPublicTrustSummary(input: {
         ? "Manufacturer specs on file — catch reports and editorial review still building."
         : "Limited source detail — check catch reports before relying on this page.";
 
+  let sourceCount = 0;
+  if (input.lastImportedAt) sourceCount += 1;
+  if (community && community.catchReports > 0) sourceCount += 1;
+  if (input.editorConfidence !== null) sourceCount += 1;
+  if (input.lifecycleState === "PUBLISHED") sourceCount += 1;
+
+  const lastVerifiedAt = input.lastVerifiedAt;
+
   return {
     score,
     answer,
@@ -322,6 +331,9 @@ export function buildPublicTrustSummary(input: {
     communityConsensus: community,
     evidence,
     provenance,
+    lastVerifiedAt,
+    editorialReviewPublished: input.lifecycleState === "PUBLISHED",
+    sourceCount,
   };
 }
 

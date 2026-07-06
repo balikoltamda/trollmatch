@@ -1,5 +1,7 @@
 import type { AppLocale } from "@/i18n/routing";
 
+import type { EditorialNotePreview } from "@/modules/editorial/types";
+
 export type VerificationStatus =
   | "unverified"
   | "partially_verified"
@@ -99,6 +101,7 @@ export type LureDetail = {
   sponsoredLinks: SponsoredLink[];
   changeHistory: ChangeHistoryEntry[];
   trust: import("@/modules/trust/types").PublicTrustSummary;
+  editorialNote: EditorialNotePreview | null;
 };
 
 export type LureDetailParams = {

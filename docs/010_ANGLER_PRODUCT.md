@@ -235,6 +235,27 @@ Reduce visual noise. Desktop first; mobile excellent. Improve presentation only 
 
 ---
 
+## Sprint 8.3 — Authority & Trust Experience (shipped)
+
+**Goal:** Increase perceived trust by making expertise visible — not by adding more content.
+
+### Delivered
+
+| Area | Change |
+|------|--------|
+| **Homepage** | Subtle Balık Oltamda trust strip under hero — developed-by link, editorial review indicators |
+| **Author architecture** | `Editorial` module, author registry, `/authors/[slug]` profile pages, `AuthorAttribution` on notes |
+| **Information sources** | `InformationSourceBadge` on every lure section — manufacturer, editorial, community, AI |
+| **Lure detail** | `TrustIndicators` (last verification, status, editorial review, source count); editorial notes from DB |
+| **Species detail** | Editorial notes separated from taxonomy; source badges and attribution |
+| **Locales** | `Editorial.*`, `Home.trust`, `LureDetail.editorial` |
+
+### Design rule
+
+Every information block shows its source. No database changes — presentation and read paths only.
+
+---
+
 ## Evolutionary domain design (platform law)
 
 **Goal:** Keep fishing knowledge models simple — extensible, not premature.

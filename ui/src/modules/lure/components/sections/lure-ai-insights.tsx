@@ -12,12 +12,18 @@ type LureAiInsightsProps = {
 
 export async function LureAiInsights({ insights, locale }: LureAiInsightsProps) {
   const t = await getTranslations("LureDetail");
+  const summary = localize(insights.summary, locale).trim();
+
+  if (!summary) {
+    return null;
+  }
 
   return (
     <LureSection
       id="ai-insights"
       title={t("sections.summary")}
       description={t("sections.summaryDescription")}
+      sourceType="ai"
     >
       <div className="border-border bg-muted/30 space-y-4 rounded-lg border p-4">
         <div className="flex items-center gap-2">
@@ -27,7 +33,7 @@ export async function LureAiInsights({ insights, locale }: LureAiInsightsProps) 
           </span>
         </div>
         <p className="text-foreground text-sm leading-relaxed sm:text-base">
-          {localize(insights.summary, locale)}
+          {summary}
         </p>
         <div>
           <p className="text-muted-foreground mb-2 text-xs font-medium">

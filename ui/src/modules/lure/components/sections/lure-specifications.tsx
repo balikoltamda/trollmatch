@@ -108,6 +108,7 @@ export async function LureSpecifications({
       id="specifications"
       title={t("sections.specifications")}
       description={t("sections.specificationsDescription")}
+      sourceType="manufacturer"
     >
       <dl>
         {rows.map((row) => (

@@ -247,7 +247,11 @@ const HALCO_LASER_PRO: LureDetail = {
       { label: "Manufacturer", value: "Halco" },
       { label: "Published", value: "11/14/2025" },
     ],
+    lastVerifiedAt: "2025-11-14T09:00:00.000Z",
+    editorialReviewPublished: true,
+    sourceCount: 4,
   },
+  editorialNote: null,
 };
 
 export const MOCK_LURES: Record<string, LureDetail> = {

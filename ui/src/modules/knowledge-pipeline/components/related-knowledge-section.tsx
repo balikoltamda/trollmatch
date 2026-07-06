@@ -78,6 +78,7 @@ export async function RelatedKnowledgeSection(props: RelatedKnowledgeSectionProp
       id="related-knowledge"
       title={t("relatedTitle")}
       description={t("relatedDescription")}
+      sourceType="editorial"
     >
       <ul className="space-y-3">
         {cards.map((card) => (

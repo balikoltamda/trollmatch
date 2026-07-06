@@ -16,6 +16,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import type { AppLocale } from "@/i18n/routing";
 import { HeroSearch } from "@/modules/home/components/hero-search";
+import { HomeTrustStrip } from "@/modules/home/components/home-trust-strip";
 import {
   COLLECTION_LINKS,
   getHomeDiscoveryData,
@@ -78,27 +79,22 @@ export async function HomeView({ locale }: HomeViewProps) {
     <div className="-mx-4 sm:-mx-6">
       <section className="relative overflow-hidden border-b border-border/40">
         <div
-          className="pointer-events-none absolute inset-0 opacity-40"
+          className="pointer-events-none absolute inset-0 opacity-25"
           aria-hidden
           style={{
             background:
               "radial-gradient(ellipse 70% 50% at 50% -20%, color-mix(in oklch, var(--turquoise), transparent 82%), transparent)",
           }}
         />
-        <Container className="relative py-24 sm:py-32 lg:py-36">
-          <div className="mx-auto flex max-w-3xl flex-col items-center gap-10 text-center">
-            <p className="label-caps text-ocean">{t("hero.eyebrow")}</p>
-            <p className="text-muted-foreground label-caps">{t("hero.regionScope")}</p>
-            <h1 className="text-foreground text-4xl font-semibold tracking-tight sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
+        <Container className="relative py-28 sm:py-36 lg:py-40">
+          <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 text-center">
+            <h1 className="text-foreground text-3xl font-semibold tracking-tight text-balance sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
               {t("hero.title")}
             </h1>
-            <p className="text-foreground/90 max-w-2xl text-lg font-medium leading-relaxed sm:text-xl">
-              {t("hero.brandStatement")}
-            </p>
             <p className="text-muted-foreground max-w-2xl text-base leading-relaxed sm:text-lg">
               {t("hero.description")}
             </p>
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-2xl pt-2">
               <HeroSearch
                 placeholder={t("hero.searchPlaceholder")}
                 ariaLabel={t("hero.searchAria")}
@@ -118,6 +114,7 @@ export async function HomeView({ locale }: HomeViewProps) {
                 {t("hero.ctaSecondary")}
               </Link>
             </div>
+            <HomeTrustStrip />
           </div>
         </Container>
       </section>

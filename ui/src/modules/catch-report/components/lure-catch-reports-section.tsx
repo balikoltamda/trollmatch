@@ -39,6 +39,7 @@ export async function LureCatchReportsSection({
       id="catch-reports"
       title={t("lureSection.title")}
       description={t("lureSection.description")}
+      sourceType="community"
     >
       {reports.length > 0 ? (
         <ul className="mb-8 space-y-3">
