@@ -162,6 +162,13 @@
       "error": "Could not submit. Try again."
     }
   },
+  "Knowledge": {
+    "relatedTitle": "Related knowledge",
+    "relatedDescription": "Verified sources linked to this page — always linking to the original, never mirrored here.",
+    "viewOriginal": "View original source",
+    "searchSectionTitle": "Knowledge sources",
+    "searchSectionDescription": "Indexed articles, videos, and papers matching your search — open the original to read more."
+  },
   "LureDetail": {
     "pageLandmark": "Lure detail",
     "breadcrumbLabel": "You are here",

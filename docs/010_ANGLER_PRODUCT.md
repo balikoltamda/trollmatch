@@ -121,6 +121,7 @@ UI · Search · AI summaries · Importers · Studio · Public pages · APIs
 | **Studio** | `/studio/knowledge` — editor inbox sorted by confidence |
 | **Actions** | Approve, reject, merge, ignore, open source (all audited) |
 | **Architecture** | Vision pipeline interfaces, knowledge graph prep, multi-source type design |
+| **Index policy** | Metadata + URL + AI summary only — no third-party content republishing |
 
 ### Not in scope
 
@@ -132,7 +133,26 @@ See `docs/013_KNOWLEDGE_PIPELINE.md` for full architecture.
 
 ---
 
-## Sprint 7.5 — Regional experience (next)
+## Sprint 7.5 — Knowledge Hub & Source Intelligence (shipped)
+
+**Goal:** Central hub for verified fishing knowledge — indexed, connected, never mirrored.
+
+### Delivered
+
+| Area | Feature |
+|------|---------|
+| **Studio** | Knowledge Hub at `/studio/knowledge` — richer workspace with source scoring |
+| **Source scoring** | Category-based engine (manufacturer, scientific, forum tiers, etc.) |
+| **Relations** | Multiple species, lures, techniques, manufacturers via knowledge graph |
+| **Public** | Related knowledge sections on lure + species pages |
+| **Search** | Knowledge titles and summaries in `/search` results |
+| **Editor** | Approve, reject, merge, archive, flag outdated, view original |
+
+See `docs/013_KNOWLEDGE_PIPELINE.md`.
+
+---
+
+## Sprint 7.6 — Regional experience (next)
 
 **Goal:** Every lure page answers “how does this work *here*?”
 
@@ -143,7 +163,7 @@ See `docs/013_KNOWLEDGE_PIPELINE.md` for full architecture.
 
 ---
 
-## Sprint 7.6 — AI summaries (angler-facing)
+## Sprint 7.7 — AI summaries (angler-facing)
 
 **Goal:** “At a glance” blocks with real cited sources — not empty shells.
 

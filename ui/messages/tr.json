@@ -162,6 +162,13 @@
       "error": "Gönderilemedi. Tekrar dene."
     }
   },
+  "Knowledge": {
+    "relatedTitle": "İlgili bilgi kaynakları",
+    "relatedDescription": "Bu sayfaya bağlı doğrulanmış kaynaklar — her zaman orijinale yönlendirir, içerik burada yansıtılmaz.",
+    "viewOriginal": "Orijinal kaynağı görüntüle",
+    "searchSectionTitle": "Bilgi kaynakları",
+    "searchSectionDescription": "Aramanızla eşleşen indekslenmiş makale, video ve yayınlar — devamı için orijinal kaynağı açın."
+  },
   "LureDetail": {
     "pageLandmark": "Yem detayı",
     "breadcrumbLabel": "Konum",

@@ -21,6 +21,28 @@ Community reports are valuable but optional. Primary knowledge growth comes from
 
 ---
 
+## External knowledge sources — index, not mirror
+
+TrollMatch does **not** republish third-party content.
+
+The platform stores only:
+
+| Stored | Not stored |
+|--------|------------|
+| Source metadata | Full article text |
+| Canonical URL | Mirrored photos |
+| Title | Embedded videos |
+| AI-generated summary | Copied forum posts |
+| Editor verification | Scraped social feeds |
+| Confidence score | |
+| Related species, lure, technique | |
+
+When possible, users and editors are **directed to the original source**. Photos and videos remain hosted by their original platform (YouTube, manufacturer sites, forums, journals).
+
+`rawSnippet*` fields are internal discovery fingerprints for deduplication — never shown publicly. `aiSummary*` is the only user-facing prose from external sources. `KnowledgeEvidence` holds reference labels and URLs, not republished excerpts.
+
+---
+
 ## Subsystem placement
 
 Knowledge Pipeline is a first-class subsystem beside:
@@ -43,7 +65,9 @@ Designed to support multiple source types. **No crawlers in Sprint 7.4.**
 | `COMMUNITY` | Catch reports, trends (optional input) |
 | `YOUTUBE` | Angling channel content |
 | `FISHING_FORUM` | Forum threads and local knowledge |
-| `PUBLIC_ARTICLE` | Editorial and magazine content |
+| `FISHING_BLOG` | Angling blog posts |
+| `MAGAZINE` | Magazine articles |
+| `PUBLIC_ARTICLE` | Legacy article type (prefer MAGAZINE / FISHING_BLOG) |
 | `SCIENTIFIC_PUBLICATION` | Peer-reviewed fisheries research |
 | `OTHER` | Future sources |
 
@@ -85,35 +109,59 @@ Supporting models:
 - **`KnowledgeGraphLink`** — edges between knowledge items and catalog entities
 - **`KnowledgeAuditEntry`** — append-only editor action log
 
-Migration: `ui/prisma/migrations/20250706140000_knowledge_pipeline/`
+Migration: `ui/prisma/migrations/20250706140000_knowledge_pipeline/`  
+Sprint 7.5: `ui/prisma/migrations/20250706160000_knowledge_hub/`
 
 ---
 
-## Knowledge inbox (Studio)
+## Knowledge Hub (Studio) — Sprint 7.5
 
 Route: `/studio/knowledge`
 
-The editor's primary workspace for discovered knowledge. Items sorted by **confidence** (HIGH first), then recency.
+Replaces the basic inbox with a richer editorial workspace. Items sorted by **source score**, then confidence, then recency.
 
-Sections surfaced in the inbox:
+Every knowledge item displays:
 
-- New manufacturer findings
-- New YouTube findings
-- Forum findings
-- Scientific findings
-- Community trends
-- Duplicate findings
-- Potential taxonomy conflicts
+- Source metadata, title, original URL, source type, language
+- Discovery date, country, region
+- AI summary and source preview (synthesized — never mirrored)
+- Related species, lures, techniques, manufacturers (multiple via graph)
+- Source score and category
+- Editor status
+
+### Source scoring (no AI)
+
+Category-based engine in `lib/source-scoring.ts`:
+
+| Category | Base score |
+|----------|------------|
+| Manufacturer | 95 |
+| Scientific publication | 90 |
+| Official documentation | 85 |
+| Balık Oltamda | 80 |
+| Trusted forum | 65 |
+| General forum | 45 |
+| Community | 35 |
+| Unknown | 20 |
+
+Trust tier (1–5) adjusts ±8 points.
 
 ### Editor actions (all audited)
 
 | Action | Effect |
 |--------|--------|
-| **Approve** | Mark verified; ready for catalog integration |
+| **Approve** | Mark verified; surfaces on public pages |
 | **Reject** | Discard finding |
 | **Merge** | Collapse duplicate into primary item |
-| **Ignore** | Defer without rejection |
-| **Open source** | Log URL visit (audit only) |
+| **Archive** | Remove from active review |
+| **Flag outdated** | Mark superseded source |
+| **View original** | Log URL visit (audit only) |
+
+---
+
+## Public related knowledge — Sprint 7.5
+
+Approved knowledge appears on lure and species pages as **Related knowledge** cards. Each card links directly to the original source. Search (`/search`) includes knowledge titles and summaries alongside lure results.
 
 ---
 

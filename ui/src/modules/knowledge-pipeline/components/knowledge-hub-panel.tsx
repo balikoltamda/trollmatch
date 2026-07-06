@@ -7,22 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   approveKnowledgeItem,
-  ignoreKnowledgeItem,
+  archiveKnowledgeItem,
+  flagKnowledgeOutdated,
   logOpenKnowledgeSource,
   mergeKnowledgeItems,
   rejectKnowledgeItem,
 } from "@/modules/knowledge-pipeline/actions/knowledge-actions";
-import type { KnowledgeInboxItem } from "@/modules/knowledge-pipeline/types";
-
-const SOURCE_LABELS: Record<string, string> = {
-  MANUFACTURER: "Manufacturer",
-  COMMUNITY: "Community",
-  YOUTUBE: "YouTube",
-  FISHING_FORUM: "Forum",
-  PUBLIC_ARTICLE: "Article",
-  SCIENTIFIC_PUBLICATION: "Scientific",
-  OTHER: "Other",
-};
+import type { KnowledgeHubItem } from "@/modules/knowledge-pipeline/types";
+import { KNOWLEDGE_SOURCE_TYPE_LABELS } from "@/modules/knowledge-pipeline/types";
 
 const CONFIDENCE_VARIANT = {
   HIGH: "turquoise",
@@ -30,11 +22,26 @@ const CONFIDENCE_VARIANT = {
   LOW: "coral",
 } as const;
 
-type KnowledgeInboxPanelProps = {
-  items: KnowledgeInboxItem[];
+type KnowledgeHubPanelProps = {
+  items: KnowledgeHubItem[];
 };
 
-export function KnowledgeInboxPanel({ items }: KnowledgeInboxPanelProps) {
+function EntityChips({
+  label,
+  items,
+}: {
+  label: string;
+  items: Array<{ slug: string; name: { en: string } }>;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <span>
+      {label}: {items.map((i) => i.name.en).join(", ")}
+    </span>
+  );
+}
+
+export function KnowledgeHubPanel({ items }: KnowledgeHubPanelProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [mergePrimaryId, setMergePrimaryId] = useState<string | null>(null);
@@ -56,7 +63,8 @@ export function KnowledgeInboxPanel({ items }: KnowledgeInboxPanelProps) {
   if (items.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
-        Knowledge inbox is empty. Sources will appear here as the pipeline discovers trustworthy information.
+        Knowledge Hub is empty. Discovered sources will appear here for editorial
+        verification.
       </p>
     );
   }
@@ -79,47 +87,70 @@ export function KnowledgeInboxPanel({ items }: KnowledgeInboxPanelProps) {
           >
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0 flex-1 space-y-1">
-                <p className="font-medium leading-snug">{item.title.en}</p>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-ocean font-medium leading-snug underline-offset-2 hover:underline"
+                  onClick={() => void logOpenKnowledgeSource(item.id, item.url)}
+                >
+                  {item.title.en}
+                </a>
                 <p className="text-muted-foreground text-xs">
-                  {SOURCE_LABELS[item.sourceType] ?? item.sourceType} ·{" "}
-                  {item.sourceName.en}
+                  {KNOWLEDGE_SOURCE_TYPE_LABELS[item.sourceType]?.en ?? item.sourceType}{" "}
+                  · {item.sourceName.en}
+                  {item.language ? ` · ${item.language}` : ""}
                   {item.region ? ` · ${item.region}` : ""}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant={
-                    CONFIDENCE_VARIANT[item.confidence] ?? "muted"
-                  }
-                >
+                <Badge variant="muted">
+                  Score {item.sourceScore}
+                </Badge>
+                <Badge variant="muted">{item.sourceScoreCategoryLabel}</Badge>
+                <Badge variant={CONFIDENCE_VARIANT[item.confidence] ?? "muted"}>
                   {item.confidence}
                 </Badge>
+                <Badge variant="muted">{item.status}</Badge>
                 {item.isDuplicate || item.hasTaxonomyConflict ? (
                   <Badge variant="coral">Duplicate / conflict</Badge>
                 ) : null}
               </div>
             </div>
 
-            <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-              {item.snippet.en}
-            </p>
+            {item.sourcePreview ? (
+              <p className="text-muted-foreground mt-2 text-xs">
+                <span className="text-foreground/70 font-medium uppercase tracking-wide">
+                  Preview ·{" "}
+                </span>
+                {item.sourcePreview.en}
+              </p>
+            ) : null}
+
+            {item.aiSummary ? (
+              <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                <span className="text-foreground/70 text-xs font-medium uppercase tracking-wide">
+                  AI summary ·{" "}
+                </span>
+                {item.aiSummary.en}
+              </p>
+            ) : (
+              <p className="text-muted-foreground mt-2 text-sm italic">
+                AI summary pending — view original source to verify.
+              </p>
+            )}
 
             <div className="text-muted-foreground mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-              {item.relatedSpecies ? (
-                <span>Species: {item.relatedSpecies.name}</span>
-              ) : null}
-              {item.relatedLure ? (
-                <span>Lure: {item.relatedLure.name}</span>
-              ) : null}
-              {item.relatedTechnique ? (
-                <span>Technique: {item.relatedTechnique.name}</span>
-              ) : null}
+              <EntityChips label="Species" items={item.relatedSpecies} />
+              <EntityChips label="Lures" items={item.relatedLures} />
+              <EntityChips label="Techniques" items={item.relatedTechniques} />
+              <EntityChips label="Manufacturers" items={item.relatedManufacturers} />
               {item.evidenceCount > 0 ? (
-                <span>{item.evidenceCount} evidence</span>
+                <span>{item.evidenceCount} references</span>
               ) : null}
-              {item.suggestionCount > 0 ? (
-                <span>{item.suggestionCount} suggestions</span>
-              ) : null}
+              <span>
+                Discovered {item.discoveredAt.toLocaleDateString("en-GB")}
+              </span>
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">
@@ -133,7 +164,7 @@ export function KnowledgeInboxPanel({ items }: KnowledgeInboxPanelProps) {
                 }}
               >
                 <ExternalLink className="mr-1 size-3.5" />
-                Open source
+                View original source
               </Button>
               <Button
                 size="sm"
@@ -154,14 +185,6 @@ export function KnowledgeInboxPanel({ items }: KnowledgeInboxPanelProps) {
                 size="sm"
                 variant="outline"
                 disabled={pending}
-                onClick={() => runAction(() => ignoreKnowledgeItem(item.id))}
-              >
-                Ignore
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={pending}
                 onClick={() =>
                   setMergePrimaryId((current) =>
                     current === item.id ? null : item.id,
@@ -169,6 +192,22 @@ export function KnowledgeInboxPanel({ items }: KnowledgeInboxPanelProps) {
                 }
               >
                 {mergePrimaryId === item.id ? "Cancel merge" : "Merge…"}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={pending}
+                onClick={() => runAction(() => archiveKnowledgeItem(item.id))}
+              >
+                Archive
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={pending}
+                onClick={() => runAction(() => flagKnowledgeOutdated(item.id))}
+              >
+                Flag outdated
               </Button>
             </div>
 

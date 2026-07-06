@@ -57,6 +57,22 @@ const SOURCE_SEEDS: Array<{
     baseUrl: null,
     trustTier: 5,
   },
+  {
+    slug: "fishing-blogs",
+    sourceType: "FISHING_BLOG",
+    nameEn: "Fishing blogs",
+    nameTr: "Balıkçılık blogları",
+    baseUrl: null,
+    trustTier: 3,
+  },
+  {
+    slug: "angling-magazines",
+    sourceType: "MAGAZINE",
+    nameEn: "Angling magazines",
+    nameTr: "Balıkçılık dergileri",
+    baseUrl: null,
+    trustTier: 4,
+  },
 ];
 
 type DemoItemSeed = {
@@ -65,10 +81,13 @@ type DemoItemSeed = {
   url: string;
   titleEn: string;
   titleTr: string;
-  snippetEn: string;
-  snippetTr: string;
+  summaryEn: string;
+  summaryTr: string;
+  previewEn: string;
+  previewTr: string;
+  language: string;
   confidence: "LOW" | "MEDIUM" | "HIGH";
-  status: "PENDING_REVIEW" | "DUPLICATE";
+  status: "PENDING_REVIEW" | "DUPLICATE" | "APPROVED";
   country: string;
   region: string;
   speciesSlug?: string;
@@ -88,10 +107,13 @@ const DEMO_ITEMS: DemoItemSeed[] = [
     url: "https://www.halco.com.au/lures/laser-pro-190-dd",
     titleEn: "Laser Pro 190 DD — rated depth update",
     titleTr: "Laser Pro 190 DD — dalış derinliği güncellemesi",
-    snippetEn: "Manufacturer page lists 1.8–3.5 m operating depth for trolling.",
-    snippetTr: "Üretici sayfası trolling için 1,8–3,5 m çalışma derinliği listeliyor.",
+    summaryEn: "Halco documents 1.8–3.5 m trolling depth for Laser Pro 190 DD.",
+    summaryTr: "Halco, Laser Pro 190 DD için 1,8–3,5 m trolling derinliği belirtiyor.",
+    previewEn: "Manufacturer depth rating · Halco Laser Pro 190 DD",
+    previewTr: "Üretici derinlik değeri · Halco Laser Pro 190 DD",
+    language: "en",
     confidence: "HIGH",
-    status: "PENDING_REVIEW",
+    status: "APPROVED",
     country: "TR",
     region: "aegean",
     lureSlug: "laser-pro-190-dd",
@@ -108,10 +130,13 @@ const DEMO_ITEMS: DemoItemSeed[] = [
     url: "https://www.youtube.com/watch?v=example-palamut",
     titleEn: "Autumn bonito trolling — Laser Pro depth band",
     titleTr: "Sonbahar palamut trolling — Laser Pro derinlik bandı",
-    snippetEn: "Angler reports consistent strikes at 2.5 m behind planer.",
-    snippetTr: "Balıkçı planer arkasında 2,5 m'de tutarlı vuruş bildiriyor.",
+    summaryEn: "Video discusses bonito trolling with Laser Pro around 2.5 m behind a planer.",
+    summaryTr: "Video, planer arkasında ~2,5 m'de Laser Pro ile palamut trolling'ini ele alıyor.",
+    previewEn: "YouTube · autumn bonito trolling depth band",
+    previewTr: "YouTube · sonbahar palamut trolling derinlik bandı",
+    language: "tr",
     confidence: "MEDIUM",
-    status: "PENDING_REVIEW",
+    status: "APPROVED",
     country: "TR",
     region: "mediterranean",
     speciesSlug: "bonito",
@@ -128,8 +153,11 @@ const DEMO_ITEMS: DemoItemSeed[] = [
     url: "https://example-forum.local/threads/lufer-minnow",
     titleEn: "Bosphorus bluefish — shallow minnow preference",
     titleTr: "Boğaz lüferi — sığ minnow tercihi",
-    snippetEn: "Multiple anglers mention 120–140 mm minnows at dawn.",
-    snippetTr: "Birden fazla balıkçı şafakta 120–140 mm minnow'dan bahsediyor.",
+    summaryEn: "Forum thread suggests 120–140 mm minnows for dawn Bosphorus bluefish.",
+    summaryTr: "Forum başlığı Boğaz lüferi için şafakta 120–140 mm minnow öneriyor.",
+    previewEn: "Forum thread · Bosphorus bluefish minnow sizes",
+    previewTr: "Forum başlığı · Boğaz lüferi minnow boyları",
+    language: "tr",
     confidence: "MEDIUM",
     status: "PENDING_REVIEW",
     country: "TR",
@@ -147,10 +175,13 @@ const DEMO_ITEMS: DemoItemSeed[] = [
     url: "https://example-journal.local/dicentrarchus-labrax-aegean",
     titleEn: "European seabass seasonal distribution — Aegean",
     titleTr: "Levrek mevsimsel dağılımı — Ege",
-    snippetEn: "Peer-reviewed survey notes nearshore aggregation Apr–Jun.",
-    snippetTr: "Hakemli çalışma Nisan–Haziran kıyı yakını kümelenme not ediyor.",
+    summaryEn: "Study notes Aegean European seabass nearshore aggregation April–June.",
+    summaryTr: "Çalışma Ege levreğinin Nisan–Haziran kıyı yakını kümelenmesini not ediyor.",
+    previewEn: "Scientific paper · Aegean seabass seasonal distribution",
+    previewTr: "Bilimsel yayın · Ege levrek mevsimsel dağılımı",
+    language: "en",
     confidence: "HIGH",
-    status: "PENDING_REVIEW",
+    status: "APPROVED",
     country: "TR",
     region: "aegean",
     speciesSlug: "european-seabass",
@@ -165,8 +196,11 @@ const DEMO_ITEMS: DemoItemSeed[] = [
     url: "https://guide.balikoltamda.net/species/european-seabass",
     titleEn: "Community trend — levrek shore reports increasing",
     titleTr: "Topluluk trendi — levrek kıyı raporları artıyor",
-    snippetEn: "Approved catch reports cluster on shore casting in May.",
-    snippetTr: "Onaylı av raporları Mayıs'ta kıyı spin'de kümeleniyor.",
+    summaryEn: "Approved catch reports cluster on shore casting for levrek in May.",
+    summaryTr: "Onaylı av raporları Mayıs'ta levrek kıyı spin'de kümeleniyor.",
+    previewEn: "Balık Oltamda trend · levrek shore casting",
+    previewTr: "Balık Oltamda trend · levrek kıyı spin",
+    language: "both",
     confidence: "LOW",
     status: "PENDING_REVIEW",
     country: "TR",
@@ -184,8 +218,11 @@ const DEMO_ITEMS: DemoItemSeed[] = [
     url: "https://example-magazine.local/levrek-lure-guide",
     titleEn: "Magazine lure guide — levrek (possible duplicate)",
     titleTr: "Dergi yem rehberi — levrek (olası mükerrer)",
-    snippetEn: "Article repeats scientific name with regional slang only.",
-    snippetTr: "Makale bilimsel adı tekrarlıyor, yalnızca bölgesel argo kullanıyor.",
+    summaryEn: "Magazine guide may duplicate levrek entry; uses regional slang over taxonomy.",
+    summaryTr: "Dergi rehberi levrek girdisini mükerrer edebilir; taksonomi yerine bölgesel argo kullanıyor.",
+    previewEn: "Magazine · levrek lure guide (possible duplicate)",
+    previewTr: "Dergi · levrek yem rehberi (olası mükerrer)",
+    language: "tr",
     confidence: "LOW",
     status: "DUPLICATE",
     country: "TR",
@@ -195,6 +232,28 @@ const DEMO_ITEMS: DemoItemSeed[] = [
     suggestionKind: "TAXONOMY_CONFLICT",
     suggestionEn: "Regional name must not replace scientific taxonomy",
     suggestionTr: "Bölgesel ad bilimsel taksonomiyi değiştirmemeli",
+  },
+  {
+    sourceSlug: "fishing-blogs",
+    externalKey: "demo-blog-trolling-speed",
+    url: "https://example-blog.local/trolling-speed-aegean",
+    titleEn: "Aegean trolling speed notes for mid-water species",
+    titleTr: "Ege orta su türleri için trolling hız notları",
+    summaryEn: "Blog compares 4–6 kn trolling bands for bonito and small tuna in the Aegean.",
+    summaryTr: "Blog, Ege'de palamut ve küçük orkinos için 4–6 kn trolling bantlarını karşılaştırıyor.",
+    previewEn: "Blog article · Aegean trolling speed bands",
+    previewTr: "Blog yazısı · Ege trolling hız bantları",
+    language: "tr",
+    confidence: "MEDIUM",
+    status: "PENDING_REVIEW",
+    country: "TR",
+    region: "aegean",
+    speciesSlug: "bonito",
+    techniqueSlug: "trolling",
+    evidenceLabel: "Blog section 3",
+    suggestionKind: "TECHNIQUE_NOTE",
+    suggestionEn: "Cross-link trolling speed guidance",
+    suggestionTr: "Trolling hız rehberini çapraz bağla",
   },
 ];
 
@@ -264,11 +323,15 @@ export async function ensureKnowledgePipelineSeeds(): Promise<void> {
           url: demo.url,
           titleEn: demo.titleEn,
           titleTr: demo.titleTr,
-          rawSnippetEn: demo.snippetEn,
-          rawSnippetTr: demo.snippetTr,
+          aiSummaryEn: demo.summaryEn,
+          aiSummaryTr: demo.summaryTr,
+          sourcePreviewEn: demo.previewEn,
+          sourcePreviewTr: demo.previewTr,
+          language: demo.language,
           discoveredAt: new Date(),
           confidence: demo.confidence,
           status: demo.status,
+          editorDecision: demo.status === "APPROVED" ? "APPROVED" : "NONE",
           country: demo.country,
           region: demo.region,
           fishSpeciesId: demo.speciesSlug
@@ -286,8 +349,7 @@ export async function ensureKnowledgePipelineSeeds(): Promise<void> {
           evidence: {
             create: {
               label: demo.evidenceLabel,
-              excerptEn: demo.snippetEn,
-              excerptTr: demo.snippetTr,
+              excerptEn: "Indexed reference — view original source.",
               sourceUrl: demo.url,
               confidence: demo.confidence,
             },

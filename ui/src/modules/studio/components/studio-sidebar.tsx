@@ -20,7 +20,7 @@ import type { StudioNavItem } from "@/modules/studio/types";
 
 const NAV_ITEMS: StudioNavItem[] = [
   { href: "/studio", label: "Attention", icon: "dashboard" },
-  { href: "/studio/knowledge", label: "Knowledge", icon: "knowledge" },
+  { href: "/studio/knowledge", label: "Knowledge Hub", icon: "knowledge" },
   { href: "/studio/review", label: "Verify", icon: "review" },
   { href: "/studio/community", label: "Community", icon: "community" },
   { href: "/studio/community/reports", label: "Catch reports", icon: "notes" },

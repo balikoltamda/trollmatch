@@ -132,13 +132,15 @@ enum BoatOrShore {
   @@map("boat_or_shore")
 }
 
-/// Knowledge acquisition source type (Sprint 7.4 — no crawlers yet).
+/// Knowledge acquisition source type (Sprint 7.4+ — no crawlers yet).
 enum KnowledgeSourceType {
   MANUFACTURER
   COMMUNITY
   YOUTUBE
   FISHING_FORUM
+  FISHING_BLOG
   PUBLIC_ARTICLE
+  MAGAZINE
   SCIENTIFIC_PUBLICATION
   OTHER
 
@@ -154,6 +156,8 @@ enum KnowledgeItemStatus {
   MERGED
   IGNORED
   DUPLICATE
+  ARCHIVED
+  OUTDATED
 
   @@map("knowledge_item_status")
 }
@@ -164,6 +168,8 @@ enum KnowledgeEditorDecision {
   REJECTED
   MERGED
   IGNORED
+  ARCHIVED
+  OUTDATED
 
   @@map("knowledge_editor_decision")
 }
@@ -182,6 +188,8 @@ enum KnowledgeAuditAction {
   MERGE
   IGNORE
   OPEN_SOURCE
+  ARCHIVE
+  FLAG_OUTDATED
 
   @@map("knowledge_audit_action")
 }
@@ -878,6 +886,9 @@ model KnowledgeSource {
 }
 
 /// Discovered knowledge awaiting editorial verification.
+/// TrollMatch is a knowledge index — not a content mirror. We store metadata,
+/// URL, title, AI-generated summary, and catalog links. Media stays on the
+/// original platform; users are directed to the source when possible.
 model KnowledgeItem {
   id                String                  @id @default(uuid()) @db.Uuid
   knowledgeSourceId String                  @map("knowledge_source_id") @db.Uuid
@@ -885,15 +896,21 @@ model KnowledgeItem {
   url               String                  @db.VarChar(2048)
   titleEn           String?                 @map("title_en") @db.VarChar(512)
   titleTr           String?                 @map("title_tr") @db.VarChar(512)
+  /// Internal discovery fingerprint for dedup/matching — never shown publicly.
   rawSnippetEn      String?                 @map("raw_snippet_en") @db.Text
   rawSnippetTr      String?                 @map("raw_snippet_tr") @db.Text
   discoveredAt      DateTime                @map("discovered_at") @db.Timestamptz(6)
   confidence        KnowledgeConfidence     @default(MEDIUM)
   status            KnowledgeItemStatus     @default(PENDING_REVIEW)
   editorDecision    KnowledgeEditorDecision @default(NONE) @map("editor_decision")
-  /// Reserved for future AI summarization — null in Sprint 7.4.
+  /// AI-generated summary — the only user-facing prose we store from external sources.
   aiSummaryEn       String?                 @map("ai_summary_en") @db.Text
   aiSummaryTr       String?                 @map("ai_summary_tr") @db.Text
+  /// Short synthesized preview for Studio — never copied third-party text.
+  sourcePreviewEn   String?                 @map("source_preview_en") @db.VarChar(512)
+  sourcePreviewTr   String?                 @map("source_preview_tr") @db.VarChar(512)
+  /// Primary language of the source content: en, tr, or both.
+  language          String?                 @db.VarChar(8)
   country           String?                 @db.Char(2)
   region            String?                 @db.VarChar(128)
   fishSpeciesId     String?                 @map("fish_species_id") @db.Uuid
@@ -926,11 +943,12 @@ model KnowledgeItem {
   @@map("knowledge_items")
 }
 
-/// Supporting evidence excerpt for a knowledge item.
+/// Editor reference pointer — label + URL only. No third-party excerpt republishing.
 model KnowledgeEvidence {
   id              String               @id @default(uuid()) @db.Uuid
   knowledgeItemId String               @map("knowledge_item_id") @db.Uuid
   label           String               @db.VarChar(256)
+  /// Optional editor note — must be synthesized, never copied source text.
   excerptEn       String               @map("excerpt_en") @db.Text
   excerptTr       String?              @map("excerpt_tr") @db.Text
   sourceUrl       String?              @map("source_url") @db.VarChar(2048)

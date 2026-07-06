@@ -11,11 +11,32 @@ export type KnowledgeActionResult =
 async function finalizeReview(
   itemId: string,
   data: {
-    status: "APPROVED" | "REJECTED" | "MERGED" | "IGNORED";
-    editorDecision: "APPROVED" | "REJECTED" | "MERGED" | "IGNORED";
+    status:
+      | "APPROVED"
+      | "REJECTED"
+      | "MERGED"
+      | "IGNORED"
+      | "ARCHIVED"
+      | "OUTDATED";
+    editorDecision:
+      | "APPROVED"
+      | "REJECTED"
+      | "MERGED"
+      | "IGNORED"
+      | "ARCHIVED"
+      | "OUTDATED";
     mergedIntoId?: string;
   },
-  audit: { action: "APPROVE" | "REJECT" | "MERGE" | "IGNORE"; summary: string },
+  audit: {
+    action:
+      | "APPROVE"
+      | "REJECT"
+      | "MERGE"
+      | "IGNORE"
+      | "ARCHIVE"
+      | "FLAG_OUTDATED";
+    summary: string;
+  },
 ): Promise<KnowledgeActionResult> {
   try {
     await prisma.$transaction([
@@ -36,6 +57,7 @@ async function finalizeReview(
     });
 
     revalidatePath("/studio/knowledge");
+    revalidatePath("/search");
     return { ok: true };
   } catch {
     return { ok: false, error: "Action failed" };
@@ -111,10 +133,31 @@ export async function mergeKnowledgeItems(
     });
 
     revalidatePath("/studio/knowledge");
+    revalidatePath("/search");
     return { ok: true };
   } catch {
     return { ok: false, error: "Could not merge items" };
   }
+}
+
+export async function archiveKnowledgeItem(
+  itemId: string,
+): Promise<KnowledgeActionResult> {
+  return finalizeReview(
+    itemId,
+    { status: "ARCHIVED", editorDecision: "ARCHIVED" },
+    { action: "ARCHIVE", summary: "Archived knowledge item" },
+  );
+}
+
+export async function flagKnowledgeOutdated(
+  itemId: string,
+): Promise<KnowledgeActionResult> {
+  return finalizeReview(
+    itemId,
+    { status: "OUTDATED", editorDecision: "OUTDATED" },
+    { action: "FLAG_OUTDATED", summary: "Flagged knowledge item as outdated" },
+  );
 }
 
 export async function logOpenKnowledgeSource(

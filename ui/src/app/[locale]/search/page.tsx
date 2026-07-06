@@ -4,6 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AppMain } from "@/components/layout/app-shell";
 import { listPublicLures } from "@/modules/discovery/data/browse-lures";
 import { LureResultsView } from "@/modules/discovery/components/lure-results-view";
+import { KnowledgeSearchResults } from "@/modules/knowledge-pipeline/components/knowledge-search-results";
+import { searchPublicKnowledge } from "@/modules/knowledge-pipeline/data/public-knowledge";
 import { routing, type AppLocale } from "@/i18n/routing";
 
 export const dynamic = "force-dynamic";
@@ -47,11 +49,14 @@ export default async function SearchPage({
   setRequestLocale(locale);
 
   const pageNum = Math.max(1, Number(page) || 1);
-  const result = await listPublicLures({
-    q: q ?? null,
-    species: species ?? null,
-    page: pageNum,
-  });
+  const [result, knowledgeResult] = await Promise.all([
+    listPublicLures({
+      q: q ?? null,
+      species: species ?? null,
+      page: pageNum,
+    }),
+    searchPublicKnowledge({ q: q ?? null, page: pageNum }),
+  ]);
 
   const t = await getTranslations("Discovery");
 
@@ -67,6 +72,10 @@ export default async function SearchPage({
 
   return (
     <AppMain>
+      <KnowledgeSearchResults
+        locale={locale as AppLocale}
+        result={knowledgeResult}
+      />
       <LureResultsView
         locale={locale as AppLocale}
         result={result}
