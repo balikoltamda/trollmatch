@@ -490,7 +490,7 @@ Two sprint numbering schemes were used early (engineering `S0xx` / product `7.x+
 | **Purpose** | Unify manufacturer imports into one production lifecycle; wire Studio batches to field diffs and live progress |
 | **Major changes** | `manufacturer-import-pipeline.ts` (persist, reconcile, images, report); `upsertCanonicalImport` with `importBatchId`; editor HERO cover preserved on re-import; enhanced `ImportReport` (imported/updated/failed, image stats, per-product outcomes); Studio **Retry import** for failed batches; live `productsProcessed` during RUNNING |
 | **Architectural decisions** | **One shared finalize path** for DUEL and static-json importers — no duplicated reconcile/image/report logic; deprecated `upsertDuelCanonicalImport` alias retained |
-| **Commit** | `4166855` |
+| **Commit** | `6f430b1` |
 
 ---
 
