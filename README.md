@@ -3,6 +3,15 @@
 **Public platform:** [Balık Oltamda Guide](https://guide.balikoltamda.net) (planned)  
 **Repository:** Private — fishing knowledge platform engineering home for Balık Oltamda
 
+## 🤖 AI Agents
+
+If you are an AI working on TrollMatch,
+read [`AI_CONTEXT.md`](AI_CONTEXT.md) first.
+
+Do not start by reading the entire repository.
+
+`AI_CONTEXT.md` is the mandatory onboarding document.
+
 ## Documentation hierarchy
 
 ```

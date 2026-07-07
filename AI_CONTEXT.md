@@ -1,6 +1,56 @@
-# TrollMatch
+# AI Quick Start
 
-> **AI agents: read this file first.** It is the single onboarding entry point. Do not read the whole repo before starting — use the Reading Order section when you need depth.
+**This document is the canonical entry point for every AI agent** working on TrollMatch — whether you are Cursor, ChatGPT, Codex, Claude Code, Gemini CLI, or any future coding agent.
+
+- **Read this file completely before changing any code.**
+- This document **summarizes** the project — vision, architecture, domain laws, current status, and constraints.
+- More detailed documentation is **referenced later**; you do not need to read the entire repository first.
+- **Never skip this document.** No future conversation should require explaining the project again.
+
+This file exists to **eliminate repeated onboarding**. If something in the repo conflicts with your assumptions, trust the repository — not memory from a prior session.
+
+---
+
+# Reading Order
+
+Read documents in this order:
+
+1. **`AI_CONTEXT.md`** (this document)
+
+**`AI_CONTEXT.md` should normally be enough.** The documents below are references — read them only when you need more detail on a specific topic.
+
+2. [`README.md`](README.md)
+3. [`docs/001_PROJECT_CHARTER.md`](docs/001_PROJECT_CHARTER.md)
+4. [`docs/002_ENGINEERING_PRINCIPLES.md`](docs/002_ENGINEERING_PRINCIPLES.md)
+5. [`docs/003_MASTER_CONTEXT.md`](docs/003_MASTER_CONTEXT.md)
+6. [`docs/007_DATABASE_VISION.md`](docs/007_DATABASE_VISION.md)
+7. [`docs/010_ANGLER_PRODUCT.md`](docs/010_ANGLER_PRODUCT.md)
+8. [`docs/fishing/TERMINOLOGY.md`](docs/fishing/TERMINOLOGY.md)
+9. [`docs/fishing/TAXONOMY_POLICY.md`](docs/fishing/TAXONOMY_POLICY.md)
+10. [`docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`](docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md)
+11. [`docs/fishing/LOCALIZATION_GUIDE.md`](docs/fishing/LOCALIZATION_GUIDE.md)
+
+**Also useful:** [`docs/KNOWN_DECISIONS.md`](docs/KNOWN_DECISIONS.md) · [`docs/CHANGELOG.md`](docs/CHANGELOG.md) · [`docs/010_CURSOR_RULES.md`](docs/010_CURSOR_RULES.md)
+
+**Conflict resolution:** charter > engineering principles > angler product doc > this file.
+
+---
+
+# Repository
+
+| | |
+|---|---|
+| **Name** | TrollMatch |
+| **URL** | https://github.com/balikoltamda/trollmatch.git |
+
+The repository is the **single source of truth**.
+
+- **Code** always has priority over assumptions.
+- **Documentation** always has priority over AI guesses.
+
+---
+
+# TrollMatch
 
 **TrollMatch** is the private engineering repository for **Balık Oltamda Guide** — a global, bilingual (Turkish and English) fishing **knowledge platform** planned at `guide.balikoltamda.net`. It is **not** an e-commerce website: there is no cart, checkout, inventory, or payment processing. Commerce may appear only as optional, clearly labeled sponsored outbound links when users explicitly seek purchase options.
 
@@ -157,14 +207,6 @@ All public pages are locale-prefixed: `/tr/...` and `/en/...` (default locale: *
 | `/[locale]/authors/[slug]` | Editorial author profile |
 
 `/studio` and `/api` are **outside** locale middleware.
-
-## Trust
-
-**Today:** `InformationSourceBadge`, `TrustIndicators`, author attribution, editorial notes from DB, catch report verification status, knowledge pipeline audit.
-
-**Still mock (Sprint 7.6 target):** `ui/src/modules/lure/data/lure-detail-enrichment.ts` feeds community stats and some trust fields on lure pages — replace with real approved catch reports, not new mocks.
-
-**Long-horizon (`007`):** Knowledge Claim + Provenance Attribution + Verification Event — partially in schema/docs; implement incrementally.
 
 ## Terminology
 
@@ -328,6 +370,12 @@ Verification: `PENDING` → Studio review → `APPROVED` | `REJECTED` | `MERGED`
 
 ## Trust system
 
+**Today:** `InformationSourceBadge`, `TrustIndicators`, author attribution, editorial notes from DB, catch report verification status, knowledge pipeline audit.
+
+**Still mock (Sprint 7.6 target):** `ui/src/modules/lure/data/lure-detail-enrichment.ts` — replace community stats with real approved catch reports, not new mocks.
+
+**Long-horizon (`007`):** Knowledge Claim + Provenance Attribution + Verification Event — implement incrementally.
+
 Every information block should show its source (manufacturer / editorial / community / AI). Do not merge provenance and verification badges. Do not skip audit on moderation approve paths.
 
 ---
@@ -336,7 +384,6 @@ Every information block should show its source (manufacturer / editorial / commu
 
 ## GitHub
 
-- Repo: `https://github.com/balikoltamda/trollmatch.git`
 - CI (`.github/workflows/ci.yml`): push/PR to `main` → lockfile verify, `npm ci`, lint, typecheck, build
 - Policy: `npm run verify` locally before push; regenerate lockfile cleanly when deps change (`docs/012_CROSS_PLATFORM_DEPENDENCIES.md`)
 
@@ -402,31 +449,3 @@ From `docs/010_ANGLER_PRODUCT.md` — **do not invent features beyond this.**
 | **Long-term (charter)** | SpeciesCompass, TechniqueLibrary, LocationInsights; expert verification; sponsored links |
 
 Charter Year 1: ≥500 curated lures, bilingual UI, community contribution, provenance on published records, modular foundation for second module.
-
----
-
-# Reading Order
-
-**Documentation hierarchy:** [`README.md`](README.md) → **[`AI_CONTEXT.md`](AI_CONTEXT.md)** (this file) → specialized documents below. Prefer linking over copying — update `AI_CONTEXT.md` when onboarding facts change.
-
-When this document is insufficient:
-
-| # | Document | Why |
-|---|----------|-----|
-| 1 | `docs/001_PROJECT_CHARTER.md` | Goals, scope, non-goals |
-| 2 | `docs/002_ENGINEERING_PRINCIPLES.md` | Coding law, evolutionary design |
-| 3 | `docs/003_MASTER_CONTEXT.md` | Domain narrative, workflows |
-| 4 | `docs/007_DATABASE_VISION.md` | Long-horizon entity model (not all implemented) |
-| 5 | `docs/010_ANGLER_PRODUCT.md` | Shipped sprints, priorities, next work |
-| 6 | `docs/fishing/TERMINOLOGY.md` | Fishing Lexicon |
-| 7 | `docs/fishing/TAXONOMY_POLICY.md` | Species naming law |
-| 8 | `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md` | Species → Technique → Lure |
-| 9 | `docs/fishing/LOCALIZATION_GUIDE.md` | tr/en authoring |
-
-**Also useful:** `docs/KNOWN_DECISIONS.md` · `docs/CHANGELOG.md` · `docs/010_CURSOR_RULES.md` · `.cursor/rules/project.md` · `docs/004_DECISIONS.md` · `docs/013_KNOWLEDGE_PIPELINE.md` · `docs/006_SYSTEM_ARCHITECTURE.md` · `docs/008_TECH_STACK.md`
-
-**Conflict resolution:** charter > engineering principles > angler product doc > this file.
-
----
-
-*Single entry point for AI agents. Summarizes — does not replace authoritative docs.*
