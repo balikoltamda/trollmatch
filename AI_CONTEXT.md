@@ -7,6 +7,8 @@
 - More detailed documentation is **referenced later**; you do not need to read the entire repository first.
 - **Never skip this document.** No future conversation should require explaining the project again.
 
+**If repository access is available, review `AI_CONTEXT.md` first before reading any other project files.**
+
 This file exists to **eliminate repeated onboarding**. If something in the repo conflicts with your assumptions, trust the repository — not memory from a prior session.
 
 ---
@@ -40,13 +42,18 @@ Read documents in this order:
 
 | | |
 |---|---|
-| **Name** | TrollMatch |
-| **URL** | https://github.com/balikoltamda/trollmatch.git |
+| **Repository name** | TrollMatch |
+| **GitHub repository** | https://github.com/balikoltamda/trollmatch |
+| **Local development folder** | `C:\trollmatch` |
+| **Production server** | `dev.balikoltamda.net` |
+| **Production path** | `/var/www/vhosts/dev.balikoltamda.net/app` |
 
-The repository is the **single source of truth**.
+The **GitHub repository is the single source of truth** for the project.
 
-- **Code** always has priority over assumptions.
-- **Documentation** always has priority over AI guesses.
+**Priority when sources disagree:**
+
+1. **Repository implementation** over documentation — if code and docs conflict, the running code wins.
+2. **Documentation** over AI assumptions — if docs and your inference conflict, follow the docs.
 
 ---
 
