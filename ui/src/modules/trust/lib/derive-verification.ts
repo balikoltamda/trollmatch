@@ -45,43 +45,172 @@ export function deriveLastVerifiedAt(input: {
   return new Date().toISOString();
 }
 
-export function computeTrustScore(input: {
+export type TrustScoreInput = {
   lifecycleState: ContentLifecycleState;
   editorConfidence: EditorNoteConfidence | null;
   lastImportedAt: Date | null;
+  lastManufacturerSyncAt?: Date | null;
   pendingSuggestions: number;
   hasEditorNote: boolean;
+  hasEditorSummary?: boolean;
   communityCatchReports: number;
   manufacturerActive: boolean;
-}): number {
-  let score = 0;
+  imageCount?: number;
+  technologyCount?: number;
+  hasCompleteSpecs?: boolean;
+  hasShortDescriptionEn?: boolean;
+  hasShortDescriptionTr?: boolean;
+  knowledgeSourceCount?: number;
+};
 
-  switch (input.lifecycleState) {
-    case "PUBLISHED":
-      score += 40;
-      break;
-    case "READY":
-      score += 30;
-      break;
-    case "PENDING_REVIEW":
-      score += 15;
-      break;
-    default:
-      score += 5;
+/** Category-based trust score — expandable breakdown per sprint 7.8 spec. */
+export function computeTrustScore(input: TrustScoreInput): number {
+  const breakdown = buildTrustScoreBreakdown(input);
+  const total = breakdown.reduce((sum, factor) => sum + factor.delta, 0);
+  return Math.max(0, Math.min(100, total));
+}
+
+export type TrustScoreBreakdownInput = TrustScoreInput;
+
+export function buildTrustScoreBreakdown(
+  input: TrustScoreBreakdownInput,
+): import("@/modules/trust/types").TrustScoreFactor[] {
+  const factors: import("@/modules/trust/types").TrustScoreFactor[] = [];
+
+  if (input.lastImportedAt || input.lastManufacturerSyncAt) {
+    factors.push({
+      label: "Manufacturer data verified",
+      delta: 25,
+      tone: "positive",
+      category: "Manufacturer Data",
+    });
+  } else {
+    factors.push({
+      label: "Not confirmed against manufacturer feed",
+      delta: 0,
+      tone: "negative",
+      category: "Manufacturer Data",
+    });
   }
 
-  if (input.editorConfidence === "HIGH") score += 20;
-  else if (input.editorConfidence === "MEDIUM") score += 12;
-  else if (input.editorConfidence === "LOW") score += 5;
+  if (input.hasCompleteSpecs) {
+    factors.push({
+      label: "Complete specifications",
+      delta: 20,
+      tone: "positive",
+      category: "Specifications",
+    });
+  } else {
+    factors.push({
+      label: "Incomplete specifications",
+      delta: 0,
+      tone: "negative",
+      category: "Specifications",
+    });
+  }
 
-  if (input.lastImportedAt) score += 12;
-  if (input.manufacturerActive) score += 8;
-  if (input.hasEditorNote) score += 10;
-  if (input.pendingSuggestions === 0) score += 10;
-  else score -= Math.min(25, input.pendingSuggestions * 4);
+  if ((input.imageCount ?? 0) > 0) {
+    factors.push({
+      label: "Product images on file",
+      delta: 15,
+      tone: "positive",
+      category: "Images",
+    });
+  } else {
+    factors.push({
+      label: "Missing product images",
+      delta: 0,
+      tone: "negative",
+      category: "Images",
+    });
+  }
 
-  if (input.communityCatchReports >= 10) score += 8;
-  else if (input.communityCatchReports >= 3) score += 4;
+  if ((input.technologyCount ?? 0) > 0) {
+    factors.push({
+      label: "Manufacturer technologies linked",
+      delta: 15,
+      tone: "positive",
+      category: "Technologies",
+    });
+  } else {
+    factors.push({
+      label: "No technologies linked",
+      delta: 0,
+      tone: "negative",
+      category: "Technologies",
+    });
+  }
 
-  return Math.max(0, Math.min(100, score));
+  if (
+    input.lifecycleState === "PUBLISHED" ||
+    input.lifecycleState === "READY"
+  ) {
+    factors.push({
+      label: "Editorial review complete",
+      delta: 10,
+      tone: "positive",
+      category: "Editorial Review",
+    });
+  } else {
+    factors.push({
+      label: "Pending editorial review",
+      delta: 0,
+      tone: "neutral",
+      category: "Editorial Review",
+    });
+  }
+
+  if ((input.knowledgeSourceCount ?? 0) > 0) {
+    factors.push({
+      label: "Knowledge sources linked",
+      delta: 10,
+      tone: "positive",
+      category: "Knowledge Sources",
+    });
+  }
+
+  if (input.communityCatchReports >= 3) {
+    factors.push({
+      label: "Verified catch reports",
+      delta: 5,
+      tone: "positive",
+      category: "Catch Reports",
+    });
+  } else {
+    factors.push({
+      label: "Missing catch reports",
+      delta: 0,
+      tone: "negative",
+      category: "Catch Reports",
+    });
+  }
+
+  if (!input.hasShortDescriptionEn) {
+    factors.push({
+      label: "Missing English summary",
+      delta: -5,
+      tone: "negative",
+      category: "Content",
+    });
+  }
+
+  if (!input.hasEditorSummary) {
+    factors.push({
+      label: "No editor summary",
+      delta: -3,
+      tone: "negative",
+      category: "Content",
+    });
+  }
+
+  if (input.pendingSuggestions > 0) {
+    factors.push({
+      label: `${input.pendingSuggestions} pending suggestion(s)`,
+      delta: -Math.min(15, input.pendingSuggestions * 3),
+      tone: "negative",
+      category: "Review",
+    });
+  }
+
+  return factors;
 }

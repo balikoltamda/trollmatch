@@ -37,6 +37,8 @@ export type SpeciesTaxonomyProfile = {
 
 export type SpeciesSearchHit = {
   slug: string;
+  slugEn: string;
+  slugTr: string;
   scientificName: string;
   preferredName: { en: string; tr: string };
   matchKind:

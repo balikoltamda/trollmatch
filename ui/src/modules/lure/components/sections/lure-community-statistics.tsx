@@ -8,11 +8,13 @@ import { cn } from "@/lib/utils";
 type LureCommunityStatisticsProps = {
   statistics: CommunityStatistics;
   locale: AppLocale;
+  embedded?: boolean;
 };
 
 export async function LureCommunityStatistics({
   statistics,
   locale,
+  embedded = false,
 }: LureCommunityStatisticsProps) {
   const t = await getTranslations("LureDetail");
 
@@ -30,13 +32,8 @@ export async function LureCommunityStatistics({
     insufficient_data: "bg-muted text-muted-foreground",
   };
 
-  return (
-    <LureSection
-      id="community"
-      title={t("sections.community")}
-      description={t("sections.communityDescription")}
-      sourceType="community"
-    >
+  const content = (
+    <>
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="border-border rounded-lg border p-4 text-center">
           <p className="text-foreground text-2xl font-semibold tabular-nums">
@@ -86,6 +83,21 @@ export async function LureCommunityStatistics({
       ) : null}
 
       <p className="text-muted-foreground mt-4 text-xs">{t("community.source")}</p>
+    </>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <LureSection
+      id="community"
+      title={t("sections.community")}
+      description={t("sections.communityDescription")}
+      sourceType="community"
+    >
+      {content}
     </LureSection>
   );
 }

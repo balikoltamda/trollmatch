@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  isUnauthorizedResult,
+  requireEditorOrUnauthorized,
+} from "@/modules/studio/auth/permissions";
 import { recordCatalogAudit } from "@/modules/studio/data/audit";
 import {
   isEditorNoteFieldKey,
@@ -164,6 +168,9 @@ async function revalidateForProduct(lureModelId: string) {
 export async function approveSuggestion(
   suggestionId: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  const auth = await requireEditorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   try {
     const suggestion = await prisma.catalogSuggestion.findUnique({
       where: { id: suggestionId },
@@ -218,6 +225,9 @@ export async function approveSuggestion(
 export async function rejectSuggestion(
   suggestionId: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  const auth = await requireEditorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   try {
     const suggestion = await prisma.catalogSuggestion.findUnique({
       where: { id: suggestionId },
@@ -268,6 +278,9 @@ export async function correctSuggestion(
   if (!trimmed) {
     return { ok: false, error: "Corrected value cannot be empty" };
   }
+
+  const auth = await requireEditorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
 
   try {
     const suggestion = await prisma.catalogSuggestion.findUnique({
@@ -335,6 +348,9 @@ export async function mergeSuggestions(
     return { ok: false, error: "Select at least two suggestions to merge" };
   }
 
+  const auth = await requireEditorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   try {
     const suggestions = await prisma.catalogSuggestion.findMany({
       where: { id: { in: allIds }, status: "PENDING" },
@@ -395,6 +411,9 @@ export async function mergeSuggestions(
 export async function approveAllSuggestions(
   lureModelId: string,
 ): Promise<{ ok: true; count: number } | { ok: false; error: string }> {
+  const auth = await requireEditorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   const pending = await prisma.catalogSuggestion.findMany({
     where: { lureModelId, status: "PENDING" },
     select: { id: true },

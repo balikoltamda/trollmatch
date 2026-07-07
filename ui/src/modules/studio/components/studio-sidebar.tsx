@@ -5,7 +5,9 @@ import {
   Fish,
   FolderOpen,
   Image,
+  Inbox,
   LayoutDashboard,
+  MapPin,
   MessageSquare,
   Package,
   Settings,
@@ -15,13 +17,18 @@ import {
   Wrench,
   Brain,
   AlertTriangle,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StudioLogoutButton } from "@/modules/studio/components/studio-logout-button";
+import { STUDIO_INTELLIGENCE_PATH, STUDIO_SOURCE_ARCHIVE_PATH, STUDIO_SPECIES_PATH, STUDIO_WORK_QUEUE_PATH } from "@/modules/studio/lib/studio-routes";
 import type { StudioNavItem } from "@/modules/studio/types";
 
 const NAV_ITEMS: StudioNavItem[] = [
   { href: "/studio", label: "Attention", icon: "dashboard" },
-  { href: "/studio/knowledge", label: "Source archive", icon: "knowledge" },
+  { href: STUDIO_WORK_QUEUE_PATH, label: "Work queue", icon: "workqueue" },
+  { href: STUDIO_INTELLIGENCE_PATH, label: "Editorial Intelligence", icon: "intelligence" },
+  { href: STUDIO_SOURCE_ARCHIVE_PATH, label: "Source archive", icon: "knowledge" },
   { href: "/studio/errors", label: "Errors", icon: "errors" },
   { href: "/studio/review", label: "Verify", icon: "review" },
   { href: "/studio/community", label: "Community", icon: "community" },
@@ -29,7 +36,8 @@ const NAV_ITEMS: StudioNavItem[] = [
   { href: "/studio/import", label: "Import Center", icon: "import" },
   { href: "/studio/products", label: "Products", icon: "products" },
   { href: "/studio/manufacturers", label: "Manufacturers", icon: "manufacturers" },
-  { href: "/studio/species", label: "Fish Species", icon: "species" },
+  { href: "/studio/regions", label: "Regions", icon: "regions" },
+  { href: STUDIO_SPECIES_PATH, label: "Fish Species", icon: "species" },
   { href: "/studio/techniques", label: "Techniques", icon: "techniques" },
   { href: "/studio/media", label: "Media Library", icon: "media" },
   { href: "/studio/settings", label: "Settings", icon: "settings" },
@@ -37,12 +45,15 @@ const NAV_ITEMS: StudioNavItem[] = [
 
 const ICONS = {
   dashboard: LayoutDashboard,
+  workqueue: Inbox,
+  intelligence: Sparkles,
   knowledge: Brain,
   errors: AlertTriangle,
   review: ClipboardList,
   import: Ship,
   products: Package,
   manufacturers: Wrench,
+  regions: MapPin,
   species: Fish,
   techniques: BookOpen,
   community: Users,
@@ -92,7 +103,8 @@ export function StudioSidebar({ currentPath }: StudioSidebarProps) {
           );
         })}
       </nav>
-      <div className="border-sidebar-border border-t p-3">
+      <div className="border-sidebar-border space-y-2 border-t p-3">
+        <StudioLogoutButton />
         <Link
           href="/tr"
           className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-xs transition-colors"

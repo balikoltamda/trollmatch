@@ -3,6 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { recordKnowledgeAudit } from "@/modules/knowledge-pipeline/data/audit";
+import { STUDIO_SOURCE_ARCHIVE_PATH } from "@/modules/studio/lib/studio-routes";
+import {
+  auditActor,
+  isUnauthorizedResult,
+  requireModeratorOrUnauthorized,
+} from "@/modules/studio/auth/permissions";
 
 export type KnowledgeActionResult =
   | { ok: true }
@@ -10,6 +16,7 @@ export type KnowledgeActionResult =
 
 async function finalizeReview(
   itemId: string,
+  actorEmail: string,
   data: {
     status:
       | "APPROVED"
@@ -45,7 +52,7 @@ async function finalizeReview(
         data: {
           ...data,
           reviewedAt: new Date(),
-          reviewedBy: "local-admin",
+          reviewedBy: actorEmail,
         },
       }),
     ]);
@@ -53,10 +60,11 @@ async function finalizeReview(
     await recordKnowledgeAudit({
       knowledgeItemId: itemId,
       action: audit.action,
+      actor: actorEmail,
       summary: audit.summary,
     });
 
-    revalidatePath("/studio/knowledge");
+    revalidatePath(STUDIO_SOURCE_ARCHIVE_PATH);
     revalidatePath("/search");
     return { ok: true };
   } catch {
@@ -67,8 +75,12 @@ async function finalizeReview(
 export async function approveKnowledgeItem(
   itemId: string,
 ): Promise<KnowledgeActionResult> {
+  const auth = await requireModeratorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   return finalizeReview(
     itemId,
+    auditActor(auth),
     { status: "APPROVED", editorDecision: "APPROVED" },
     { action: "APPROVE", summary: "Approved knowledge item" },
   );
@@ -77,8 +89,12 @@ export async function approveKnowledgeItem(
 export async function rejectKnowledgeItem(
   itemId: string,
 ): Promise<KnowledgeActionResult> {
+  const auth = await requireModeratorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   return finalizeReview(
     itemId,
+    auditActor(auth),
     { status: "REJECTED", editorDecision: "REJECTED" },
     { action: "REJECT", summary: "Rejected knowledge item" },
   );
@@ -87,8 +103,12 @@ export async function rejectKnowledgeItem(
 export async function ignoreKnowledgeItem(
   itemId: string,
 ): Promise<KnowledgeActionResult> {
+  const auth = await requireModeratorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   return finalizeReview(
     itemId,
+    auditActor(auth),
     { status: "IGNORED", editorDecision: "IGNORED" },
     { action: "IGNORE", summary: "Ignored knowledge item" },
   );
@@ -98,9 +118,14 @@ export async function mergeKnowledgeItems(
   primaryId: string,
   duplicateId: string,
 ): Promise<KnowledgeActionResult> {
+  const auth = await requireModeratorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   if (primaryId === duplicateId) {
     return { ok: false, error: "Cannot merge item with itself" };
   }
+
+  const actorEmail = auditActor(auth);
 
   try {
     await prisma.$transaction([
@@ -111,7 +136,7 @@ export async function mergeKnowledgeItems(
           editorDecision: "MERGED",
           mergedIntoId: primaryId,
           reviewedAt: new Date(),
-          reviewedBy: "local-admin",
+          reviewedBy: actorEmail,
         },
       }),
       prisma.knowledgeGraphLink.create({
@@ -128,11 +153,12 @@ export async function mergeKnowledgeItems(
     await recordKnowledgeAudit({
       knowledgeItemId: duplicateId,
       action: "MERGE",
+      actor: actorEmail,
       summary: `Merged into knowledge item ${primaryId}`,
       metadata: { primaryId },
     });
 
-    revalidatePath("/studio/knowledge");
+    revalidatePath(STUDIO_SOURCE_ARCHIVE_PATH);
     revalidatePath("/search");
     return { ok: true };
   } catch {
@@ -143,8 +169,12 @@ export async function mergeKnowledgeItems(
 export async function archiveKnowledgeItem(
   itemId: string,
 ): Promise<KnowledgeActionResult> {
+  const auth = await requireModeratorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   return finalizeReview(
     itemId,
+    auditActor(auth),
     { status: "ARCHIVED", editorDecision: "ARCHIVED" },
     { action: "ARCHIVE", summary: "Archived knowledge item" },
   );
@@ -153,8 +183,12 @@ export async function archiveKnowledgeItem(
 export async function flagKnowledgeOutdated(
   itemId: string,
 ): Promise<KnowledgeActionResult> {
+  const auth = await requireModeratorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   return finalizeReview(
     itemId,
+    auditActor(auth),
     { status: "OUTDATED", editorDecision: "OUTDATED" },
     { action: "FLAG_OUTDATED", summary: "Flagged knowledge item as outdated" },
   );
@@ -164,10 +198,14 @@ export async function logOpenKnowledgeSource(
   itemId: string,
   url: string,
 ): Promise<KnowledgeActionResult> {
+  const auth = await requireModeratorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   try {
     await recordKnowledgeAudit({
       knowledgeItemId: itemId,
       action: "OPEN_SOURCE",
+      actor: auditActor(auth),
       summary: "Editor opened source URL",
       metadata: { url },
     });

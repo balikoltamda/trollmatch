@@ -10,6 +10,7 @@ import {
   type EditorNoteForm,
   type ProductEditorData,
 } from "@/modules/studio/types";
+import { resolveManufacturerProductSource } from "@/modules/import/sync/resolve-manufacturer-source";
 
 function decimalToString(value: { toString(): string } | null): string | null {
   return value ? value.toString() : null;
@@ -107,26 +108,39 @@ export async function getProductEditorData(
       images: { where: { deletedAt: null }, orderBy: { sortOrder: "asc" } },
       aliases: { where: { deletedAt: null }, take: 20 },
       editorNote: true,
-      auditEntries: {
-        orderBy: { createdAt: "desc" },
-        take: 30,
-      },
       importFieldChanges: {
         where: { status: "PENDING" },
         orderBy: { createdAt: "desc" },
+      },
+      auditEntries: {
+        orderBy: { createdAt: "desc" },
+        take: 30,
       },
     },
   });
 
   if (!model) return null;
 
+  const source = resolveManufacturerProductSource({
+    manufacturerSlug: model.manufacturer.slug,
+    aliases: model.aliases.map((a) => ({ alias: a.alias })),
+  });
   const suggestions = await listProductSuggestions(id);
-  const trustProfile = await computeProductTrustProfile(id);
+  const lastEditorialReview = await prisma.studioAiReviewSession.findFirst({
+    where: { entityType: "LURE", entityId: id },
+    orderBy: { createdAt: "desc" },
+    select: { createdAt: true },
+  });
 
   const hasCover = model.images.some((img) => img.role === "HERO");
   const moderatorSpecies = model.lureSpeciesLinks.filter(
     (l) => l.associationKind === "MODERATOR_CURATED",
   );
+  const trustProfile = await computeProductTrustProfile(id);
+
+  const changesAvailable =
+    model.importFieldChanges.length + suggestions.filter((s) => s.status === "PENDING").length;
+
   const completeness = computeCompleteness({
     nameTr: model.nameTr,
     bodyTypeEn: model.bodyTypeEn,
@@ -216,6 +230,8 @@ export async function getProductEditorData(
       fieldKey: diff.fieldKey,
       oldValue: diff.oldValue,
       newValue: diff.newValue,
+      editedValue: diff.editedValue,
+      changeKind: diff.changeKind,
       status: diff.status,
       createdAt: diff.createdAt,
     })),
@@ -238,6 +254,20 @@ export async function getProductEditorData(
     completeness: {
       score: completeness.score,
       missing: completeness.missing,
+    },
+    manufacturerSourceUrl: source.kind === "duel_pid" ? source.url : model.manufacturerUrl,
+    canRefreshManufacturer: source.kind === "duel_pid",
+    lastEditorialReviewAt: lastEditorialReview?.createdAt ?? null,
+    changesAvailable,
+    digitalTwin: {
+      manufacturerUrl: model.manufacturerUrl ?? (source.kind === "duel_pid" ? source.url : null),
+      lastManufacturerSyncAt: model.lastManufacturerSyncAt,
+      lastManufacturerCheckAt: model.lastManufacturerCheckAt,
+      lastSuccessfulImportAt: model.lastSuccessfulImportAt ?? model.lastImportedAt,
+      syncStatus: model.syncStatus,
+      contentHash: model.contentHash,
+      manufacturerUpdated: model.syncStatus === "STALE" || model.syncStatus === "CHANGES_PENDING",
+      editorialUpdatedAt: model.editorNote?.updatedAt ?? null,
     },
   };
 }

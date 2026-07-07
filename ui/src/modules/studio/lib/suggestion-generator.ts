@@ -5,7 +5,7 @@ import type {
   SuggestionSource,
 } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { LURE_DETAIL_ENRICHMENTS } from "@/modules/lure/data/lure-detail-enrichment";
+import { getCommunitySpeciesForLureModel, getCommunityStatisticsForLureModel } from "@/modules/catch-report/data/community-statistics";
 import {
   computeCompleteness,
   editorNoteHasMeaningfulContent,
@@ -120,6 +120,10 @@ function buildGapSuggestions(
       mediterraneanNotesEn: string | null;
     } | null;
   },
+  community: {
+    statistics: Awaited<ReturnType<typeof getCommunityStatisticsForLureModel>>;
+    species: Awaited<ReturnType<typeof getCommunitySpeciesForLureModel>>;
+  },
 ): SuggestionSeed[] {
   const seeds: SuggestionSeed[] = [];
   const completeness = computeCompleteness({
@@ -163,62 +167,39 @@ function buildGapSuggestions(
     });
   }
 
-  const enrichment = LURE_DETAIL_ENRICHMENTS[model.slug];
-  if (enrichment) {
-    if (completeness.issues.includes("missing_species")) {
-      const communitySpecies = enrichment.recommendedSpecies?.filter(
-        (s) => s.kind === "community",
-      );
-      for (const species of communitySpecies ?? []) {
-        seeds.push({
-          kind: "SPECIES_LINK",
-          fieldKey: species.id,
-          fieldLabel: "Target species (community)",
-          currentValue: null,
-          suggestedValue: species.name.en,
-          confidence: "MEDIUM",
-          source: "COMMUNITY_REPORT",
-          reasoning: `${enrichment.communityStatistics.verifiedCatchReportCount} verified catch reports support this species link.`,
-          provenance: {
-            speciesSlug: species.id,
-            catchReports: enrichment.communityStatistics.verifiedCatchReportCount,
-            effectiveness: enrichment.communityStatistics.effectivenessBand,
-          },
-        });
-      }
-    }
-
-    if (completeness.issues.includes("missing_editor_note")) {
+  if (completeness.issues.includes("missing_species") && community.species.length > 0) {
+    for (const species of community.species) {
       seeds.push({
-        kind: "EDITOR_NOTE",
-        fieldKey: "currentRecommendationEn",
-        fieldLabel: "Current recommendation",
+        kind: "SPECIES_LINK",
+        fieldKey: species.id,
+        fieldLabel: "Target species (community)",
         currentValue: null,
-        suggestedValue: enrichment.aiInsights.summary.en,
-        confidence: "LOW",
-        source: "AI_SUMMARY",
-        reasoning: `AI summary from ${enrichment.aiInsights.corpusDate} corpus with ${enrichment.aiInsights.citations.length} citations.`,
+        suggestedValue: species.name.en,
+        confidence: "MEDIUM",
+        source: "COMMUNITY_REPORT",
+        reasoning: `${community.statistics.verifiedCatchReportCount} verified catch reports support this species link.`,
         provenance: {
-          corpusDate: enrichment.aiInsights.corpusDate,
-          citations: enrichment.aiInsights.citations.length,
+          speciesSlug: species.id,
+          catchReports: community.statistics.verifiedCatchReportCount,
+          effectiveness: community.statistics.effectivenessBand,
         },
       });
     }
+  }
 
-    if (!model.images.some((i) => i.role === "HERO") && model.images[0]) {
-      seeds.push({
-        kind: "IMAGE_COVER",
-        fieldKey: model.images[0].id,
-        fieldLabel: "Cover image",
-        currentValue: null,
-        suggestedValue: model.images[0].id,
-        confidence: "MEDIUM",
-        source: "AI_ENRICHMENT",
-        reasoning:
-          "First gallery image proposed as cover — confirm it represents the product on the shelf.",
-        provenance: { imageId: model.images[0].id },
-      });
-    }
+  if (!model.images.some((i) => i.role === "HERO") && model.images[0]) {
+    seeds.push({
+      kind: "IMAGE_COVER",
+      fieldKey: model.images[0].id,
+      fieldLabel: "Cover image",
+      currentValue: null,
+      suggestedValue: model.images[0].id,
+      confidence: "MEDIUM",
+      source: "AI_ENRICHMENT",
+      reasoning:
+        "First gallery image proposed as cover — confirm it represents the product on the shelf.",
+      provenance: { imageId: model.images[0].id },
+    });
   }
 
   return seeds;
@@ -260,7 +241,12 @@ export async function generateEnrichmentSuggestions(
 
   if (!model) return 0;
 
-  const seeds = buildGapSuggestions(model);
+  const [statistics, species] = await Promise.all([
+    getCommunityStatisticsForLureModel(model.id),
+    getCommunitySpeciesForLureModel(model.id),
+  ]);
+
+  const seeds = buildGapSuggestions(model, { statistics, species });
   let created = 0;
 
   for (const seed of seeds) {

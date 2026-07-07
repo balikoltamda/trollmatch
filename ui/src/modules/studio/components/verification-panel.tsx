@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -46,6 +47,7 @@ export function VerificationPanel({
   productName,
   suggestions,
 }: VerificationPanelProps) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [correctingId, setCorrectingId] = useState<string | null>(null);
@@ -69,6 +71,7 @@ export function VerificationPanel({
       setCorrectingId(null);
       setMergeMode(false);
       setMergeSelected(new Set());
+      router.refresh();
     });
   }
 

@@ -303,6 +303,50 @@ function parseFeatureImages($: cheerio.CheerioAPI): string[] {
   return [...urls];
 }
 
+function parseMediaLinks($: cheerio.CheerioAPI): {
+  videoUrls: DuelParsedProduct["videoUrls"];
+  downloadUrls: DuelParsedProduct["downloadUrls"];
+} {
+  const videoUrls: DuelParsedProduct["videoUrls"] = [];
+  const downloadUrls: DuelParsedProduct["downloadUrls"] = [];
+  const seenVideos = new Set<string>();
+  const seenDownloads = new Set<string>();
+
+  $("a[href]").each((_, anchor) => {
+    const href = resolveAbsoluteUrl($(anchor).attr("href"));
+    if (!href) return;
+
+    const label = $(anchor).text().replace(/\s+/g, " ").trim();
+    const lower = href.toLowerCase();
+
+    if (
+      /youtube\.com|youtu\.be|vimeo\.com|\.mp4(?:\?|$)/i.test(lower) &&
+      !seenVideos.has(href)
+    ) {
+      seenVideos.add(href);
+      videoUrls.push({ url: href, title: label || undefined });
+      return;
+    }
+
+    if (/\.pdf(?:\?|$)|manual|catalog|download/i.test(`${lower} ${label}`) && !seenDownloads.has(href)) {
+      seenDownloads.add(href);
+      const role = /manual/i.test(label) ? "manual" : /catalog/i.test(label) ? "catalog" : "spec_sheet";
+      downloadUrls.push({ url: href, title: label || undefined, role });
+    }
+  });
+
+  $("iframe[src]").each((_, frame) => {
+    const src = resolveAbsoluteUrl($(frame).attr("src"));
+    if (!src || seenVideos.has(src)) return;
+    if (/youtube|vimeo|player/i.test(src)) {
+      seenVideos.add(src);
+      videoUrls.push({ url: src });
+    }
+  });
+
+  return { videoUrls, downloadUrls };
+}
+
 /** Parse a DUEL English/Japanese product detail HTML snapshot. */
 export function parseDuelProductHtml(
   html: string,
@@ -329,6 +373,7 @@ export function parseDuelProductHtml(
   const specRows = parseSpecTable($);
   const colors = parseColors($);
   const janSku = parseJanSkuTable($);
+  const { videoUrls, downloadUrls } = parseMediaLinks($);
 
   const descriptionParts = [headline, ...bullets].filter(Boolean);
   const locale = options.locale ?? (options.sourceUrl.includes("/english/") ? "en" : "ja");
@@ -355,6 +400,8 @@ export function parseDuelProductHtml(
     janSku,
     availableSizes: specRows.map((row) => row.sizeLabel).filter(Boolean),
     availableColors: colors.map((color) => color.code),
+    videoUrls,
+    downloadUrls,
   };
 }
 

@@ -158,12 +158,13 @@ Public catalog reads PostgreSQL via Prisma in Next.js server code. Search is Pri
 | **terminology** | Fishing Lexicon types + `LEXICON_REGISTRY` seed data |
 | **editorial** | Author registry, attribution, editorial notes |
 | **trust** | Trust indicators, source badges; still uses enrichment mock for some stats |
-| **knowledge-pipeline** | Knowledge Hub, source scoring, graph links, public related knowledge |
+| **knowledge-pipeline** | Source Archive, source scoring, graph links, public related knowledge |
 | **import** | Manufacturer importers, canonical DTO, registry, persistence, DUEL connector |
 | **studio** | Editor UI — products, imports, community, knowledge, media |
 | **home** | Homepage feed and layout |
 | **stability** | Error/loading/empty states |
 | **species**, **manufacturer**, **technique** | Scaffolded placeholders |
+| **region** | Fishing geography reference data — Studio management (Sprint 7.6B) |
 | **add-lure** (`/[locale]/add-lure`) | Form UI only — save disabled; not production workflow yet |
 
 ## Studio
@@ -176,9 +177,10 @@ Editor-facing surface at `/studio` — **no auth gate yet** (settings page notes
 | `/studio/products`, `/studio/products/[id]` | Catalog editing, completeness, verification |
 | `/studio/import`, `/studio/import/batch/[id]` | Import Center — queue batches, poll status |
 | `/studio/community/reports` | Catch report approve/reject/merge |
-| `/studio/knowledge` | Knowledge Hub inbox |
+| `/studio/source-archive` | Source Archive — verified external sources inbox |
 | `/studio/notes` | Editorial notes |
 | `/studio/manufacturers` | Manufacturer management |
+| `/studio/regions` | Region management (fishing geography) |
 | `/studio/media` | Image assets |
 
 Logic: `ui/src/modules/studio/` (data loaders, server actions in `actions/`). Studio actions perform real DB work with audit trails where implemented.

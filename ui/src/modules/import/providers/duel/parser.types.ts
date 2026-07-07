@@ -53,6 +53,10 @@ export type DuelParsedProduct = {
   janSku: Array<{ catalogNumber: string; colorCode?: string; value: string }>;
   availableSizes: string[];
   availableColors: string[];
+  /** Embedded or linked product demo videos. */
+  videoUrls: Array<{ url: string; title?: string }>;
+  /** PDF/manual/download assets linked from product page. */
+  downloadUrls: Array<{ url: string; title?: string; role?: string }>;
 };
 
 /** Product card from a category listing snapshot. */

@@ -6,6 +6,7 @@ import {
   StudioPageHeader,
 } from "@/modules/studio/components/studio-page";
 import { StudioStatCard } from "@/modules/studio/components/studio-ui";
+import { ImportBatchRetryButton } from "@/modules/studio/components/import-batch-retry-button";
 import { getImportBatchReport } from "@/modules/studio/data/import-batch-report";
 import { ImportBatchStatusPoller } from "@/modules/studio/components/import-batch-status-poller";
 import { resolveImporterSlug } from "@/modules/import/registry/manufacturer-slugs";
@@ -65,6 +66,9 @@ export default async function StudioImportBatchReportPage({
               >
                 Open errors
               </Link>
+            ) : null}
+            {report.status === "FAILED" ? (
+              <ImportBatchRetryButton manufacturerCode={report.manufacturerCode} />
             ) : null}
             <Link
               href="/studio/import"

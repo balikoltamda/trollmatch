@@ -43,12 +43,17 @@ export async function SpeciesIndexView({
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {species.map((item) => (
               <SpeciesCard
-                key={item.slug}
+                key={item.slugEn}
                 slug={item.slug}
                 name={pickLocalized(item.name, locale)}
-                habitat={pickLocalized(item.subtitle, locale)}
+                scientificName={item.scientificName}
+                regions={item.regions}
+                regionLabels={item.regions
+                  .map((region) => pickLocalized({ en: region.en, tr: region.tr }, locale))
+                  .join(" · ")}
                 lureCount={item.lureCount}
                 lureCountLabel={t("lureCount", { count: item.lureCount })}
+                heroImageUrl={item.heroImageUrl}
               />
             ))}
           </div>

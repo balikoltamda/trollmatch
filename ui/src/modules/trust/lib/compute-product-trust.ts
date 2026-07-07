@@ -1,10 +1,15 @@
-import { LURE_DETAIL_ENRICHMENTS } from "@/modules/lure/data/lure-detail-enrichment";
 import { prisma } from "@/lib/prisma";
 import { editorialStatusLabel } from "@/modules/studio/lib/editorial";
+import {
+  getCommunityStatisticsForLureModel,
+  toCommunityConsensus,
+} from "@/modules/catch-report/data/community-statistics";
+import type { CommunityStatistics } from "@/modules/lure/types/lure-detail";
 import {
   computeTrustScore,
   deriveLastVerifiedAt,
   derivePublicVerificationStatus,
+  buildTrustScoreBreakdown,
 } from "@/modules/trust/lib/derive-verification";
 import type {
   CommunityConsensus,
@@ -20,36 +25,34 @@ type TrustModelRecord = {
   lifecycleState: import("@/generated/prisma/client").ContentLifecycleState;
   manufacturerStatus: import("@/generated/prisma/client").ManufacturerProductStatus;
   lastImportedAt: Date | null;
+  lastManufacturerSyncAt: Date | null;
   firstSeenAt: Date | null;
   bodyTypeEn: string | null;
   actionEn: string | null;
   divingDepthMaxM: { toString(): string } | null;
-  manufacturer: { nameEn: string; slug: string };
+  shortDescriptionEn: string | null;
+  shortDescriptionTr: string | null;
+  manufacturer: { nameEn: string; slug: string; id: string };
   editorNote: {
     confidence: import("@/generated/prisma/client").EditorNoteConfidence;
     updatedAt: Date;
     currentRecommendationEn: string | null;
     shortRecommendationEn: string | null;
+    longRecommendationEn: string | null;
   } | null;
   _count: {
     images: number;
     catalogSuggestions: number;
     lureSpeciesLinks: number;
+    technologyLinks: number;
+    knowledgeItems: number;
   };
 };
 
-function communityFromSlug(slug: string): CommunityConsensus | null {
-  const enrichment = LURE_DETAIL_ENRICHMENTS[slug];
-  if (!enrichment || enrichment.communityStatistics.verifiedCatchReportCount === 0) {
-    return null;
-  }
-  const stats = enrichment.communityStatistics;
-  return {
-    assertions: stats.usageAssertionCount,
-    catchReports: stats.verifiedCatchReportCount,
-    effectivenessBand: stats.effectivenessBand,
-    summary: `${stats.verifiedCatchReportCount} verified catch reports · effectiveness: ${stats.effectivenessBand}`,
-  };
+function communityFromStatistics(
+  stats: CommunityStatistics,
+): CommunityConsensus | null {
+  return toCommunityConsensus(stats);
 }
 
 function buildLayers(
@@ -106,7 +109,8 @@ function buildLayers(
             : "LOW",
       evidence: [
         `${community.catchReports} verified catch reports`,
-        `Effectiveness: ${community.effectivenessBand}`,
+        `${community.assertions} field notes`,
+        `Evidence band: ${community.effectivenessBand}`,
       ],
       provenance: [
         { label: "Source", value: "Verified angler catch reports" },
@@ -176,17 +180,21 @@ async function loadTrustModel(lureModelId: string): Promise<TrustModelRecord | n
       lifecycleState: true,
       manufacturerStatus: true,
       lastImportedAt: true,
+      lastManufacturerSyncAt: true,
       firstSeenAt: true,
       bodyTypeEn: true,
       actionEn: true,
       divingDepthMaxM: true,
-      manufacturer: { select: { nameEn: true, slug: true } },
+      shortDescriptionEn: true,
+      shortDescriptionTr: true,
+      manufacturer: { select: { nameEn: true, slug: true, id: true } },
       editorNote: {
         select: {
           confidence: true,
           updatedAt: true,
           currentRecommendationEn: true,
           shortRecommendationEn: true,
+          longRecommendationEn: true,
         },
       },
       _count: {
@@ -194,6 +202,8 @@ async function loadTrustModel(lureModelId: string): Promise<TrustModelRecord | n
           images: { where: { deletedAt: null } },
           catalogSuggestions: { where: { status: "PENDING" } },
           lureSpeciesLinks: { where: { deletedAt: null } },
+          technologyLinks: true,
+          knowledgeItems: true,
         },
       },
     },
@@ -211,26 +221,43 @@ async function getPublishedAt(lureModelId: string): Promise<Date | null> {
 
 export async function computeProductTrustProfile(
   lureModelId: string,
+  communityStats?: CommunityStatistics,
 ): Promise<TrustProfile | null> {
   const model = await loadTrustModel(lureModelId);
   if (!model) return null;
 
-  const [publishedAt] = await Promise.all([
-    getPublishedAt(lureModelId),
-  ]);
+  const stats =
+    communityStats ?? (await getCommunityStatisticsForLureModel(lureModelId));
 
+  const publishedAt = await getPublishedAt(lureModelId);
   const pendingCount = model._count.catalogSuggestions;
-  const community = communityFromSlug(model.slug);
+  const community = communityFromStatistics(stats);
 
-  const score = computeTrustScore({
+  const trustInput = {
     lifecycleState: model.lifecycleState,
     editorConfidence: model.editorNote?.confidence ?? null,
     lastImportedAt: model.lastImportedAt,
+    lastManufacturerSyncAt: model.lastManufacturerSyncAt,
     pendingSuggestions: pendingCount,
     hasEditorNote: model.editorNote !== null,
-    communityCatchReports: community?.catchReports ?? 0,
+    hasEditorSummary: Boolean(
+      model.editorNote?.currentRecommendationEn?.trim() ||
+        model.editorNote?.shortRecommendationEn?.trim(),
+    ),
+    communityCatchReports: stats.verifiedCatchReportCount,
     manufacturerActive: model.manufacturerStatus === "ACTIVE",
-  });
+    imageCount: model._count.images,
+    technologyCount: model._count.technologyLinks,
+    hasCompleteSpecs: Boolean(
+      model.bodyTypeEn && model.actionEn && model.divingDepthMaxM,
+    ),
+    hasShortDescriptionEn: Boolean(model.shortDescriptionEn?.trim()),
+    hasShortDescriptionTr: Boolean(model.shortDescriptionTr?.trim()),
+    knowledgeSourceCount: model._count.knowledgeItems,
+  };
+
+  const score = computeTrustScore(trustInput);
+  const scoreBreakdown = buildTrustScoreBreakdown(trustInput);
 
   const layers = buildLayers(model, pendingCount, publishedAt, community);
 
@@ -246,6 +273,7 @@ export async function computeProductTrustProfile(
     headline: "Why should I trust this information?",
     answer,
     layers,
+    scoreBreakdown,
     communityConsensus: community,
     editorialVerification: {
       status: model.lifecycleState,
@@ -260,7 +288,6 @@ export async function computeProductTrustProfile(
 }
 
 export function buildPublicTrustSummary(input: {
-  slug: string;
   lifecycleState: import("@/generated/prisma/client").ContentLifecycleState;
   lastImportedAt: Date | null;
   editorConfidence: import("@/generated/prisma/client").EditorNoteConfidence | null;
@@ -268,15 +295,17 @@ export function buildPublicTrustSummary(input: {
   manufacturerName: string;
   publishedAt: Date | null;
   lastVerifiedAt: string | null;
+  communityStatistics: CommunityStatistics;
 }): PublicTrustSummary {
-  const community = communityFromSlug(input.slug);
+  const community = communityFromStatistics(input.communityStatistics);
   const score = computeTrustScore({
     lifecycleState: input.lifecycleState,
     editorConfidence: input.editorConfidence,
     lastImportedAt: input.lastImportedAt,
     pendingSuggestions: input.pendingSuggestions,
     hasEditorNote: input.editorConfidence !== null,
-    communityCatchReports: community?.catchReports ?? 0,
+    hasEditorSummary: input.editorConfidence !== null,
+    communityCatchReports: input.communityStatistics.verifiedCatchReportCount,
     manufacturerActive: true,
   });
 
@@ -320,8 +349,6 @@ export function buildPublicTrustSummary(input: {
   if (input.editorConfidence !== null) sourceCount += 1;
   if (input.lifecycleState === "PUBLISHED") sourceCount += 1;
 
-  const lastVerifiedAt = input.lastVerifiedAt;
-
   return {
     score,
     answer,
@@ -331,7 +358,7 @@ export function buildPublicTrustSummary(input: {
     communityConsensus: community,
     evidence,
     provenance,
-    lastVerifiedAt,
+    lastVerifiedAt: input.lastVerifiedAt,
     editorialReviewPublished: input.lifecycleState === "PUBLISHED",
     sourceCount,
   };

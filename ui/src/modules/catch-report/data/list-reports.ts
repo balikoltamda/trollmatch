@@ -13,7 +13,7 @@ const REPORT_INCLUDE = {
       },
     },
   },
-  technique: { select: { nameEn: true, nameTr: true } },
+  technique: { select: { id: true, nameEn: true, nameTr: true } },
 } satisfies Prisma.CatchReportInclude;
 
 type ReportRaw = Prisma.CatchReportGetPayload<{ include: typeof REPORT_INCLUDE }>;
@@ -35,6 +35,7 @@ function mapReport(row: ReportRaw): CatchReportSummary {
     techniqueName: row.technique
       ? { en: row.technique.nameEn, tr: row.technique.nameTr }
       : null,
+    techniqueId: row.techniqueId,
     country: row.country,
     region: row.region,
     location: row.location,
@@ -59,10 +60,39 @@ export async function listApprovedCatchReportsForLure(
     const rows = await prisma.catchReport.findMany({
       where: {
         verificationStatus: "APPROVED",
+        mergedIntoId: null,
         lureVariant: {
           deletedAt: null,
           lureModel: { slug: lureSlug, deletedAt: null },
         },
+      },
+      include: REPORT_INCLUDE,
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+    return rows.map(mapReport);
+  } catch {
+    return [];
+  }
+}
+
+export async function listApprovedCatchReportsForSpecies(
+  speciesSlug: string,
+  limit = 10,
+): Promise<CatchReportSummary[]> {
+  try {
+    const species = await prisma.fishSpecies.findFirst({
+      where: { slug: speciesSlug, deletedAt: null },
+      select: { id: true },
+    });
+    if (!species) return [];
+
+    const rows = await prisma.catchReport.findMany({
+      where: {
+        fishSpeciesId: species.id,
+        verificationStatus: "APPROVED",
+        mergedIntoId: null,
+        lureVariant: { deletedAt: null },
       },
       include: REPORT_INCLUDE,
       orderBy: { createdAt: "desc" },

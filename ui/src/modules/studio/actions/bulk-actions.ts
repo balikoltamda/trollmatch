@@ -2,12 +2,22 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import {
+  auditActor,
+  isUnauthorizedResult,
+  requireAdminOrUnauthorized,
+  requireEditorOrUnauthorized,
+} from "@/modules/studio/auth/permissions";
 import { recordCatalogAudit } from "@/modules/studio/data/audit";
 import { exportProductsCsv } from "@/modules/studio/data/products";
 
 export type BulkAction =
   | "publish"
   | "unpublish"
+  | "reject"
+  | "archive"
+  | "restore"
+  | "delete"
   | "assign_species"
   | "assign_techniques"
   | "delete_editor_note"
@@ -28,6 +38,8 @@ export async function bulkProductAction(
   try {
     switch (action) {
       case "publish": {
+        const actor = await requireEditorOrUnauthorized();
+        if (isUnauthorizedResult(actor)) return actor;
         await prisma.lureModel.updateMany({
           where: { id: { in: ids }, deletedAt: null },
           data: { lifecycleState: "PUBLISHED" },
@@ -36,6 +48,7 @@ export async function bulkProductAction(
           entityType: "bulk",
           entityId: ids[0]!,
           action: "BULK_ACTION",
+          actor: auditActor(actor),
           summary: `Published ${ids.length} products`,
           metadata: { ids, action },
         });
@@ -44,6 +57,8 @@ export async function bulkProductAction(
       }
 
       case "unpublish": {
+        const actor = await requireEditorOrUnauthorized();
+        if (isUnauthorizedResult(actor)) return actor;
         await prisma.lureModel.updateMany({
           where: { id: { in: ids }, deletedAt: null },
           data: { lifecycleState: "READY" },
@@ -52,6 +67,7 @@ export async function bulkProductAction(
           entityType: "bulk",
           entityId: ids[0]!,
           action: "BULK_ACTION",
+          actor: auditActor(actor),
           summary: `Unpublished ${ids.length} products`,
           metadata: { ids, action },
         });
@@ -59,7 +75,85 @@ export async function bulkProductAction(
         return { ok: true, message: `Unpublished ${ids.length} products` };
       }
 
+      case "reject": {
+        const actor = await requireEditorOrUnauthorized();
+        if (isUnauthorizedResult(actor)) return actor;
+        await prisma.lureModel.updateMany({
+          where: { id: { in: ids }, deletedAt: null },
+          data: { lifecycleState: "REJECTED" },
+        });
+        await recordCatalogAudit({
+          entityType: "bulk",
+          entityId: ids[0]!,
+          action: "BULK_ACTION",
+          actor: auditActor(actor),
+          summary: `Rejected ${ids.length} products`,
+          metadata: { ids, action },
+        });
+        revalidateStudio();
+        return { ok: true, message: `Rejected ${ids.length} products` };
+      }
+
+      case "archive": {
+        const actor = await requireEditorOrUnauthorized();
+        if (isUnauthorizedResult(actor)) return actor;
+        await prisma.lureModel.updateMany({
+          where: { id: { in: ids }, deletedAt: null },
+          data: { lifecycleState: "ARCHIVED" },
+        });
+        await recordCatalogAudit({
+          entityType: "bulk",
+          entityId: ids[0]!,
+          action: "BULK_ACTION",
+          actor: auditActor(actor),
+          summary: `Archived ${ids.length} products`,
+          metadata: { ids, action },
+        });
+        revalidateStudio();
+        return { ok: true, message: `Archived ${ids.length} products` };
+      }
+
+      case "restore": {
+        const actor = await requireEditorOrUnauthorized();
+        if (isUnauthorizedResult(actor)) return actor;
+        await prisma.lureModel.updateMany({
+          where: { id: { in: ids } },
+          data: { deletedAt: null, lifecycleState: "PENDING_REVIEW" },
+        });
+        await recordCatalogAudit({
+          entityType: "bulk",
+          entityId: ids[0]!,
+          action: "BULK_ACTION",
+          actor: auditActor(actor),
+          summary: `Restored ${ids.length} products`,
+          metadata: { ids, action },
+        });
+        revalidateStudio();
+        return { ok: true, message: `Restored ${ids.length} products` };
+      }
+
+      case "delete": {
+        const actor = await requireAdminOrUnauthorized();
+        if (isUnauthorizedResult(actor)) return actor;
+        await prisma.lureModel.updateMany({
+          where: { id: { in: ids }, deletedAt: null },
+          data: { deletedAt: new Date() },
+        });
+        await recordCatalogAudit({
+          entityType: "bulk",
+          entityId: ids[0]!,
+          action: "BULK_ACTION",
+          actor: auditActor(actor),
+          summary: `Soft-deleted ${ids.length} products`,
+          metadata: { ids, action },
+        });
+        revalidateStudio();
+        return { ok: true, message: `Deleted ${ids.length} products` };
+      }
+
       case "assign_species": {
+        const actor = await requireEditorOrUnauthorized();
+        if (isUnauthorizedResult(actor)) return actor;
         const speciesIds = payload?.speciesIds ?? [];
         if (speciesIds.length === 0) {
           return { ok: false, error: "Select at least one species" };
@@ -79,6 +173,14 @@ export async function bulkProductAction(
             });
           }
         });
+        await recordCatalogAudit({
+          entityType: "bulk",
+          entityId: ids[0]!,
+          action: "BULK_ACTION",
+          actor: auditActor(actor),
+          summary: `Assigned species to ${ids.length} products`,
+          metadata: { ids, action, speciesIds },
+        });
         revalidateStudio();
         return {
           ok: true,
@@ -87,6 +189,8 @@ export async function bulkProductAction(
       }
 
       case "assign_techniques": {
+        const actor = await requireEditorOrUnauthorized();
+        if (isUnauthorizedResult(actor)) return actor;
         const techniqueIds = payload?.techniqueIds ?? [];
         if (techniqueIds.length === 0) {
           return { ok: false, error: "Select at least one technique" };
@@ -103,6 +207,14 @@ export async function bulkProductAction(
             });
           }
         });
+        await recordCatalogAudit({
+          entityType: "bulk",
+          entityId: ids[0]!,
+          action: "BULK_ACTION",
+          actor: auditActor(actor),
+          summary: `Assigned techniques to ${ids.length} products`,
+          metadata: { ids, action, techniqueIds },
+        });
         revalidateStudio();
         return {
           ok: true,
@@ -111,8 +223,18 @@ export async function bulkProductAction(
       }
 
       case "delete_editor_note": {
+        const actor = await requireAdminOrUnauthorized();
+        if (isUnauthorizedResult(actor)) return actor;
         await prisma.lureEditorNote.deleteMany({
           where: { lureModelId: { in: ids } },
+        });
+        await recordCatalogAudit({
+          entityType: "bulk",
+          entityId: ids[0]!,
+          action: "BULK_ACTION",
+          actor: auditActor(actor),
+          summary: `Removed editor notes from ${ids.length} products`,
+          metadata: { ids, action },
         });
         revalidateStudio();
         return {
@@ -122,6 +244,8 @@ export async function bulkProductAction(
       }
 
       case "export": {
+        const actor = await requireEditorOrUnauthorized();
+        if (isUnauthorizedResult(actor)) return actor;
         const result = await exportProductsCsv(ids);
         if (!result.ok) return result;
         return { ok: true, message: "Export ready", csv: result.csv };

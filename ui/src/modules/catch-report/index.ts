@@ -16,8 +16,21 @@ export {
 export {
   countPendingCatchReports,
   listApprovedCatchReportsForLure,
+  listApprovedCatchReportsForSpecies,
   listCatchReportsForReview,
 } from "@/modules/catch-report/data/list-reports";
+
+export {
+  countApprovedCatchReportsByLureModelIds,
+  countApprovedCatchReportsForLureModel,
+  emptyCommunityStatistics,
+  getCommunityStatisticsForLureModel,
+  getCommunityStatisticsForSpecies,
+  getCommunitySpeciesForLureModel,
+  getCommunityTechniquesForLureModel,
+  getCommunityTechniquesForSpecies,
+  toCommunityConsensus,
+} from "@/modules/catch-report/data/community-statistics";
 
 export {
   getCatchReportFormContext,

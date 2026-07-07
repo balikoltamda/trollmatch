@@ -5,6 +5,12 @@ import type {
   LureDetailParams,
 } from "@/modules/lure/types/lure-detail";
 
+export {
+  getActiveVariant,
+  localize,
+  formatPatternCount,
+} from "@/modules/lure/lib/lure-display";
+
 const defaultRepository: LureRepository = prismaLureRepository;
 
 export async function getLureDetail(
@@ -18,23 +24,4 @@ export async function getLureSlugs(
   repository: LureRepository = defaultRepository,
 ): Promise<string[]> {
   return repository.getAllSlugs();
-}
-
-export function getActiveVariant(
-  lure: LureDetail,
-  variantId?: string,
-): LureDetail["variants"][number] {
-  const match = lure.variants.find((v) => v.id === variantId);
-  if (match) return match;
-  return (
-    lure.variants.find((v) => v.id === lure.defaultVariantId) ??
-    lure.variants[0]
-  );
-}
-
-export function localize<T extends Record<string, string>>(
-  value: T,
-  locale: keyof T,
-): string {
-  return value[locale] ?? value.en ?? Object.values(value)[0] ?? "";
 }

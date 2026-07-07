@@ -18,6 +18,7 @@ export type LureVariant = {
   weightG: number;
   colorCode: string;
   imageSrc: string;
+  galleryImages: string[];
 };
 
 export type LureSpecifications = {
@@ -80,6 +81,12 @@ export type ChangeHistoryEntry = {
   actor: LocalizedString;
 };
 
+export type LureRegionalNotesView = {
+  mediterranean: LocalizedString | null;
+  aegean: LocalizedString | null;
+  northernCyprus: LocalizedString | null;
+};
+
 export type LureDetail = {
   slug: string;
   manufacturer: LocalizedString;
@@ -102,6 +109,7 @@ export type LureDetail = {
   changeHistory: ChangeHistoryEntry[];
   trust: import("@/modules/trust/types").PublicTrustSummary;
   editorialNote: EditorialNotePreview | null;
+  regionalNotes: LureRegionalNotesView | null;
 };
 
 export type LureDetailParams = {

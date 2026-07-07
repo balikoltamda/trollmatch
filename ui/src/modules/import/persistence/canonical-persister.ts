@@ -1,18 +1,17 @@
 import {
   ColorAliasKind,
   ContentLifecycleState,
-  ImageRole,
   ProductAliasKind,
 } from "@/generated/prisma/client";
 import type { PrismaClient } from "@/generated/prisma/client";
 import type {
   CanonicalColor,
-  CanonicalImage,
   CanonicalLureImport,
 } from "../core/canonical-lure";
+import { ensureImportImages } from "@/modules/import/images/ensure-import-images";
+import { prepareCanonicalImportImages } from "@/modules/import/images/persist-import-image";
 import {
   findColorBySlug,
-  findImageByUrl,
   findLureModel,
   findLureVariant,
   findManufacturerByCanonicalIdentity,
@@ -29,19 +28,6 @@ import {
   mergeImportSummaries,
   type ImportSummary,
 } from "./types";
-
-function mapImageRole(role?: string): ImageRole {
-  switch (role) {
-    case "hero":
-      return ImageRole.HERO;
-    case "rigging_diagram":
-      return ImageRole.RIGGING_DIAGRAM;
-    case "technical_diagram":
-      return ImageRole.TECHNICAL_DIAGRAM;
-    default:
-      return ImageRole.PRODUCT;
-  }
-}
 
 async function ensureColor(
   tx: DbClient,
@@ -98,37 +84,6 @@ async function ensureColor(
   }
 
   return colorRecord.id;
-}
-
-async function ensureImages(
-  tx: DbClient,
-  lureModelId: string,
-  images: CanonicalImage[] | undefined,
-  lureVariantId: string | null,
-  summary: ImportSummary,
-  labelPrefix: string,
-): Promise<void> {
-  for (const [index, image] of (images ?? []).entries()) {
-    const existing = await findImageByUrl(tx, lureModelId, image.url, lureVariantId);
-
-    if (existing) {
-      summary.skipped.push(`${labelPrefix} Image: ${image.url}`);
-      continue;
-    }
-
-    await tx.image.create({
-      data: {
-        lureModelId,
-        lureVariantId,
-        url: image.url,
-        altTextEn: image.alt ? resolveLocalized(image.alt, "en") : null,
-        altTextTr: image.alt ? resolveLocalized(image.alt, "tr") : null,
-        role: mapImageRole(image.role),
-        sortOrder: image.sortOrder ?? index,
-      },
-    });
-    summary.created.push(`${labelPrefix} Image: ${image.url}`);
-  }
 }
 
 async function persistSingleRecord(
@@ -264,7 +219,7 @@ async function persistSingleRecord(
     }
   }
 
-  await ensureImages(
+  await ensureImportImages(
     tx,
     lureModel.id,
     modelInput.images,
@@ -298,7 +253,7 @@ async function persistSingleRecord(
     summary.created.push(`LureVariant: ${lureVariant.slug}`);
   }
 
-  await ensureImages(
+  await ensureImportImages(
     tx,
     lureModel.id,
     variantInput.images,
@@ -314,7 +269,8 @@ export async function persistCanonicalImport(
   prisma: PrismaClient,
   record: CanonicalLureImport,
 ): Promise<ImportSummary> {
-  return prisma.$transaction(async (tx) => persistSingleRecord(tx, record));
+  const prepared = await prepareCanonicalImportImages(record);
+  return prisma.$transaction(async (tx) => persistSingleRecord(tx, prepared));
 }
 
 export async function persistCanonicalImports(

@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import type { AppLocale } from "@/i18n/routing";
 import {
   HOME_LURES,
   HOME_MANUFACTURERS,
-  HOME_SPECIES,
   HOME_STATISTICS,
 } from "@/modules/home/data/home-content";
 import { listPublicLures } from "@/modules/discovery/data/browse-lures";
@@ -13,14 +13,24 @@ import {
 import { PUBLIC_LURE_WHERE } from "@/modules/discovery/lib/public-visibility";
 import type { HomeDiscoveryData } from "@/modules/discovery/types";
 
+function emptyHomeData(): HomeDiscoveryData {
+  return {
+    species: [],
+    latestLures: [],
+    manufacturers: [],
+    stats: {
+      lureCount: 0,
+      speciesCount: 0,
+      manufacturerCount: 0,
+      importBatchCount: 0,
+    },
+    fromDatabase: false,
+  };
+}
+
 function fallbackHomeData(): HomeDiscoveryData {
   return {
-    species: HOME_SPECIES.map((s) => ({
-      slug: s.id,
-      name: s.name,
-      subtitle: s.habitat,
-      lureCount: s.lureCount,
-    })),
+    species: [],
     latestLures: HOME_LURES.map((l) => ({
       slug: l.slug,
       manufacturer: l.manufacturer,
@@ -37,7 +47,7 @@ function fallbackHomeData(): HomeDiscoveryData {
     })),
     stats: {
       lureCount: Number(HOME_STATISTICS.find((s) => s.id === "lures")?.value.replace(/\D/g, "") ?? 0),
-      speciesCount: Number(HOME_STATISTICS.find((s) => s.id === "species")?.value.replace(/\D/g, "") ?? 0),
+      speciesCount: 0,
       manufacturerCount: Number(HOME_STATISTICS.find((s) => s.id === "manufacturers")?.value.replace(/\D/g, "") ?? 0),
       importBatchCount: 0,
     },
@@ -73,11 +83,13 @@ async function listHomeManufacturers(limit = 6): Promise<HomeDiscoveryData["manu
     .slice(0, limit);
 }
 
-export async function getHomeDiscoveryData(): Promise<HomeDiscoveryData> {
+export async function getHomeDiscoveryData(
+  locale: AppLocale,
+): Promise<HomeDiscoveryData> {
   try {
     const [species, lureList, lureCount, manufacturerCount, speciesWithLures, manufacturers, importBatchCount] =
       await Promise.all([
-        listPublicSpecies(8),
+        listPublicSpecies(locale, 8),
         listPublicLures({ page: 1, pageSize: 4 }),
         prisma.lureModel.count({ where: PUBLIC_LURE_WHERE }),
         prisma.manufacturer.count({ where: { deletedAt: null } }),
@@ -111,13 +123,13 @@ export async function getHomeDiscoveryData(): Promise<HomeDiscoveryData> {
       fromDatabase: true,
     };
   } catch {
-    return fallbackHomeData();
+    return emptyHomeData();
   }
 }
 
 /** Collection cards on homepage → species or search entry points. */
 export const COLLECTION_LINKS: Record<string, string> = {
-  "bosphorus-bluefish": "/species/bluefish",
-  "aegean-shore": "/species/european-seabass",
-  "med-topwater-trolling": "/species/bonito",
+  "bosphorus-bluefish": "/species",
+  "aegean-shore": "/species",
+  "med-topwater-trolling": "/species",
 };

@@ -1,9 +1,8 @@
-import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { VerificationBadge } from "@/modules/lure/components/ui/verification-badge";
-import { VariantSelector } from "@/modules/lure/components/ui/variant-selector";
-import { localize } from "@/modules/lure/services/get-lure-detail";
+import { LureProductMedia } from "@/modules/lure/components/ui/lure-product-media";
+import { formatPatternCount, localize } from "@/modules/lure/lib/lure-display";
 import type { LureDetail } from "@/modules/lure/types/lure-detail";
 import type { AppLocale } from "@/i18n/routing";
 import type { LureVariant } from "@/modules/lure/types/lure-detail";
@@ -23,6 +22,19 @@ export async function LureHero({ lure, activeVariant, locale }: LureHeroProps) {
     manufacturer_verified: t("verification.manufacturerVerified"),
     moderator_verified: t("verification.moderatorVerified"),
     expert_endorsed: t("verification.expertEndorsed"),
+  };
+
+  const patternLabels = {
+    patternCount: formatPatternCount(lure.variants.length, locale),
+    scrollPrev: t("pattern.scrollPrev"),
+    scrollNext: t("pattern.scrollNext"),
+    patternName: t("pattern.name"),
+    colorCode: t("pattern.colorCode"),
+    length: t("pattern.length"),
+    weight: t("pattern.weight"),
+    buoyancy: t("pattern.buoyancy"),
+    selectorLabel: t("pattern.selectorLabel"),
+    galleryLabel: t("pattern.galleryLabel"),
   };
 
   return (
@@ -55,18 +67,14 @@ export async function LureHero({ lure, activeVariant, locale }: LureHeroProps) {
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-14 lg:items-start">
-        <div className="border-border/50 bg-card overflow-hidden rounded-2xl border shadow-[0_1px_2px_oklch(0.28_0.04_255/0.04),0_12px_40px_oklch(0.28_0.04_255/0.04)]">
-          <div className="bg-surface-muted/60 relative aspect-[5/4]">
-            <Image
-              src={activeVariant.imageSrc}
-              alt={localize(activeVariant.label, locale)}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 55vw"
-              className="object-contain p-10 sm:p-12"
-            />
-          </div>
-        </div>
+        <LureProductMedia
+          slug={lure.slug}
+          variants={lure.variants}
+          activeVariant={activeVariant}
+          locale={locale}
+          buoyancy={lure.specifications.buoyancy}
+          labels={patternLabels}
+        />
 
         <div className="flex flex-col gap-6 lg:pt-2">
           <div className="space-y-3">
@@ -89,14 +97,6 @@ export async function LureHero({ lure, activeVariant, locale }: LureHeroProps) {
             label={verificationLabels[lure.verificationStatus]}
             lastVerifiedLabel={t("verification.lastVerified")}
             lastVerifiedAt={lure.lastVerifiedAt}
-          />
-
-          <VariantSelector
-            slug={lure.slug}
-            variants={lure.variants}
-            activeVariantId={activeVariant.id}
-            locale={locale}
-            label={t("variantLabel")}
           />
         </div>
       </div>

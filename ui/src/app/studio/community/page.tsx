@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   StudioPageBody,
   StudioPageHeader,
 } from "@/modules/studio/components/studio-page";
+import { CommunitySuggestionActions } from "@/modules/studio/components/community-suggestion-actions";
 import { SOURCE_LABELS } from "@/modules/studio/lib/suggestion-labels";
 import { listCommunitySuggestions } from "@/modules/studio/data/attention-inbox";
 import { ensureAttentionSuggestions } from "@/modules/studio/lib/suggestion-generator";
@@ -89,12 +89,10 @@ export default async function StudioCommunityPage() {
                       .join(" · ")}
                   </p>
                 ) : null}
-                <Link
-                  href={`/studio/products/${s.lureModel.id}`}
-                  className={buttonVariants({ size: "sm", className: "mt-3" })}
-                >
-                  Verify & build trust
-                </Link>
+                <CommunitySuggestionActions
+                  suggestionId={s.id}
+                  productId={s.lureModel.id}
+                />
               </li>
             ))}
           </ul>

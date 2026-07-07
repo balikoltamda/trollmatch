@@ -143,6 +143,46 @@
     "searchTitle": "Fish species",
     "disambiguation": "Note: {correct} is the correct species for this name."
   },
+  "SpeciesCompass": {
+    "profileTitle": "Species profile",
+    "classificationTitle": "Scientific classification",
+    "galleryTitle": "Gallery",
+    "regionalNotesTitle": "Regional notes",
+    "techniquesTitle": "Fishing techniques",
+    "catchReportsTitle": "Verified catch reports",
+    "catchReportsDescription": "What anglers reported catching for this species — checked before publication.",
+    "communityStatsTitle": "Community evidence",
+    "communityStatsDescription": "Aggregated from approved catch reports only — no estimates or marketing claims.",
+    "habitat": "Habitat",
+    "distribution": "Distribution",
+    "spawning": "Spawning",
+    "conservation": "Conservation",
+    "depth": "Typical depth",
+    "maxLength": "Maximum length",
+    "maxWeight": "Maximum weight",
+    "iucnStatus": "IUCN Red List",
+    "faoAreas": "FAO fishing areas",
+    "mediterraneanNotes": "Eastern Mediterranean",
+    "aegeanNotes": "Aegean",
+    "northernCyprusNotes": "Northern Cyprus",
+    "kingdom": "Kingdom",
+    "phylum": "Phylum",
+    "class": "Class",
+    "order": "Order",
+    "family": "Family",
+    "genus": "Genus",
+    "iucn": {
+      "LC": "Least Concern",
+      "NT": "Near Threatened",
+      "VU": "Vulnerable",
+      "EN": "Endangered",
+      "CR": "Critically Endangered",
+      "DD": "Data Deficient",
+      "NE": "Not Evaluated",
+      "EW": "Extinct in the Wild",
+      "EX": "Extinct"
+    }
+  },
   "Lures": {
     "meta": {
       "title": "Browse lures",
@@ -183,7 +223,15 @@
     "catalogLuresDescription": "Catalog entries from manufacturer and editorial tags — not effectiveness advice without a fishing technique.",
     "noLuresYet": "No lures linked to this species yet.",
     "contributeLure": "Add a lure you use for this fish",
-    "verified": "Verified"
+    "verified": "Verified",
+    "header": {
+      "distribution": "Distribution",
+      "habitat": "Habitat",
+      "maxSize": "Maximum size",
+      "maxLength": "Length",
+      "maxWeight": "Weight",
+      "sizeSeparator": " · "
+    }
   },
   "CatchReport": {
     "verified": "Verified report",
@@ -233,6 +281,17 @@
     "breadcrumbHome": "Home",
     "breadcrumbLures": "Lures",
     "variantLabel": "Colour",
+    "pattern": {
+      "selectorLabel": "Pattern",
+      "scrollPrev": "Scroll patterns left",
+      "scrollNext": "Scroll patterns right",
+      "name": "Pattern",
+      "colorCode": "Manufacturer colour code",
+      "length": "Length",
+      "weight": "Weight",
+      "buoyancy": "Buoyancy",
+      "galleryLabel": "Gallery"
+    },
     "manufacturerSource": "Manufacturer specs",
     "verification": {
       "unverified": "Not verified yet",
@@ -295,13 +354,20 @@
     "community": {
       "assertions": "Field notes",
       "catchReports": "Catch reports",
-      "effectiveness": "What anglers report",
-      "bandLow": "Few positive reports",
-      "bandModerate": "Mixed reports",
-      "bandHigh": "Mostly positive",
+      "effectiveness": "Report volume",
+      "bandLow": "Limited reports",
+      "bandModerate": "Growing evidence",
+      "bandHigh": "Strong evidence",
       "bandInsufficient": "Not enough reports yet",
       "topRegions": "Where people fish it",
       "source": "Verified angler reports — not the manufacturer's suggestion alone."
+    },
+    "regional": {
+      "title": "Regional notes",
+      "description": "How this lure performs in Eastern Mediterranean waters — from editorial field testing.",
+      "mediterranean": "Eastern Mediterranean",
+      "aegean": "Aegean",
+      "northernCyprus": "Northern Cyprus"
     },
     "ai": {
       "assistedLabel": "AI summary",
@@ -334,7 +400,8 @@
       "sourceCount": "Source count",
       "notYet": "Not yet",
       "editorialPublished": "Published",
-      "editorialPending": "Pending review"
+      "editorialPending": "Pending review",
+      "catchReports": "Verified catch reports"
     },
     "authorPage": {
       "metaTitle": "Editorial profile",

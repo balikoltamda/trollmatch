@@ -145,6 +145,20 @@ export type ProductEditorData = {
     score: number;
     missing: string[];
   };
+  manufacturerSourceUrl: string | null;
+  canRefreshManufacturer: boolean;
+  lastEditorialReviewAt: Date | null;
+  changesAvailable: number;
+  digitalTwin: {
+    manufacturerUrl: string | null;
+    lastManufacturerSyncAt: Date | null;
+    lastManufacturerCheckAt: Date | null;
+    lastSuccessfulImportAt: Date | null;
+    syncStatus: string;
+    contentHash: string | null;
+    manufacturerUpdated: boolean;
+    editorialUpdatedAt: Date | null;
+  };
 };
 
 export type ImportFieldChangeRow = {
@@ -153,6 +167,8 @@ export type ImportFieldChangeRow = {
   fieldKey: string;
   oldValue: string | null;
   newValue: string | null;
+  editedValue: string | null;
+  changeKind: string;
   status: string;
   createdAt: Date;
 };

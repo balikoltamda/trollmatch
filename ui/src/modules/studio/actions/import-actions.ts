@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import {
+  isUnauthorizedResult,
+  requireEditorOrUnauthorized,
+} from "@/modules/studio/auth/permissions";
+import {
   cancelQueuedImportBatch,
   createQueuedImportBatch,
 } from "@/modules/studio/data/execute-import-batch";
@@ -14,6 +18,9 @@ export async function enqueueManufacturerImport(
   | { ok: true; batchId: string }
   | { ok: false; error: string }
 > {
+  const auth = await requireEditorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   const created = await createQueuedImportBatch(prisma, manufacturerCode);
 
   if ("error" in created) {
@@ -58,6 +65,9 @@ export async function runManufacturerImport(manufacturerCode: string) {
 export async function cancelManufacturerImport(
   batchId: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
+  const auth = await requireEditorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   const result = await cancelQueuedImportBatch(prisma, batchId);
 
   if (!result.ok) {

@@ -11,17 +11,34 @@ export type LureCardData = {
   verified: boolean;
 };
 
+export type SpeciesRegionLabel = {
+  en: string;
+  tr: string;
+  code: string;
+};
+
 export type SpeciesCardData = {
   slug: string;
+  slugEn: string;
+  slugTr: string;
   name: LocalizedPair;
-  subtitle: LocalizedPair;
+  scientificName: string;
+  regions: SpeciesRegionLabel[];
   lureCount: number;
+  heroImageUrl: string | null;
 };
 
 export type SpeciesDetailData = {
   slug: string;
+  slugEn: string;
+  slugTr: string;
   name: LocalizedPair;
   scientificName: string;
+  habitat: LocalizedPair;
+  maxLengthCm: number | null;
+  maxWeightG: number | null;
+  description: LocalizedPair;
+  regions: SpeciesRegionLabel[];
   lureCount: number;
   lures: LureCardData[];
   topLuresByTechnique: SpeciesTechniqueLureGroup[];

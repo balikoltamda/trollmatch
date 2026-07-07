@@ -36,6 +36,7 @@ const HALCO_LASER_PRO: LureDetail = {
       weightG: 119,
       colorCode: "H70",
       imageSrc: "/lures/halco-laser-pro-190-dd.svg",
+      galleryImages: ["/lures/halco-laser-pro-190-dd.svg"],
     },
     {
       id: "h81-green-mackerel",
@@ -47,6 +48,7 @@ const HALCO_LASER_PRO: LureDetail = {
       weightG: 119,
       colorCode: "H81",
       imageSrc: "/lures/halco-laser-pro-190-dd.svg",
+      galleryImages: ["/lures/halco-laser-pro-190-dd.svg"],
     },
     {
       id: "h56-silver-flash",
@@ -58,6 +60,7 @@ const HALCO_LASER_PRO: LureDetail = {
       weightG: 119,
       colorCode: "H56",
       imageSrc: "/lures/halco-laser-pro-190-dd.svg",
+      galleryImages: ["/lures/halco-laser-pro-190-dd.svg"],
     },
   ],
   specifications: {
@@ -252,6 +255,7 @@ const HALCO_LASER_PRO: LureDetail = {
     sourceCount: 4,
   },
   editorialNote: null,
+  regionalNotes: null,
 };
 
 export const MOCK_LURES: Record<string, LureDetail> = {

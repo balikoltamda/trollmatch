@@ -169,7 +169,7 @@ export async function executeImportBatch(
     const result = await importer.run({
       prisma,
       offline: false,
-      downloadImages: true,
+      downloadImages: false,
       importBatchId: batchId,
     });
 

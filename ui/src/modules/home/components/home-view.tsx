@@ -50,7 +50,7 @@ type HomeViewProps = {
 
 export async function HomeView({ locale }: HomeViewProps) {
   const t = await getTranslations("Home");
-  const discovery = await getHomeDiscoveryData();
+  const discovery = await getHomeDiscoveryData(locale);
 
   const liveStats = HOME_STATISTICS.map((stat) => {
     let value = stat.value;
@@ -145,11 +145,16 @@ export async function HomeView({ locale }: HomeViewProps) {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {discovery.species.map((species) => (
               <SpeciesCard
-                key={species.slug}
+                key={species.slugEn}
                 slug={species.slug}
                 name={pickLocalized(species.name, locale)}
-                habitat={pickLocalized(species.subtitle, locale)}
+                scientificName={species.scientificName}
+                regions={species.regions}
+                regionLabels={species.regions
+                  .map((region) => pickLocalized({ en: region.en, tr: region.tr }, locale))
+                  .join(" · ")}
                 lureCount={species.lureCount}
+                heroImageUrl={species.heroImageUrl}
               />
             ))}
           </div>

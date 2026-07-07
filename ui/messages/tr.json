@@ -143,6 +143,46 @@
     "searchTitle": "Balık türleri",
     "disambiguation": "Not: Bu ad için doğru tür {correct}."
   },
+  "SpeciesCompass": {
+    "profileTitle": "Tür profili",
+    "classificationTitle": "Bilimsel sınıflandırma",
+    "galleryTitle": "Galeri",
+    "regionalNotesTitle": "Bölgesel notlar",
+    "techniquesTitle": "Balıkçılık teknikleri",
+    "catchReportsTitle": "Doğrulanmış av raporları",
+    "catchReportsDescription": "Bu tür için balıkçıların bildirdiği avlar — yayınlanmadan önce kontrol edilir.",
+    "communityStatsTitle": "Topluluk kanıtı",
+    "communityStatsDescription": "Yalnızca onaylanmış av raporlarından — tahmin veya pazarlama iddiası yok.",
+    "habitat": "Yaşam alanı",
+    "distribution": "Dağılım",
+    "spawning": "Üreme",
+    "conservation": "Koruma durumu",
+    "depth": "Tipik derinlik",
+    "maxLength": "Azami boy",
+    "maxWeight": "Azami ağırlık",
+    "iucnStatus": "IUCN Kırmızı Liste",
+    "faoAreas": "FAO balıkçılık alanları",
+    "mediterraneanNotes": "Doğu Akdeniz",
+    "aegeanNotes": "Ege",
+    "northernCyprusNotes": "Kuzey Kıbrıs",
+    "kingdom": "Alem",
+    "phylum": "Şube",
+    "class": "Sınıf",
+    "order": "Takım",
+    "family": "Familya",
+    "genus": "Cins",
+    "iucn": {
+      "LC": "En az endişe",
+      "NT": "Tehdit altına girmeye yakın",
+      "VU": "Hassas",
+      "EN": "Tehlike altında",
+      "CR": "Kritik derecede tehlike altında",
+      "DD": "Yetersiz veri",
+      "NE": "Değerlendirilmedi",
+      "EW": "Doğada yok",
+      "EX": "Soyu tükenmiş"
+    }
+  },
   "Lures": {
     "meta": {
       "title": "Yemlere göz at",
@@ -183,7 +223,15 @@
     "catalogLuresDescription": "Üretici ve editoryal etiketlerden katalog kayıtları — av tekniği olmadan etkinlik önerisi değildir.",
     "noLuresYet": "Bu türe henüz yem bağlanmadı.",
     "contributeLure": "Bu balık için kullandığın yemi ekle",
-    "verified": "Doğrulandı"
+    "verified": "Doğrulandı",
+    "header": {
+      "distribution": "Dağılım",
+      "habitat": "Habitat",
+      "maxSize": "Azami boyut",
+      "maxLength": "Boy",
+      "maxWeight": "Ağırlık",
+      "sizeSeparator": " · "
+    }
   },
   "CatchReport": {
     "verified": "Doğrulanmış rapor",
@@ -233,6 +281,17 @@
     "breadcrumbHome": "Ana sayfa",
     "breadcrumbLures": "Yemler",
     "variantLabel": "Renk",
+    "pattern": {
+      "selectorLabel": "Desen",
+      "scrollPrev": "Desenleri sola kaydır",
+      "scrollNext": "Desenleri sağa kaydır",
+      "name": "Desen",
+      "colorCode": "Üretici renk kodu",
+      "length": "Boy",
+      "weight": "Ağırlık",
+      "buoyancy": "Balans",
+      "galleryLabel": "Galeri"
+    },
     "manufacturerSource": "Üretici bilgisi",
     "verification": {
       "unverified": "Henüz doğrulanmadı",
@@ -295,13 +354,20 @@
     "community": {
       "assertions": "Saha notları",
       "catchReports": "Av raporları",
-      "effectiveness": "Ne bildiriliyor",
-      "bandLow": "Az olumlu rapor",
-      "bandModerate": "Karışık raporlar",
-      "bandHigh": "Çoğunlukla olumlu",
+      "effectiveness": "Rapor hacmi",
+      "bandLow": "Sınırlı rapor",
+      "bandModerate": "Artan kanıt",
+      "bandHigh": "Güçlü kanıt",
       "bandInsufficient": "Henüz yeterli rapor yok",
       "topRegions": "Nerede denenmiş",
       "source": "Doğrulanmış balıkçı raporları — üretici önerisi değil."
+    },
+    "regional": {
+      "title": "Bölgesel notlar",
+      "description": "Doğu Akdeniz sularında bu yem nasıl iş görüyor — editör saha tecrübesinden.",
+      "mediterranean": "Doğu Akdeniz",
+      "aegean": "Ege",
+      "northernCyprus": "Kuzey Kıbrıs"
     },
     "ai": {
       "assistedLabel": "Yapay zekâ özeti",
@@ -334,7 +400,8 @@
       "sourceCount": "Kaynak sayısı",
       "notYet": "Henüz yok",
       "editorialPublished": "Yayında",
-      "editorialPending": "İnceleme bekliyor"
+      "editorialPending": "İnceleme bekliyor",
+      "catchReports": "Doğrulanmış av raporları"
     },
     "authorPage": {
       "metaTitle": "Editör profili",

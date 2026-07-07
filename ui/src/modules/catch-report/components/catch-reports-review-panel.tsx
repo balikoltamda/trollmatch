@@ -10,13 +10,17 @@ import {
   rejectCatchReport,
 } from "@/modules/catch-report/actions/catch-report-actions";
 import type { CatchReportReviewRow } from "@/modules/catch-report/types";
+import { CatchReportAiReviewSection } from "@/modules/studio/ai-review/components/catch-report-ai-review-section";
+import type { AiReviewSessionView } from "@/modules/studio/ai-review/types";
 
 type CatchReportsReviewPanelProps = {
   reports: CatchReportReviewRow[];
+  aiSessions?: Record<string, AiReviewSessionView | null>;
 };
 
 export function CatchReportsReviewPanel({
   reports,
+  aiSessions = {},
 }: CatchReportsReviewPanelProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -128,6 +132,13 @@ export function CatchReportsReviewPanel({
               >
                 Merge into primary
               </Button>
+            ) : null}
+            {report.verificationStatus === "PENDING" ? (
+              <CatchReportAiReviewSection
+                reportId={report.id}
+                techniqueId={report.techniqueId}
+                session={aiSessions[report.id] ?? null}
+              />
             ) : null}
           </li>
         ))}

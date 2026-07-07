@@ -39,10 +39,18 @@ export type TrustProfile = {
   headline: string;
   answer: string;
   layers: TrustLayer[];
+  scoreBreakdown: TrustScoreFactor[];
   communityConsensus: CommunityConsensus | null;
   editorialVerification: EditorialVerification;
   pendingVerificationCount: number;
   manufacturerStatus: ManufacturerProductStatus;
+};
+
+export type TrustScoreFactor = {
+  label: string;
+  delta: number;
+  tone: "positive" | "negative" | "neutral";
+  category?: string;
 };
 
 export type PublicTrustSummary = {

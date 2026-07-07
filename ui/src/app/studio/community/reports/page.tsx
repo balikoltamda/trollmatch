@@ -8,6 +8,11 @@ import {
   countPendingCatchReports,
   listCatchReportsForReview,
 } from "@/modules/catch-report/data/list-reports";
+import {
+  ensureEntityAiReview,
+  loadAiReviewSession,
+} from "@/modules/studio/ai-review/actions/ai-review-actions";
+import type { AiReviewSessionView } from "@/modules/studio/ai-review/types";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +21,22 @@ export default async function StudioCatchReportsPage() {
     listCatchReportsForReview(50),
     countPendingCatchReports(),
   ]);
+
+  const pendingReports = reports.filter((r) => r.verificationStatus === "PENDING");
+  await Promise.all(
+    pendingReports.map((r) => ensureEntityAiReview("CATCH_REPORT", r.id)),
+  );
+
+  const sessionEntries = await Promise.all(
+    pendingReports.map(async (r) => [
+      r.id,
+      await loadAiReviewSession("CATCH_REPORT", r.id),
+    ] as const),
+  );
+  const aiSessions = Object.fromEntries(sessionEntries) as Record<
+    string,
+    AiReviewSessionView | null
+  >;
 
   return (
     <>
@@ -32,7 +53,7 @@ export default async function StudioCatchReportsPage() {
           Catch reports are separate from catalog suggestions — they are field
           experiences, not product edits.
         </p>
-        <CatchReportsReviewPanel reports={reports} />
+        <CatchReportsReviewPanel reports={reports} aiSessions={aiSessions} />
       </StudioPageBody>
     </>
   );

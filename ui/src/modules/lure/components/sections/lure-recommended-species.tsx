@@ -23,6 +23,10 @@ export async function LureRecommendedSpecies({
 }: LureRecommendedSpeciesProps) {
   const t = await getTranslations("LureDetail");
 
+  if (species.length === 0) {
+    return null;
+  }
+
   const kindLabels: Record<LureSpecies["kind"], string> = {
     curated: t("speciesKind.curated"),
     marketing: t("speciesKind.marketing"),

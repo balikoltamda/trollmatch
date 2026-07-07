@@ -1,11 +1,15 @@
 "use client";
 
-import { useMemo, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import {
+  addProductImageByUrl,
+  deleteProductImage,
   reorderProductImages,
   setCoverImage,
 } from "@/modules/studio/actions/product-actions";
+import { StudioField, StudioInput } from "@/modules/studio/components/studio-ui";
 
 type ImageItem = {
   id: string;
@@ -23,7 +27,10 @@ export function ImageReviewPanel({
   lureModelId,
   images: initialImages,
 }: ImageReviewPanelProps) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [message, setMessage] = useState<string | null>(null);
+  const [uploadUrl, setUploadUrl] = useState("");
   const images = useMemo(
     () => [...initialImages].sort((a, b) => a.sortOrder - b.sortOrder),
     [initialImages],
@@ -43,10 +50,23 @@ export function ImageReviewPanel({
     return list;
   }, [images]);
 
-  function makeCover(imageId: string) {
+  function run(
+    action: () => Promise<{ ok: boolean; error?: string }>,
+    success: string,
+  ) {
     startTransition(async () => {
-      await setCoverImage(lureModelId, imageId);
+      const result = await action();
+      if (!result.ok) {
+        setMessage(result.error ?? "Action failed");
+        return;
+      }
+      setMessage(success);
+      router.refresh();
     });
+  }
+
+  function makeCover(imageId: string) {
+    run(() => setCoverImage(lureModelId, imageId), "Cover image updated.");
   }
 
   function move(imageId: string, direction: -1 | 1) {
@@ -55,13 +75,53 @@ export function ImageReviewPanel({
     const target = index + direction;
     if (index < 0 || target < 0 || target >= ids.length) return;
     [ids[index], ids[target]] = [ids[target]!, ids[index]!];
-    startTransition(async () => {
-      await reorderProductImages(lureModelId, ids);
-    });
+    run(
+      () => reorderProductImages(lureModelId, ids),
+      "Image order updated.",
+    );
+  }
+
+  function removeImage(imageId: string) {
+    if (!window.confirm("Remove this image from the product?")) return;
+    run(
+      () => deleteProductImage(lureModelId, imageId),
+      "Image deleted.",
+    );
+  }
+
+  function uploadImage() {
+    run(
+      () => addProductImageByUrl(lureModelId, uploadUrl),
+      "Image uploaded.",
+    );
+    setUploadUrl("");
   }
 
   return (
     <div className="space-y-4">
+      <section className="border-border/70 flex flex-wrap items-end gap-2 rounded-xl border px-4 py-3">
+        <div className="min-w-64 flex-1">
+          <StudioField label="Upload image by URL">
+            <StudioInput
+              value={uploadUrl}
+              onChange={(e) => setUploadUrl(e.target.value)}
+            />
+          </StudioField>
+        </div>
+        <button
+          type="button"
+          disabled={pending || !uploadUrl.trim()}
+          className={buttonVariants({ size: "sm" })}
+          onClick={uploadImage}
+        >
+          Upload
+        </button>
+      </section>
+
+      {message ? (
+        <p className="text-muted-foreground text-sm">{message}</p>
+      ) : null}
+
       {warnings.length > 0 ? (
         <ul className="border-coral/40 bg-coral/5 rounded-lg border px-4 py-3 text-sm">
           {warnings.map((w) => (
@@ -105,6 +165,14 @@ export function ImageReviewPanel({
                       Set cover
                     </button>
                   ) : null}
+                  <button
+                    type="button"
+                    disabled={pending}
+                    className={buttonVariants({ size: "sm", variant: "ghost" })}
+                    onClick={() => removeImage(img.id)}
+                  >
+                    Delete
+                  </button>
                   <button
                     type="button"
                     disabled={pending || index === 0}

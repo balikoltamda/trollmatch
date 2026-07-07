@@ -2,6 +2,7 @@ import type { DataFetchResult } from "@/lib/data-result";
 import { logServerError } from "@/lib/log-server-error";
 import { prisma } from "@/lib/prisma";
 import type { LocalizedPair, LureCardData } from "@/modules/discovery/types";
+import { resolvePublicImagePath } from "@/modules/studio/media/lib/media-asset-service";
 
 export type PublicManufacturerData = {
   slug: string;
@@ -106,7 +107,9 @@ async function listPublicLuresByManufacturer(slug: string) {
             en: row.bodyTypeEn ?? "",
             tr: row.bodyTypeTr ?? row.bodyTypeEn ?? "",
           },
-          imageSrc: hero?.url ?? "/lures/placeholder.svg",
+          imageSrc: hero?.url
+            ? resolvePublicImagePath(hero.url)
+            : "/lures/placeholder.svg",
           verified:
             row.lifecycleState === "PUBLISHED" || row.editorNote !== null,
         };

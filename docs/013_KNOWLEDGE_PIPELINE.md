@@ -111,7 +111,7 @@ Sprint 7.5: `ui/prisma/migrations/20250706160000_knowledge_hub/`
 
 ## Knowledge Hub (Studio) — Sprint 7.5
 
-Route: `/studio/knowledge`
+Route: `/studio/source-archive` (legacy redirect from `/studio/knowledge`)
 
 Replaces the basic inbox with a richer editorial workspace. Items sorted by **source score**, then confidence, then recency.
 

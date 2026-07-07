@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/prisma";
 
 export type ManufacturerDetailStats = {
+  id: string;
   slug: string;
   nameEn: string;
   nameTr: string;
   countryCode: string | null;
   website: string | null;
+  logoUrl: string | null;
   productCount: number;
   needsReview: number;
   published: number;
@@ -78,11 +80,13 @@ export async function getManufacturerDetail(
   const lastBatch = manufacturer.importBatches[0] ?? null;
 
   return {
+    id: manufacturer.id,
     slug: manufacturer.slug,
     nameEn: manufacturer.nameEn,
     nameTr: manufacturer.nameTr,
     countryCode: manufacturer.countryCode,
     website: manufacturer.website,
+    logoUrl: manufacturer.logoUrl,
     productCount: products.length,
     needsReview,
     published,

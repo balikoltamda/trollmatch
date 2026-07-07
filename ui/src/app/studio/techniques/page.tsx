@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 import {
   StudioPageBody,
   StudioPageHeader,
@@ -25,6 +27,14 @@ export default async function StudioTechniquesPage() {
       <StudioPageHeader
         title="Techniques"
         description="Fishing methods linked to lure models."
+        actions={
+          <Link
+            href="/studio/techniques/new"
+            className={buttonVariants({ size: "sm" })}
+          >
+            New technique
+          </Link>
+        }
       />
       <StudioPageBody>
         <StudioTable>

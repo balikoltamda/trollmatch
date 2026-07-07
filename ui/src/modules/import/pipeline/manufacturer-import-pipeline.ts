@@ -1,5 +1,7 @@
 import type { PrismaClient } from "@/generated/prisma/client";
+import { triggerEditorialReviewBatch } from "@/modules/studio/ai-review/lib/trigger-editorial-review";
 import type { CanonicalLureImport } from "../core/canonical-lure";
+import { enrichCanonicalForEditorial } from "../enrichment/editorial-product-enricher";
 import {
   collectImageUrlsFromRecords,
   downloadManufacturerImages,
@@ -105,10 +107,11 @@ export async function persistValidatedRecords(
   const total = input.records.length;
 
   for (const [index, record] of input.records.entries()) {
+    const enriched = enrichCanonicalForEditorial(record);
     try {
       const persistResult = await upsertCanonicalImport(
         input.prisma,
-        record,
+        enriched,
         input.importedAt,
         input.importBatchId,
       );
@@ -189,7 +192,7 @@ export async function finalizeManufacturerImport(
 
   let imageDownloads: ImportReport["imageDownloads"];
 
-  if (input.downloadImages !== false && input.records.length > 0) {
+  if (input.downloadImages === true && input.records.length > 0) {
     const imageUrls = collectImageUrlsFromRecords(input.records);
     const imageResult = await downloadManufacturerImages(
       input.manufacturerSlug,
@@ -223,6 +226,14 @@ export async function finalizeManufacturerImport(
 
   const reportPath = await writeImportReport(report, input.reportsRoot);
   report.reportPath = reportPath;
+
+  if (input.observedLureModelIds.length > 0) {
+    await triggerEditorialReviewBatch(
+      input.observedLureModelIds.map((entityId) => ({ entityType: "LURE", entityId })),
+      "IMPORT",
+      "importer",
+    ).catch(() => {});
+  }
 
   return {
     summary,

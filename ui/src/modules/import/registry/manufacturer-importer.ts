@@ -9,7 +9,7 @@ export type ManufacturerImportRunOptions = {
   limit?: number;
   /** Skip live network fetch where supported. */
   offline?: boolean;
-  /** Download manufacturer images to local storage. */
+  /** Eagerly download manufacturer images (default: lazy metadata only). */
   downloadImages?: boolean;
   fetchFn?: typeof fetch;
   /** Studio import batch — links field diffs and progress updates. */
@@ -57,7 +57,7 @@ export function parseManufacturerCliFlags(argv: string[]): {
   let all = false;
   let limit: number | undefined;
   let offline = false;
-  let downloadImages = true;
+  let downloadImages = false;
   let help = false;
 
   for (let index = 0; index < argv.length; index += 1) {

@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import { Badge } from "@/components/ui/badge";
 import { LureCard } from "@/components/cards/lure-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Container } from "@/components/ui/container";
@@ -8,27 +9,45 @@ import { Section } from "@/components/ui/section";
 import { SpeciesTopLuresSection } from "@/modules/catch-report/components/species-top-lures-section";
 import { RelatedKnowledgeSection } from "@/modules/knowledge-pipeline/components/related-knowledge-section";
 import { SpeciesTaxonomySection } from "@/modules/taxonomy/components/species-taxonomy-section";
+import { SpeciesProfileSection } from "@/modules/species/components/species-profile-section";
+import { SpeciesClassificationSection } from "@/modules/species/components/species-classification-section";
+import { SpeciesGallerySection } from "@/modules/species/components/species-gallery-section";
+import { SpeciesRegionalNotesSection } from "@/modules/species/components/species-regional-notes-section";
+import { SpeciesTechniquesSection } from "@/modules/species/components/species-techniques-section";
+import { SpeciesCatchReportsSection } from "@/modules/species/components/species-catch-reports-section";
+import { SpeciesCommunityStatisticsSection } from "@/modules/species/components/species-community-statistics-section";
 import { SafeSection } from "@/modules/stability/components/safe-section";
 import type { SpeciesDetailData } from "@/modules/discovery/types";
+import type { SpeciesCompassData } from "@/modules/species/types";
 import type { SpeciesTaxonomyProfile } from "@/modules/taxonomy/types";
 import type { AppLocale } from "@/i18n/routing";
 import { pickLocalized } from "@/modules/home/data/home-content";
-import { getSpeciesImageSrc } from "@/modules/discovery/data/species-images";
+import {
+  formatSpeciesMaxSize,
+} from "@/modules/species/components/species-structured-data";
 
 type SpeciesDetailViewProps = {
   locale: AppLocale;
   species: SpeciesDetailData;
   taxonomy?: SpeciesTaxonomyProfile | null;
+  compass?: SpeciesCompassData | null;
 };
 
 export async function SpeciesDetailView({
   locale,
   species,
   taxonomy,
+  compass,
 }: SpeciesDetailViewProps) {
   const t = await getTranslations("Species");
   const name = pickLocalized(species.name, locale);
-  const heroImage = getSpeciesImageSrc(species.slug);
+  const heroImage = compass?.heroImageUrl ?? null;
+  const habitat = pickLocalized(species.habitat, locale);
+  const maxSize = formatSpeciesMaxSize(species, locale, {
+    length: t("header.maxLength"),
+    weight: t("header.maxWeight"),
+    separator: t("header.sizeSeparator"),
+  });
 
   return (
     <Section spacing="default">
@@ -90,7 +109,33 @@ export async function SpeciesDetailView({
               </p>
             </>
           ) : null}
-          <p className="text-muted-foreground text-base leading-relaxed sm:text-lg">
+          <dl className="text-muted-foreground mt-4 grid gap-3 text-sm sm:grid-cols-2">
+            {species.regions.length > 0 ? (
+              <div>
+                <dt className="text-foreground font-medium">{t("header.distribution")}</dt>
+                <dd className="mt-1 flex flex-wrap gap-1.5">
+                  {species.regions.map((region) => (
+                    <Badge key={region.code} variant="muted">
+                      {pickLocalized({ en: region.en, tr: region.tr }, locale)}
+                    </Badge>
+                  ))}
+                </dd>
+              </div>
+            ) : null}
+            {habitat ? (
+              <div>
+                <dt className="text-foreground font-medium">{t("header.habitat")}</dt>
+                <dd className="mt-1 leading-relaxed">{habitat}</dd>
+              </div>
+            ) : null}
+            {maxSize ? (
+              <div>
+                <dt className="text-foreground font-medium">{t("header.maxSize")}</dt>
+                <dd className="mt-1">{maxSize}</dd>
+              </div>
+            ) : null}
+          </dl>
+          <p className="text-muted-foreground mt-4 text-base leading-relaxed sm:text-lg">
             {t("detailDescription", { count: species.lureCount })}
           </p>
           <Link
@@ -105,8 +150,39 @@ export async function SpeciesDetailView({
         </header>
 
         <div className="section-stack">
+          {compass?.profile ? (
+            <SpeciesProfileSection locale={locale} profile={compass.profile} />
+          ) : null}
+
+          {compass?.classification ? (
+            <SpeciesClassificationSection
+              classification={compass.classification}
+            />
+          ) : null}
+
           {taxonomy ? (
             <SpeciesTaxonomySection locale={locale} taxonomy={taxonomy} />
+          ) : null}
+
+          {compass?.regionalNotes ? (
+            <SpeciesRegionalNotesSection
+              locale={locale}
+              notes={compass.regionalNotes}
+            />
+          ) : null}
+
+          {compass?.techniques && compass.techniques.length > 0 ? (
+            <SpeciesTechniquesSection
+              locale={locale}
+              techniques={compass.techniques}
+            />
+          ) : null}
+
+          {compass?.communityStatistics ? (
+            <SpeciesCommunityStatisticsSection
+              locale={locale}
+              statistics={compass.communityStatistics}
+            />
           ) : null}
 
           <SafeSection
@@ -127,6 +203,23 @@ export async function SpeciesDetailView({
           >
             <RelatedKnowledgeSection speciesSlug={species.slug} locale={locale} />
           </SafeSection>
+
+          {compass?.catchReports && compass.catchReports.length > 0 ? (
+            <SafeSection
+              page="/[locale]/species/[slug]"
+              section="catch-reports"
+              slug={species.slug}
+            >
+              <SpeciesCatchReportsSection
+                locale={locale}
+                reports={compass.catchReports}
+              />
+            </SafeSection>
+          ) : null}
+
+          {compass?.gallery && compass.gallery.length > 0 ? (
+            <SpeciesGallerySection locale={locale} gallery={compass.gallery} />
+          ) : null}
 
           <section>
             <header className="mb-8 max-w-2xl space-y-2">

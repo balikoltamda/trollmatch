@@ -1,7 +1,6 @@
 import {
   ColorAliasKind,
   ContentLifecycleState,
-  ImageRole,
   ManufacturerProductStatus,
   Prisma,
   ProductAliasKind,
@@ -10,16 +9,17 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import type {
   CanonicalColor,
   CanonicalDivingDepth,
-  CanonicalImage,
   CanonicalLocalizedText,
   CanonicalLureImport,
   CanonicalLureVariant,
   CanonicalTrollingSpeedRange,
 } from "../../core/canonical-lure";
+import { enrichCanonicalForEditorial } from "../../enrichment/editorial-product-enricher";
+import { ensureImportImages } from "../../images/ensure-import-images";
+import { prepareCanonicalImportImages } from "../../images/persist-import-image";
 import {
   ensureTechnique,
   findColorBySlug,
-  findImageByUrl,
   findLureModel,
   findLureVariant,
   findManufacturerByCanonicalIdentity,
@@ -37,7 +37,12 @@ import {
   type ImportSummary,
 } from "../../persistence/types";
 import { pickChangedFields } from "../../persistence/lifecycle-reconciler";
+import { pickFillMissingFields } from "../../persistence/fill-missing-fields";
 import { recordImportFieldChanges } from "../../persistence/import-field-diff";
+import {
+  buildImportSpecMetadata,
+  ensureTechnologyLinks,
+} from "../../persistence/technology-persister";
 
 export type UpsertCanonicalImportResult = {
   summary: ImportSummary;
@@ -75,20 +80,8 @@ const LURE_MODEL_COMPARE_KEYS = [
   "actionTr",
   "shortDescriptionEn",
   "shortDescriptionTr",
+  "importSpecMetadata",
 ] as const;
-
-function mapImageRole(role?: string): ImageRole {
-  switch (role) {
-    case "hero":
-      return ImageRole.HERO;
-    case "rigging_diagram":
-      return ImageRole.RIGGING_DIAGRAM;
-    case "technical_diagram":
-      return ImageRole.TECHNICAL_DIAGRAM;
-    default:
-      return ImageRole.PRODUCT;
-  }
-}
 
 async function ensureColor(
   tx: DbClient,
@@ -145,60 +138,6 @@ async function ensureColor(
   }
 
   return colorRecord.id;
-}
-
-async function modelHasEditorCover(tx: DbClient, lureModelId: string): Promise<boolean> {
-  const hero = await tx.image.findFirst({
-    where: {
-      lureModelId,
-      role: ImageRole.HERO,
-      deletedAt: null,
-    },
-    select: { id: true },
-  });
-
-  return hero !== null;
-}
-
-async function ensureImages(
-  tx: DbClient,
-  lureModelId: string,
-  images: CanonicalImage[] | undefined,
-  lureVariantId: string | null,
-  summary: ImportSummary,
-  labelPrefix: string,
-): Promise<void> {
-  const preserveCover = await modelHasEditorCover(tx, lureModelId);
-
-  for (const [index, image] of (images ?? []).entries()) {
-    const existing = await findImageByUrl(tx, lureModelId, image.url, lureVariantId);
-
-    if (existing) {
-      summary.skipped.push(`${labelPrefix} Image: ${image.url}`);
-      continue;
-    }
-
-    let role = mapImageRole(image.role);
-    if (preserveCover && role === ImageRole.HERO) {
-      role = ImageRole.PRODUCT;
-      summary.warnings.push(
-        `${labelPrefix} Image cover preserved (editor HERO): ${image.url}`,
-      );
-    }
-
-    await tx.image.create({
-      data: {
-        lureModelId,
-        lureVariantId,
-        url: image.url,
-        altTextEn: image.alt ? resolveLocalized(image.alt, "en") : null,
-        altTextTr: image.alt ? resolveLocalized(image.alt, "tr") : null,
-        role,
-        sortOrder: image.sortOrder ?? index,
-      },
-    });
-    summary.created.push(`${labelPrefix} Image: ${image.url}`);
-  }
 }
 
 async function findLureModelByDuelPid(
@@ -405,6 +344,7 @@ async function upsertVariant(
   variantInput: CanonicalLureVariant,
   sortOrder: number,
   summary: ImportSummary,
+  deferMedia = false,
 ): Promise<void> {
   const colorInput = variantInput.colors[0];
   if (!colorInput) {
@@ -467,14 +407,16 @@ async function upsertVariant(
     summary.created.push(`LureVariant: ${variantInput.slug}`);
   }
 
-  await ensureImages(
-    tx,
-    lureModelId,
-    variantInput.images,
-    lureVariantId,
-    summary,
-    "Variant",
-  );
+  if (!deferMedia) {
+    await ensureImportImages(
+      tx,
+      lureModelId,
+      variantInput.images,
+      lureVariantId,
+      summary,
+      "Variant",
+    );
+  }
 }
 
 async function upsertSingleRecord(
@@ -634,12 +576,30 @@ async function upsertSingleRecord(
       primaryAction?.manufacturerTerm,
       "tr",
     ),
-    shortDescriptionEn: modelInput.description
-      ? resolveLocalized(modelInput.description, "en")
-      : null,
-    shortDescriptionTr: modelInput.description
-      ? resolveLocalized(modelInput.description, "tr")
-      : null,
+    shortDescriptionEn: modelInput.shortDescription
+      ? resolveLocalized(modelInput.shortDescription, "en")
+      : modelInput.description
+        ? resolveLocalized(modelInput.description, "en")
+        : null,
+    shortDescriptionTr: modelInput.shortDescription
+      ? resolveLocalized(modelInput.shortDescription, "tr")
+      : modelInput.description
+        ? resolveLocalized(modelInput.description, "tr")
+        : null,
+    importSpecMetadata: buildImportSpecMetadata({
+      hooks: modelInput.hooks as Array<Record<string, unknown>> | undefined,
+      splitRings: modelInput.splitRings as Array<Record<string, unknown>> | undefined,
+      manufacturerNotes: modelInput.manufacturerNotes,
+      featureBlocks: record.metadata.extras?.featureBlocks as
+        | Array<Record<string, unknown>>
+        | undefined,
+      castingRanges: record.metadata.extras?.castingRanges as string[] | undefined,
+      videos: modelInput.videos as Array<Record<string, unknown>> | undefined,
+      downloads: modelInput.downloads as Array<Record<string, unknown>> | undefined,
+      editorialRelationshipHints: record.metadata.extras?.editorialRelationshipHints as
+        | Record<string, unknown>
+        | undefined,
+    }),
     ...lifecycleTouch(importedAt),
   };
 
@@ -647,10 +607,25 @@ async function upsertSingleRecord(
   let dataChanged = false;
 
   if (lureModel) {
-    const changedFields = pickChangedFields(lureModel, modelPayload, [
-      ...LURE_MODEL_COMPARE_KEYS,
-    ]);
-    dataChanged = Object.keys(changedFields).length > 0;
+    const { fill, conflicts } = pickFillMissingFields(
+      lureModel as unknown as Record<string, unknown>,
+      modelPayload as unknown as Record<string, unknown>,
+      [...LURE_MODEL_COMPARE_KEYS],
+    );
+    dataChanged = Object.keys(fill).length > 0;
+
+    if (Object.keys(conflicts).length > 0) {
+      await recordImportFieldChanges(
+        tx,
+        lureModel.id,
+        importBatchId,
+        lureModel as unknown as Record<string, unknown>,
+        conflicts,
+      );
+      summary.warnings.push(
+        `LureModel ${lureModel.slug}: ${Object.keys(conflicts).length} field conflict(s) queued for review`,
+      );
+    }
 
     if (dataChanged) {
       await recordImportFieldChanges(
@@ -658,14 +633,14 @@ async function upsertSingleRecord(
         lureModel.id,
         importBatchId,
         lureModel as unknown as Record<string, unknown>,
-        changedFields as Record<string, unknown>,
+        fill,
       );
     }
 
     await tx.lureModel.update({
       where: { id: lureModel.id },
       data: {
-        ...(dataChanged ? changedFields : {}),
+        ...(dataChanged ? fill : {}),
         ...lifecycleTouch(importedAt),
         firstSeenAt: lureModel.firstSeenAt ?? importedAt,
       },
@@ -714,7 +689,15 @@ async function upsertSingleRecord(
     );
   }
 
-  await ensureImages(tx, lureModel.id, modelInput.images, null, summary, "Model");
+  const deferMedia = Boolean(record.metadata.extras?.syncDeferMedia);
+
+  if (!deferMedia) {
+    await ensureImportImages(tx, lureModel.id, modelInput.images, null, summary, "Model");
+  } else if (modelInput.images?.length) {
+    summary.warnings.push(
+      `Model images deferred for editor review (${modelInput.images.length})`,
+    );
+  }
 
   for (const [index, variant] of record.variants.entries()) {
     await upsertVariant(
@@ -725,10 +708,24 @@ async function upsertSingleRecord(
       variant,
       index,
       summary,
+      deferMedia,
     );
   }
 
   await ensureTechniqueLinks(tx, lureModel.id, record, summary);
+  if (!deferMedia) {
+    await ensureTechnologyLinks(
+      tx,
+      manufacturer.id,
+      lureModel.id,
+      modelInput.technologies,
+      summary,
+    );
+  } else if (modelInput.technologies?.length) {
+    summary.warnings.push(
+      `Technologies deferred for editor review (${modelInput.technologies.length})`,
+    );
+  }
 
   return {
     summary,
@@ -746,8 +743,9 @@ export async function upsertCanonicalImport(
   importedAt: Date = new Date(),
   importBatchId: string | null = null,
 ): Promise<UpsertCanonicalImportResult> {
+  const prepared = await prepareCanonicalImportImages(record);
   return prisma.$transaction(async (tx) =>
-    upsertSingleRecord(tx, record, importedAt, importBatchId),
+    upsertSingleRecord(tx, prepared, importedAt, importBatchId),
   );
 }
 
@@ -771,9 +769,10 @@ export async function upsertCanonicalImports(
 
   for (const record of records) {
     try {
+      const enriched = enrichCanonicalForEditorial(record);
       const result = await upsertCanonicalImport(
         prisma,
-        record,
+        enriched,
         importedAt,
         importBatchId,
       );

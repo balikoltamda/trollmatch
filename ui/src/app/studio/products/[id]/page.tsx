@@ -7,6 +7,12 @@ import {
 } from "@/modules/studio/components/studio-page";
 import { ProductEditor } from "@/modules/studio/components/product-editor";
 import {
+  ensureEntityAiReview,
+  loadAiReviewSession,
+} from "@/modules/studio/ai-review/actions/ai-review-actions";
+import { EntityAiReviewMini } from "@/modules/studio/ai-review/components/entity-ai-review-mini";
+import { EntityInsightsPanel } from "@/modules/studio/ai-review/components/entity-insights-panel";
+import {
   getProductEditorData,
   listSpeciesOptions,
   listTechniqueOptions,
@@ -29,6 +35,9 @@ export default async function StudioProductEditorPage({ params }: PageProps) {
 
   if (!product) notFound();
 
+  await ensureEntityAiReview("LURE", product.id);
+  const aiSession = await loadAiReviewSession("LURE", product.id);
+
   return (
     <>
       <StudioPageHeader
@@ -44,6 +53,13 @@ export default async function StudioProductEditorPage({ params }: PageProps) {
         }
       />
       <StudioPageBody>
+        <EntityAiReviewMini
+          entityType="LURE"
+          entityId={product.id}
+          session={aiSession}
+          label="Lure model name (re-analyze validation)"
+        />
+        <EntityInsightsPanel entityType="LURE" entityId={product.id} entityLabel={product.nameEn} />
         <ProductEditor
           product={product}
           techniqueOptions={techniqueOptions}

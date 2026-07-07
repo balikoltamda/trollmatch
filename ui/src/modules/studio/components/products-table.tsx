@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { bulkProductAction } from "@/modules/studio/actions/bulk-actions";
@@ -26,6 +27,7 @@ export function ProductsTable({
   speciesOptions,
   techniqueOptions,
 }: ProductsTableProps) {
+  const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [speciesId, setSpeciesId] = useState("");
   const [techniqueId, setTechniqueId] = useState("");
@@ -67,6 +69,7 @@ export function ProductsTable({
         URL.revokeObjectURL(url);
       }
       setMessage(result.message);
+      router.refresh();
     });
   }
 
@@ -88,6 +91,47 @@ export function ProductsTable({
           onClick={() => run("unpublish")}
         >
           Unpublish
+        </button>
+        <button
+          type="button"
+          disabled={pending || selected.size === 0}
+          className={buttonVariants({ size: "sm", variant: "outline" })}
+          onClick={() => run("reject")}
+        >
+          Reject
+        </button>
+        <button
+          type="button"
+          disabled={pending || selected.size === 0}
+          className={buttonVariants({ size: "sm", variant: "outline" })}
+          onClick={() => run("archive")}
+        >
+          Archive
+        </button>
+        <button
+          type="button"
+          disabled={pending || selected.size === 0}
+          className={buttonVariants({ size: "sm", variant: "outline" })}
+          onClick={() => run("restore")}
+        >
+          Restore
+        </button>
+        <button
+          type="button"
+          disabled={pending || selected.size === 0}
+          className={buttonVariants({ size: "sm", variant: "ghost" })}
+          onClick={() => {
+            if (
+              !window.confirm(
+                `Soft-delete ${selected.size} selected product(s)?`,
+              )
+            ) {
+              return;
+            }
+            run("delete");
+          }}
+        >
+          Delete
         </button>
         <button
           type="button"

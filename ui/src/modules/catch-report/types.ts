@@ -11,6 +11,7 @@ export type CatchReportSummary = {
   lureModelName: { en: string; tr: string };
   lureVariantLabel: { en: string; tr: string };
   techniqueName: { en: string; tr: string } | null;
+  techniqueId: string | null;
   country: string;
   region: string;
   location: string | null;

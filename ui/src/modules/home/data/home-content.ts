@@ -8,13 +8,6 @@ export const DEFAULT_HOME_REGION = {
   },
 } as const;
 
-export type HomeSpecies = {
-  id: string;
-  name: { en: string; tr: string };
-  habitat: { en: string; tr: string };
-  lureCount: number;
-};
-
 export type HomeCollection = {
   id: string;
   title: { en: string; tr: string };
@@ -47,45 +40,6 @@ export type HomeStatistic = {
   hint: { en: string; tr: string };
   accent: "ocean" | "turquoise" | "coral" | "navy";
 };
-
-export const HOME_SPECIES: HomeSpecies[] = [
-  {
-    id: "bluefish",
-    name: { en: "Bluefish", tr: "Lüfer" },
-    habitat: {
-      en: "Bosphorus · Marmara · strait runs",
-      tr: "Boğaz · Marmara · göç zamanı",
-    },
-    lureCount: 86,
-  },
-  {
-    id: "european-seabass",
-    name: { en: "European seabass", tr: "Levrek" },
-    habitat: {
-      en: "Aegean bays · rocky shore",
-      tr: "Ege koyları · kayalık",
-    },
-    lureCount: 112,
-  },
-  {
-    id: "bonito",
-    name: { en: "Atlantic bonito", tr: "Palamut" },
-    habitat: {
-      en: "Autumn migration · offshore trolling",
-      tr: "Sonbahar göçü · açık trolling",
-    },
-    lureCount: 74,
-  },
-  {
-    id: "gilthead-seabream",
-    name: { en: "Gilthead seabream", tr: "Çipura" },
-    habitat: {
-      en: "Eastern Mediterranean · inshore",
-      tr: "Doğu Akdeniz · kıyı",
-    },
-    lureCount: 68,
-  },
-];
 
 export const HOME_COLLECTIONS: HomeCollection[] = [
   {

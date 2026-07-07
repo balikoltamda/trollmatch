@@ -3,28 +3,37 @@ import { Fish } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getSpeciesImageSrc } from "@/modules/discovery/data/species-images";
 import { cn } from "@/lib/utils";
+import type { SpeciesRegionLabel } from "@/modules/discovery/types";
 
 type SpeciesCardProps = {
   slug?: string;
   name: string;
-  habitat: string;
+  scientificName: string;
+  regions?: SpeciesRegionLabel[];
+  regionLabels?: string;
   lureCount: number;
   lureCountLabel?: string;
+  heroImageUrl?: string | null;
   className?: string;
 };
 
 export function SpeciesCard({
   slug,
   name,
-  habitat,
+  scientificName,
+  regions = [],
+  regionLabels,
   lureCount,
   lureCountLabel,
+  heroImageUrl = null,
   className,
 }: SpeciesCardProps) {
   const countLabel = lureCountLabel ?? String(lureCount);
-  const imageSrc = slug ? getSpeciesImageSrc(slug) : null;
+  const imageSrc = heroImageUrl;
+  const distribution =
+    regionLabels ??
+    (regions.length > 0 ? regions.map((region) => region.en).join(" · ") : scientificName);
 
   const card = (
     <Card interactive className={cn("h-full overflow-hidden", className)}>
@@ -56,9 +65,23 @@ export function SpeciesCard({
         <h3 className="text-foreground text-lg font-semibold tracking-tight">
           {name}
         </h3>
-        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-          {habitat}
-        </p>
+        <p className="text-muted-foreground mt-1 text-sm italic">{scientificName}</p>
+        {regions.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {(regionLabels
+              ? regionLabels.split(" · ")
+              : regions.map((region) => region.en)
+            ).map((label) => (
+              <Badge key={label} variant="muted" className="text-xs">
+                {label}
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+            {distribution}
+          </p>
+        )}
       </CardContent>
     </Card>
   );

@@ -25,13 +25,15 @@ export async function SpeciesSearchResults({
         {t("searchTitle")}
       </h2>
       <ul className="space-y-3">
-        {result.hits.map((hit) => (
+        {result.hits.map((hit) => {
+          const speciesSlug = locale === "tr" ? hit.slugTr : hit.slugEn;
+          return (
           <li
-            key={`${hit.slug}-${hit.matchKind}`}
+            key={`${speciesSlug}-${hit.matchKind}`}
             className="border-border bg-surface-muted/30 rounded-xl border px-4 py-3"
           >
             <Link
-              href={`/species/${hit.slug}`}
+              href={`/species/${speciesSlug}`}
               className="text-ocean text-sm font-medium hover:underline"
             >
               {pickLocalized(hit.preferredName, locale)}
@@ -48,7 +50,8 @@ export async function SpeciesSearchResults({
               </p>
             ) : null}
           </li>
-        ))}
+          );
+        })}
       </ul>
     </div>
   );

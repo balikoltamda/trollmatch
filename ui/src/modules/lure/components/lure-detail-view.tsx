@@ -6,6 +6,7 @@ import { LureRecommendedSpecies } from "@/modules/lure/components/sections/lure-
 import { LureRecommendedTechniques } from "@/modules/lure/components/sections/lure-recommended-techniques";
 import { LureTrollingInfo } from "@/modules/lure/components/sections/lure-trolling-info";
 import { LureCommunityStatistics } from "@/modules/lure/components/sections/lure-community-statistics";
+import { LureRegionalNotesSection } from "@/modules/lure/components/sections/lure-regional-notes-section";
 import { LureCatchReportsSection } from "@/modules/catch-report/components/lure-catch-reports-section";
 import { RelatedKnowledgeSection } from "@/modules/knowledge-pipeline/components/related-knowledge-section";
 import { SafeSection } from "@/modules/stability/components/safe-section";
@@ -42,6 +43,9 @@ export async function LureDetailView({
       {lure.editorialNote ? (
         <LureEditorialNotesSection note={lure.editorialNote} locale={locale} />
       ) : null}
+      {lure.regionalNotes ? (
+        <LureRegionalNotesSection notes={lure.regionalNotes} locale={locale} />
+      ) : null}
       <LureRecommendedSpecies species={lure.recommendedSpecies} locale={locale} />
       <LureRecommendedTechniques
         techniques={lure.recommendedTechniques}
@@ -50,10 +54,12 @@ export async function LureDetailView({
       {lure.trolling ? (
         <LureTrollingInfo trolling={lure.trolling} locale={locale} />
       ) : null}
-      <LureCommunityStatistics
-        statistics={lure.communityStatistics}
-        locale={locale}
-      />
+      {lure.communityStatistics.verifiedCatchReportCount > 0 ? (
+        <LureCommunityStatistics
+          statistics={lure.communityStatistics}
+          locale={locale}
+        />
+      ) : null}
       <SafeSection
         page="/[locale]/lures/[slug]"
         section="catch-reports"

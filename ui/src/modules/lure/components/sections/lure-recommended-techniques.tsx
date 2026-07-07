@@ -15,6 +15,10 @@ export async function LureRecommendedTechniques({
 }: LureRecommendedTechniquesProps) {
   const t = await getTranslations("LureDetail");
 
+  if (techniques.length === 0) {
+    return null;
+  }
+
   return (
     <LureSection
       id="techniques"

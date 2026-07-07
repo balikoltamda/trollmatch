@@ -41,3 +41,4 @@ jobs:
         run: npm run build
         env:
           DATABASE_URL: postgresql://trollmatch:trollmatch@localhost:5432/trollmatch
+          AUTH_SECRET: ci-build-auth-secret-not-for-production

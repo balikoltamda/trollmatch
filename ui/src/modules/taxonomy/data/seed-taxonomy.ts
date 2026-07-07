@@ -6,6 +6,7 @@ import {
   type SpeciesSeedFromLexicon,
 } from "@/modules/terminology";
 import { normalizeSpeciesLabel } from "@/modules/taxonomy/lib/normalize-species-label";
+import { slugifySpeciesTr } from "@/modules/species/lib/slug";
 
 const REFERENCE_SPECIES: SpeciesSeedFromLexicon[] =
   REFERENCE_SPECIES_LEXICON_IDS.map((id) => {
@@ -32,6 +33,8 @@ async function upsertSpecies(seed: SpeciesSeedFromLexicon) {
     where: { slug: seed.slug },
     create: {
       slug: seed.slug,
+      slugEn: seed.slug,
+      slugTr: slugifySpeciesTr(seed.nameTr),
       scientificName: seed.scientificName,
       nameEn: seed.nameEn,
       nameTr: seed.nameTr,
@@ -39,6 +42,8 @@ async function upsertSpecies(seed: SpeciesSeedFromLexicon) {
       editorialNotesTr: seed.editorialNotesTr,
     },
     update: {
+      slugEn: seed.slug,
+      slugTr: slugifySpeciesTr(seed.nameTr),
       scientificName: seed.scientificName,
       nameEn: seed.nameEn,
       nameTr: seed.nameTr,

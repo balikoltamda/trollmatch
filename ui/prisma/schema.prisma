@@ -34,10 +34,39 @@ enum LureSpeciesAssociationKind {
 enum ImageRole {
   HERO
   PRODUCT
+  GALLERY
+  PACKAGING
+  TECHNOLOGY
+  HOOK_DETAIL
+  SPLIT_RING_DETAIL
+  COLOR_CARD
+  ACTION_DIAGRAM
   RIGGING_DIAGRAM
   TECHNICAL_DIAGRAM
+  UNKNOWN
 
   @@map("image_role")
+}
+
+/// Digital twin sync state — manufacturer page vs catalog alignment.
+enum DigitalTwinSyncStatus {
+  NEVER_SYNCED
+  SYNCED
+  STALE
+  CHANGES_PENDING
+  CHECK_FAILED
+
+  @@map("digital_twin_sync_status")
+}
+
+/// Classification for manufacturer sync diffs.
+enum ImportFieldChangeKind {
+  ADDED
+  UPDATED
+  REMOVED
+  UNCHANGED
+
+  @@map("import_field_change_kind")
 }
 
 enum ProductAliasKind {
@@ -66,6 +95,45 @@ enum SpeciesAliasKind {
   @@map("species_alias_kind")
 }
 
+/// IUCN Red List category — optional on SpeciesProfile.
+enum IucnRedListStatus {
+  LC
+  NT
+  VU
+  EN
+  CR
+  DD
+  NE
+  EW
+  EX
+
+  @@map("iucn_red_list_status")
+}
+
+enum SpeciesImageRole {
+  HERO
+  GALLERY
+
+  @@map("species_image_role")
+}
+
+enum ManufacturerImageRole {
+  LOGO
+
+  @@map("manufacturer_image_role")
+}
+
+/// Optimized derivative sizes for a managed media asset.
+enum MediaAssetVariantKind {
+  ORIGINAL
+  LARGE
+  MEDIUM
+  THUMBNAIL
+  WEBP
+
+  @@map("media_asset_variant_kind")
+}
+
 /// Manufacturer feed presence — distinct from editorial ContentLifecycleState (Sprint S014).
 enum ManufacturerProductStatus {
   ACTIVE
@@ -74,6 +142,15 @@ enum ManufacturerProductStatus {
   UNKNOWN
 
   @@map("manufacturer_product_status")
+}
+
+/// Studio access role — ADMIN supersedes EDITOR and MODERATOR permissions in app code.
+enum StudioRole {
+  ADMIN
+  EDITOR
+  MODERATOR
+
+  @@map("studio_role")
 }
 
 /// Editorial confidence for Balık Oltamda field notes (Studio).
@@ -112,6 +189,11 @@ enum CatalogAuditAction {
   SUGGESTION_REJECT
   SUGGESTION_CORRECT
   SUGGESTION_MERGE
+  AI_SUGGESTION_ACCEPT
+  AI_SUGGESTION_REJECT
+  NOTIFICATION_REVIEW
+  NOTIFICATION_REVIEW_CATEGORY
+  NOTIFICATION_REVIEW_ALL
 
   @@map("catalog_audit_action")
 }
@@ -283,6 +365,9 @@ model Manufacturer {
   colorAliases  ColorAlias[]
   importBatches ImportBatch[]
   knowledgeItems KnowledgeItem[]
+  images        ManufacturerImage[]
+  technologies  ManufacturerTechnology[]
+  mediaAssets   MediaAsset[]
 
   @@index([deletedAt])
   @@map("manufacturers")
@@ -338,6 +423,27 @@ model LureModel {
   actionTr          String?               @map("action_tr") @db.VarChar(128)
   shortDescriptionEn String?              @map("short_description_en") @db.Text
   shortDescriptionTr String?              @map("short_description_tr") @db.Text
+  seoTitleEn         String?              @map("seo_title_en") @db.VarChar(256)
+  seoTitleTr         String?              @map("seo_title_tr") @db.VarChar(256)
+  metaDescriptionEn  String?              @map("meta_description_en") @db.Text
+  metaDescriptionTr  String?              @map("meta_description_tr") @db.Text
+  openGraphTitleEn   String?              @map("open_graph_title_en") @db.VarChar(256)
+  openGraphTitleTr   String?              @map("open_graph_title_tr") @db.VarChar(256)
+  openGraphDescriptionEn String?          @map("open_graph_description_en") @db.Text
+  openGraphDescriptionTr String?          @map("open_graph_description_tr") @db.Text
+  /// Permanent link to official manufacturer product page (digital twin).
+  manufacturerUrl    String?              @map("manufacturer_url") @db.VarChar(1024)
+  lastManufacturerSyncAt DateTime?        @map("last_manufacturer_sync_at") @db.Timestamptz(6)
+  lastManufacturerCheckAt DateTime?       @map("last_manufacturer_check_at") @db.Timestamptz(6)
+  lastSuccessfulImportAt DateTime?       @map("last_successful_import_at") @db.Timestamptz(6)
+  manufacturerVersionHash String?           @map("manufacturer_version_hash") @db.Char(64)
+  contentHash        String?              @map("content_hash") @db.Char(64)
+  imageHash          String?              @map("image_hash") @db.Char(64)
+  technologyHash     String?              @map("technology_hash") @db.Char(64)
+  specificationHash  String?              @map("specification_hash") @db.Char(64)
+  syncStatus         DigitalTwinSyncStatus @default(NEVER_SYNCED) @map("sync_status")
+  /// Hooks, split rings, manufacturer notes from import — JSON blob.
+  importSpecMetadata Json?                 @map("import_spec_metadata")
   lifecycleState    ContentLifecycleState @default(DRAFT) @map("lifecycle_state")
   /// First observation in a manufacturer import feed (S014).
   firstSeenAt        DateTime?              @map("first_seen_at") @db.Timestamptz(6)
@@ -365,6 +471,7 @@ model LureModel {
   importFieldChanges  ImportFieldChange[]
   catalogSuggestions  CatalogSuggestion[]
   knowledgeItems      KnowledgeItem[]
+  technologyLinks     LureModelTechnology[]
 
   @@index([manufacturerId])
   @@index([productLineId])
@@ -372,6 +479,116 @@ model LureModel {
   @@index([manufacturerStatus])
   @@index([deletedAt])
   @@map("lure_models")
+}
+
+/// Reusable manufacturer technology (3D Prism Finish, Wave Motion Belly, etc.).
+model ManufacturerTechnology {
+  id             String   @id @default(uuid()) @db.Uuid
+  manufacturerId String   @map("manufacturer_id") @db.Uuid
+  slug           String   @db.VarChar(128)
+  nameEn         String   @map("name_en") @db.VarChar(256)
+  descriptionEn  String?  @map("description_en") @db.Text
+  descriptionTr  String?  @map("description_tr") @db.Text
+  patentNote     String?  @map("patent_note") @db.Text
+  imageUrl       String?  @map("image_url") @db.VarChar(1024)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  manufacturer Manufacturer          @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  lureLinks    LureModelTechnology[]
+  images       TechnologyImage[]
+
+  @@unique([manufacturerId, slug])
+  @@index([manufacturerId])
+  @@map("manufacturer_technologies")
+}
+
+/// Technology encyclopedia image — patent diagrams, marketing assets.
+model TechnologyImage {
+  id           String   @id @default(uuid()) @db.Uuid
+  technologyId String   @map("technology_id") @db.Uuid
+  mediaAssetId String?  @map("media_asset_id") @db.Uuid
+  url          String   @db.VarChar(1024)
+  altTextEn    String?  @map("alt_text_en") @db.VarChar(512)
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  technology ManufacturerTechnology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+  mediaAsset MediaAsset?            @relation(fields: [mediaAssetId], references: [id], onDelete: SetNull)
+
+  @@index([technologyId])
+  @@index([mediaAssetId])
+  @@map("technology_images")
+}
+
+/// Canonical managed media asset — single source of truth for local image storage.
+model MediaAsset {
+  id             String    @id @default(uuid()) @db.Uuid
+  sha256Hash     String    @unique @map("sha256_hash") @db.Char(64)
+  originalUrl    String?   @map("original_url") @db.VarChar(1024)
+  mimeType       String    @map("mime_type") @db.VarChar(128)
+  widthPx        Int?      @map("width_px")
+  heightPx       Int?      @map("height_px")
+  sizeBytes      Int       @map("size_bytes")
+  importedAt     DateTime  @default(now()) @map("imported_at") @db.Timestamptz(6)
+  manufacturerId String?   @map("manufacturer_id") @db.Uuid
+  creditEn       String?   @map("credit_en") @db.VarChar(512)
+  creditTr       String?   @map("credit_tr") @db.VarChar(512)
+  photographerEn String?   @map("photographer_en") @db.VarChar(512)
+  photographerTr String?   @map("photographer_tr") @db.VarChar(512)
+  copyrightEn    String?   @map("copyright_en") @db.VarChar(512)
+  copyrightTr    String?   @map("copyright_tr") @db.VarChar(512)
+  licenseNoteEn  String?   @map("license_note_en") @db.VarChar(512)
+  licenseNoteTr  String?   @map("license_note_tr") @db.VarChar(512)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  manufacturer       Manufacturer?       @relation(fields: [manufacturerId], references: [id], onDelete: SetNull)
+  variants           MediaAssetVariant[]
+  lureImages         Image[]
+  speciesImages      SpeciesImage[]
+  manufacturerImages ManufacturerImage[]
+  technologyImages   TechnologyImage[]
+
+  @@index([manufacturerId])
+  @@index([importedAt])
+  @@map("media_assets")
+}
+
+/// Derived image file for a MediaAsset (large, medium, thumbnail, WebP).
+model MediaAssetVariant {
+  id           String                @id @default(uuid()) @db.Uuid
+  mediaAssetId String                @map("media_asset_id") @db.Uuid
+  kind         MediaAssetVariantKind
+  publicPath   String                @map("public_path") @db.VarChar(1024)
+  mimeType     String                @map("mime_type") @db.VarChar(128)
+  widthPx      Int?                  @map("width_px")
+  heightPx     Int?                  @map("height_px")
+  sizeBytes    Int                   @map("size_bytes")
+  createdAt    DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  mediaAsset MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaAssetId, kind])
+  @@index([mediaAssetId])
+  @@map("media_asset_variants")
+}
+
+/// Product ↔ technology link — products reference shared technology entities.
+model LureModelTechnology {
+  id           String   @id @default(uuid()) @db.Uuid
+  lureModelId  String   @map("lure_model_id") @db.Uuid
+  technologyId String   @map("technology_id") @db.Uuid
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  lureModel  LureModel              @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
+  technology ManufacturerTechnology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@unique([lureModelId, technologyId])
+  @@index([lureModelId])
+  @@index([technologyId])
+  @@map("lure_model_technologies")
 }
 
 /// LureAtlas Variant — SKU-level size / weight / color release.
@@ -407,9 +624,20 @@ model Image {
   id            String    @id @default(uuid()) @db.Uuid
   lureModelId   String    @map("lure_model_id") @db.Uuid
   lureVariantId String?   @map("lure_variant_id") @db.Uuid
+  mediaAssetId  String?   @map("media_asset_id") @db.Uuid
   url           String    @db.VarChar(1024)
+  /// Original remote URL when `url` points at locally stored media.
+  sourceUrl     String?   @map("source_url") @db.VarChar(1024)
+  sha256Hash    String?   @map("sha256_hash") @db.Char(64)
+  mimeType      String?   @map("mime_type") @db.VarChar(128)
+  widthPx       Int?      @map("width_px")
+  heightPx      Int?      @map("height_px")
   altTextEn     String?   @map("alt_text_en") @db.VarChar(512)
   altTextTr     String?   @map("alt_text_tr") @db.VarChar(512)
+  creditEn      String?   @map("credit_en") @db.VarChar(512)
+  creditTr      String?   @map("credit_tr") @db.VarChar(512)
+  copyrightEn   String?   @map("copyright_en") @db.VarChar(512)
+  copyrightTr   String?   @map("copyright_tr") @db.VarChar(512)
   role          ImageRole @default(PRODUCT)
   sortOrder     Int       @default(0) @map("sort_order")
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -418,9 +646,12 @@ model Image {
 
   lureModel   LureModel    @relation(fields: [lureModelId], references: [id], onDelete: Cascade)
   lureVariant LureVariant? @relation(fields: [lureVariantId], references: [id], onDelete: SetNull)
+  mediaAsset  MediaAsset?  @relation(fields: [mediaAssetId], references: [id], onDelete: SetNull)
 
   @@index([lureModelId])
   @@index([lureVariantId])
+  @@index([mediaAssetId])
+  @@index([sha256Hash])
   @@index([deletedAt])
   @@map("images")
 }
@@ -432,7 +663,10 @@ model Image {
 /// Fish species — platform biological anchor (Fish Species facade, L3).
 model FishSpecies {
   id              String    @id @default(uuid()) @db.Uuid
+  /// Legacy canonical slug — kept in sync with slugEn for backward compatibility.
   slug            String    @unique @db.VarChar(128)
+  slugEn          String    @unique @map("slug_en") @db.VarChar(128)
+  slugTr          String    @unique @map("slug_tr") @db.VarChar(128)
   scientificName  String    @map("scientific_name") @db.VarChar(256)
   nameEn          String    @map("name_en") @db.VarChar(256)
   nameTr          String    @map("name_tr") @db.VarChar(256)
@@ -454,10 +688,167 @@ model FishSpecies {
   confusedBy      SpeciesConfusion[] @relation("SpeciesConfusionTarget")
   catchReports    CatchReport[]
   knowledgeItems  KnowledgeItem[]
+  profile         SpeciesProfile?
+  classification  SpeciesClassification?
+  editorNote      SpeciesEditorNote?
+  images          SpeciesImage[]
+  techniqueLinks  SpeciesTechnique[]
+  regionLinks     FishSpeciesRegion[]
 
   @@index([parentId])
   @@index([deletedAt])
   @@map("fish_species")
+}
+
+/// SpeciesCompass profile — optional 1:1 extension for curated species articles.
+model SpeciesProfile {
+  id              String                @id @default(uuid()) @db.Uuid
+  fishSpeciesId   String                @unique @map("fish_species_id") @db.Uuid
+  descriptionEn   String?               @map("description_en") @db.Text
+  descriptionTr   String?               @map("description_tr") @db.Text
+  habitatEn       String?               @map("habitat_en") @db.Text
+  habitatTr       String?               @map("habitat_tr") @db.Text
+  distributionEn  String?               @map("distribution_en") @db.Text
+  distributionTr  String?               @map("distribution_tr") @db.Text
+  depthMinM       Decimal?              @map("depth_min_m") @db.Decimal(6, 2)
+  depthMaxM       Decimal?              @map("depth_max_m") @db.Decimal(6, 2)
+  spawningEn      String?               @map("spawning_en") @db.Text
+  spawningTr      String?               @map("spawning_tr") @db.Text
+  maxLengthCm     Decimal?              @map("max_length_cm") @db.Decimal(8, 2)
+  maxWeightG      Decimal?              @map("max_weight_g") @db.Decimal(10, 2)
+  conservationEn  String?               @map("conservation_en") @db.Text
+  conservationTr  String?               @map("conservation_tr") @db.Text
+  faoAreas        String[]              @default([]) @map("fao_areas")
+  iucnStatus      IucnRedListStatus?    @map("iucn_status")
+  lifecycleState  ContentLifecycleState @default(DRAFT) @map("lifecycle_state")
+  createdAt       DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  fishSpecies FishSpecies @relation(fields: [fishSpeciesId], references: [id], onDelete: Cascade)
+
+  @@index([lifecycleState])
+  @@map("species_profiles")
+}
+
+/// Linnaean hierarchy — optional 1:1 per species.
+model SpeciesClassification {
+  id            String   @id @default(uuid()) @db.Uuid
+  fishSpeciesId String   @unique @map("fish_species_id") @db.Uuid
+  kingdom       String?  @db.VarChar(128)
+  phylum        String?  @db.VarChar(128)
+  className     String?  @map("class_name") @db.VarChar(128)
+  orderName     String?  @map("order_name") @db.VarChar(128)
+  family        String?  @db.VarChar(128)
+  genus         String?  @db.VarChar(128)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  fishSpecies FishSpecies @relation(fields: [fishSpeciesId], references: [id], onDelete: Cascade)
+
+  @@map("species_classifications")
+}
+
+/// Regional angler notes for species pages — Eastern Mediterranean lens.
+model SpeciesEditorNote {
+  id                    String               @id @default(uuid()) @db.Uuid
+  fishSpeciesId         String               @unique @map("fish_species_id") @db.Uuid
+  mediterraneanNotesEn  String?              @map("mediterranean_notes_en") @db.Text
+  mediterraneanNotesTr  String?              @map("mediterranean_notes_tr") @db.Text
+  aegeanNotesEn         String?              @map("aegean_notes_en") @db.Text
+  aegeanNotesTr         String?              @map("aegean_notes_tr") @db.Text
+  northernCyprusNotesEn String?              @map("northern_cyprus_notes_en") @db.Text
+  northernCyprusNotesTr String?              @map("northern_cyprus_notes_tr") @db.Text
+  confidence            EditorNoteConfidence @default(MEDIUM)
+  internalNotes         String?              @map("internal_notes") @db.Text
+  createdAt             DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  fishSpecies FishSpecies @relation(fields: [fishSpeciesId], references: [id], onDelete: Cascade)
+
+  @@map("species_editor_notes")
+}
+
+/// Species photography — hero and gallery assets.
+model SpeciesImage {
+  id            String           @id @default(uuid()) @db.Uuid
+  fishSpeciesId String           @map("fish_species_id") @db.Uuid
+  mediaAssetId  String?          @map("media_asset_id") @db.Uuid
+  url           String           @db.VarChar(1024)
+  sourceUrl     String?          @map("source_url") @db.VarChar(1024)
+  sha256Hash    String?          @map("sha256_hash") @db.Char(64)
+  altTextEn     String?          @map("alt_text_en") @db.VarChar(512)
+  altTextTr     String?          @map("alt_text_tr") @db.VarChar(512)
+  creditEn      String?          @map("credit_en") @db.VarChar(512)
+  creditTr      String?          @map("credit_tr") @db.VarChar(512)
+  photographerEn String?          @map("photographer_en") @db.VarChar(512)
+  photographerTr String?          @map("photographer_tr") @db.VarChar(512)
+  copyrightEn   String?          @map("copyright_en") @db.VarChar(512)
+  copyrightTr   String?          @map("copyright_tr") @db.VarChar(512)
+  role          SpeciesImageRole @default(GALLERY)
+  sortOrder     Int              @default(0) @map("sort_order")
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime?        @map("deleted_at") @db.Timestamptz(6)
+
+  fishSpecies FishSpecies @relation(fields: [fishSpeciesId], references: [id], onDelete: Cascade)
+  mediaAsset  MediaAsset? @relation(fields: [mediaAssetId], references: [id], onDelete: SetNull)
+
+  @@index([fishSpeciesId])
+  @@index([mediaAssetId])
+  @@index([role])
+  @@index([sha256Hash])
+  @@index([deletedAt])
+  @@map("species_images")
+}
+
+/// Manufacturer brand assets — logos and future marketing media.
+model ManufacturerImage {
+  id             String                @id @default(uuid()) @db.Uuid
+  manufacturerId String                @map("manufacturer_id") @db.Uuid
+  mediaAssetId   String?               @map("media_asset_id") @db.Uuid
+  url            String                @db.VarChar(1024)
+  sourceUrl      String?               @map("source_url") @db.VarChar(1024)
+  sha256Hash     String?               @map("sha256_hash") @db.Char(64)
+  altTextEn      String?               @map("alt_text_en") @db.VarChar(512)
+  altTextTr      String?               @map("alt_text_tr") @db.VarChar(512)
+  creditEn       String?               @map("credit_en") @db.VarChar(512)
+  creditTr       String?               @map("credit_tr") @db.VarChar(512)
+  copyrightEn    String?               @map("copyright_en") @db.VarChar(512)
+  copyrightTr    String?               @map("copyright_tr") @db.VarChar(512)
+  role           ManufacturerImageRole @default(LOGO)
+  sortOrder      Int                   @default(0) @map("sort_order")
+  createdAt      DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime              @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime?             @map("deleted_at") @db.Timestamptz(6)
+
+  manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Cascade)
+  mediaAsset   MediaAsset?  @relation(fields: [mediaAssetId], references: [id], onDelete: SetNull)
+
+  @@index([manufacturerId])
+  @@index([mediaAssetId])
+  @@index([role])
+  @@index([sha256Hash])
+  @@index([deletedAt])
+  @@map("manufacturer_images")
+}
+
+/// Moderator-curated species ↔ technique links.
+model SpeciesTechnique {
+  id            String    @id @default(uuid()) @db.Uuid
+  fishSpeciesId String    @map("fish_species_id") @db.Uuid
+  techniqueId   String    @map("technique_id") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  fishSpecies FishSpecies @relation(fields: [fishSpeciesId], references: [id], onDelete: Cascade)
+  technique   Technique   @relation(fields: [techniqueId], references: [id], onDelete: Restrict)
+
+  @@unique([fishSpeciesId, techniqueId])
+  @@index([fishSpeciesId])
+  @@index([techniqueId])
+  @@index([deletedAt])
+  @@map("species_techniques")
 }
 
 /// Fishing technique — discovery and compatibility axis (Fishing Technique facade, L3).
@@ -474,12 +865,54 @@ model Technique {
   parent         Technique?      @relation("TechniqueHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   children       Technique[]     @relation("TechniqueHierarchy")
   lureTechniques LureTechnique[]
+  speciesTechniques SpeciesTechnique[]
   catchReports   CatchReport[]
   knowledgeItems KnowledgeItem[]
 
   @@index([parentId])
   @@index([deletedAt])
   @@map("techniques")
+}
+
+// ---------------------------------------------------------------------------
+// Geographic regions (Sprint 7.6B — fishing knowledge context, not GIS)
+// Future: optional regionId on CatchReport, LureEditorNote, KnowledgeItem,
+// FishSpecies, LureModel — attach when those flows migrate off free-text region.
+// ---------------------------------------------------------------------------
+
+model Region {
+  id            String   @id @default(uuid()) @db.Uuid
+  slug          String   @unique @db.VarChar(128)
+  code          String   @unique @db.VarChar(64)
+  nameEn        String   @map("name_en") @db.VarChar(256)
+  nameTr        String   @map("name_tr") @db.VarChar(256)
+  descriptionEn String?  @map("description_en") @db.Text
+  descriptionTr String?  @map("description_tr") @db.Text
+  displayOrder  Int      @default(0) @map("display_order")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  speciesLinks FishSpeciesRegion[]
+
+  @@index([isActive, displayOrder])
+  @@map("regions")
+}
+
+/// Distribution regions for a fish species — Version 1 water bodies only.
+model FishSpeciesRegion {
+  id            String   @id @default(uuid()) @db.Uuid
+  fishSpeciesId String   @map("fish_species_id") @db.Uuid
+  regionId      String   @map("region_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  fishSpecies FishSpecies @relation(fields: [fishSpeciesId], references: [id], onDelete: Cascade)
+  region      Region      @relation(fields: [regionId], references: [id], onDelete: Cascade)
+
+  @@unique([fishSpeciesId, regionId])
+  @@index([fishSpeciesId])
+  @@index([regionId])
+  @@map("fish_species_regions")
 }
 
 // ---------------------------------------------------------------------------
@@ -789,6 +1222,8 @@ model ImportFieldChange {
   fieldLabel     String                  @map("field_label") @db.VarChar(128)
   oldValue       String?                 @map("old_value") @db.Text
   newValue       String?                 @map("new_value") @db.Text
+  editedValue    String?                 @map("edited_value") @db.Text
+  changeKind     ImportFieldChangeKind   @default(ADDED) @map("change_kind")
   status         ImportFieldChangeStatus @default(PENDING)
   createdAt      DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
   resolvedAt     DateTime?               @map("resolved_at") @db.Timestamptz(6)
@@ -849,6 +1284,128 @@ model CatalogAuditEntry {
   @@index([action])
   @@index([createdAt(sort: Desc)])
   @@map("catalog_audit_entries")
+}
+
+// ---------------------------------------------------------------------------
+// Studio AI Review (Sprint 7.6D — AI assists, editors verify)
+// ---------------------------------------------------------------------------
+
+enum StudioReviewEntityType {
+  SPECIES
+  TECHNIQUE
+  MANUFACTURER
+  LURE
+  LURE_VARIANT
+  PRODUCT_LINE
+  KNOWLEDGE_SOURCE
+  REGION
+  CATCH_REPORT
+
+  @@map("studio_review_entity_type")
+}
+
+/// Groups AI suggestions for a single editorial review pass (draft or existing entity).
+model StudioAiReviewSession {
+  id         String                 @id @default(uuid()) @db.Uuid
+  entityType StudioReviewEntityType @map("entity_type")
+  entityId   String?                @map("entity_id") @db.Uuid
+  seedInput  Json                   @map("seed_input")
+  createdBy  String                 @map("created_by") @db.VarChar(128)
+  createdAt  DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  suggestions StudioAiSuggestion[]
+
+  @@index([entityType, entityId])
+  @@index([createdAt(sort: Desc)])
+  @@map("studio_ai_review_sessions")
+}
+
+/// AI-generated field suggestion — never applied until an editor accepts.
+model StudioAiSuggestion {
+  id             String                 @id @default(uuid()) @db.Uuid
+  sessionId      String                 @map("session_id") @db.Uuid
+  entityType     StudioReviewEntityType @map("entity_type")
+  entityId       String?                @map("entity_id") @db.Uuid
+  fieldKey       String                 @map("field_key") @db.VarChar(64)
+  fieldLabel     String                 @map("field_label") @db.VarChar(128)
+  suggestedValue String                 @map("suggested_value") @db.Text
+  currentValue   String?                @map("current_value") @db.Text
+  confidencePct  Int                    @map("confidence_pct")
+  source         SuggestionSource
+  reasoning      String                 @db.Text
+  status         SuggestionStatus       @default(PENDING)
+  editedValue    String?                @map("edited_value") @db.Text
+  provenance     Json?
+  resolvedAt     DateTime?              @map("resolved_at") @db.Timestamptz(6)
+  resolvedBy     String?                @map("resolved_by") @db.VarChar(128)
+  createdAt      DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  session StudioAiReviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, status])
+  @@index([entityType, entityId, status])
+  @@map("studio_ai_suggestions")
+}
+
+// ---------------------------------------------------------------------------
+// Platform Notification Center (Sprint 7.6E)
+// ---------------------------------------------------------------------------
+
+enum PlatformNotificationSource {
+  EDITORIAL_INTELLIGENCE
+
+  @@map("platform_notification_source")
+}
+
+enum PlatformNotificationSeverity {
+  CRITICAL
+  WARNING
+  SUGGESTION
+
+  @@map("platform_notification_severity")
+}
+
+enum PlatformNotificationStatus {
+  ACTIVE
+  REVIEWED
+  CLOSED
+  RESOLVED
+
+  @@map("platform_notification_status")
+}
+
+/// Reusable in-app notification — editorial intelligence, imports, community, etc.
+model PlatformNotification {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  source                PlatformNotificationSource
+  severity              PlatformNotificationSeverity
+  status                PlatformNotificationStatus   @default(ACTIVE)
+  entityType            StudioReviewEntityType?      @map("entity_type")
+  entityId              String?                      @map("entity_id") @db.Uuid
+  entityLabel           String?                      @map("entity_label") @db.VarChar(256)
+  entityHref            String?                      @map("entity_href") @db.VarChar(512)
+  category              String?                      @db.VarChar(64)
+  title                 String                       @db.VarChar(256)
+  description           String                       @db.Text
+  /// Stable logical issue id — e.g. species:akya:missing-hero-image
+  issueFingerprint      String                       @map("issue_fingerprint") @db.VarChar(320)
+  sessionId             String?                      @map("session_id") @db.Uuid
+  reviewedAt            DateTime?                    @map("reviewed_at") @db.Timestamptz(6)
+  reviewedBy            String?                      @map("reviewed_by") @db.VarChar(128)
+  closedAt              DateTime?                    @map("closed_at") @db.Timestamptz(6)
+  resolvedAt            DateTime?                    @map("resolved_at") @db.Timestamptz(6)
+  resolvedAutomatically Boolean                      @default(false) @map("resolved_automatically")
+  assignedEditorId      String?                      @map("assigned_editor_id") @db.Uuid
+  assignedAt            DateTime?                    @map("assigned_at") @db.Timestamptz(6)
+  assignedBy            String?                      @map("assigned_by") @db.VarChar(128)
+  createdAt             DateTime                     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime                     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status, severity, createdAt(sort: Desc)])
+  @@index([issueFingerprint, status])
+  @@index([entityType, entityId, status])
+  @@index([assignedEditorId, status])
+  @@map("platform_notifications")
 }
 
 // ---------------------------------------------------------------------------
@@ -1067,4 +1624,22 @@ model RuntimeErrorLog {
   @@index([resolved, createdAt(sort: Desc)])
   @@index([page])
   @@map("runtime_error_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Studio authentication (email/password — users created manually)
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String     @id @default(uuid()) @db.Uuid
+  email        String     @unique @db.VarChar(320)
+  passwordHash String     @map("password_hash") @db.VarChar(255)
+  name         String?    @db.VarChar(128)
+  role         StudioRole @default(EDITOR)
+  isActive     Boolean    @default(true) @map("is_active")
+  lastLoginAt  DateTime?  @map("last_login_at") @db.Timestamptz(6)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("studio_users")
 }

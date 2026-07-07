@@ -1,9 +1,11 @@
 import type {
+  CanonicalAction,
   CanonicalBodyType,
   CanonicalBuoyancy,
   CanonicalCoatingType,
   CanonicalColor,
   CanonicalDivingDepth,
+  CanonicalDownload,
   CanonicalExternalIdentifier,
   CanonicalHookConfiguration,
   CanonicalImage,
@@ -11,9 +13,11 @@ import type {
   CanonicalLureImport,
   CanonicalLureVariant,
   CanonicalSize,
+  CanonicalSplitRingConfiguration,
   CanonicalTag,
   CanonicalTechniqueRef,
   CanonicalTrollingSpeedRange,
+  CanonicalVideo,
   CanonicalWeight,
 } from "../../core/canonical-lure";
 import type {
@@ -28,7 +32,21 @@ import {
   DUEL_SITE_ORIGIN,
 } from "./parser.types";
 
-export const DUEL_MAPPER_SCHEMA_VERSION = "1.1.0";
+export const DUEL_MAPPER_SCHEMA_VERSION = "1.3.0";
+
+const ACTION_PATTERNS: Array<{ pattern: RegExp; slug: string }> = [
+  { pattern: /\bstop\s*[-&]?\s*go\b/i, slug: "stop-and-go" },
+  { pattern: /\bs[- ]?curve\b/i, slug: "s-curve" },
+  { pattern: /\bwide\s*wobble\b/i, slug: "wide-wobble" },
+  { pattern: /\btight\s*wobble\b/i, slug: "tight-wobble" },
+  { pattern: /\brolling\b/i, slug: "rolling" },
+  { pattern: /\bdarting\b/i, slug: "darting" },
+  { pattern: /\bwalk(?:ing)?\s*the\s*dog\b/i, slug: "walk-the-dog" },
+  { pattern: /\bhigh\s*pitch\b/i, slug: "high-pitch" },
+];
+
+const TECHNOLOGY_TITLE_PATTERN =
+  /\b(finish|boost|transfer|prism|mag\s*lock|magnetic|jet|flash|system|coat|technology|tech)\b/i;
 
 const TROLLING_SPEED_PATTERN =
   /\b([\d.]+)\s*(?:~|–|-|to)\s*([\d.]+)\s*(?:knots?|kt|kn)\b|\b([\d.]+)\s*(?:knots?|kt|kn)\b/i;
@@ -408,6 +426,65 @@ export function normalizeTrollingSpeed(product: DuelParsedProduct): CanonicalTro
   return undefined;
 }
 
+function manufacturerImageCredit(product: DuelParsedProduct): CanonicalLocalizedText {
+  const credit = `${product.brand} / ${product.manufacturerName}`.trim();
+  return { en: credit, default: credit };
+}
+
+/** Infer swimming action from marketing copy — never from technology feature titles. */
+export function normalizeAction(product: DuelParsedProduct): CanonicalAction | undefined {
+  const corpus = [
+    product.description,
+    ...product.featureBullets,
+    ...product.features
+      .filter((feature) => !TECHNOLOGY_TITLE_PATTERN.test(feature.title))
+      .map((feature) => `${feature.title} ${feature.text}`),
+  ].join("\n");
+
+  for (const { pattern, slug } of ACTION_PATTERNS) {
+    if (pattern.test(corpus)) {
+      const term = corpus.match(pattern)?.[0]?.trim();
+      return {
+        slug,
+        manufacturerTerm: term,
+        label: localized(term ?? slug),
+      };
+    }
+  }
+
+  return undefined;
+}
+
+function collectCastingRanges(rows: DuelParsedSpecRow[]): string[] {
+  return [
+    ...new Set(
+      rows
+        .map((row) => row.castingRange?.trim())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ];
+}
+
+function normalizeVideos(product: DuelParsedProduct): CanonicalVideo[] | undefined {
+  if (!product.videoUrls.length) return undefined;
+  return product.videoUrls.map((video, index) => ({
+    url: video.url,
+    role: "product_demo",
+    title: video.title ? localized(video.title) : undefined,
+    sortOrder: index,
+  }));
+}
+
+function normalizeDownloads(product: DuelParsedProduct): CanonicalDownload[] | undefined {
+  if (!product.downloadUrls.length) return undefined;
+  return product.downloadUrls.map((download, index) => ({
+    url: download.url,
+    role: (download.role as CanonicalDownload["role"]) ?? "spec_sheet",
+    title: download.title ? localized(download.title) : undefined,
+    sortOrder: index,
+  }));
+}
+
 function normalizeSize(row: DuelParsedSpecRow): CanonicalSize | undefined {
   const lengthMm = normalizeLengthMm(row.sizeLabel, row.lengthMm);
   if (lengthMm === undefined) {
@@ -448,27 +525,57 @@ function normalizeColor(color: DuelParsedColor): CanonicalColor {
 }
 
 function normalizeHookConfig(row: DuelParsedSpecRow): CanonicalHookConfiguration | undefined {
-  if (!row.hook && !row.ring) {
+  if (!row.hook) {
     return undefined;
   }
 
   return {
-    hookSize: row.hook?.trim(),
-    configuration: row.ring ? `Ring ${row.ring.trim()}` : undefined,
+    hookSize: row.hook.trim(),
     factoryDefault: true,
   };
+}
+
+function normalizeSplitRingConfig(
+  row: DuelParsedSpecRow,
+): CanonicalSplitRingConfiguration | undefined {
+  if (!row.ring) {
+    return undefined;
+  }
+
+  return {
+    size: row.ring.trim(),
+  };
+}
+
+function collectSplitRings(rows: DuelParsedSpecRow[]): CanonicalSplitRingConfiguration[] {
+  const seen = new Set<string>();
+  const rings: CanonicalSplitRingConfiguration[] = [];
+
+  for (const row of rows) {
+    const ring = normalizeSplitRingConfig(row);
+    if (!ring?.size || seen.has(ring.size)) continue;
+    seen.add(ring.size);
+    rings.push(ring);
+  }
+
+  return rings;
 }
 
 function normalizeModelImages(product: DuelParsedProduct): CanonicalImage[] {
   const seen = new Set<string>();
   const images: CanonicalImage[] = [];
+  const credit = manufacturerImageCredit(product);
 
   const push = (image: CanonicalImage) => {
     if (seen.has(image.url)) {
       return;
     }
     seen.add(image.url);
-    images.push(image);
+    images.push({
+      ...image,
+      credit: image.credit ?? credit,
+      sourcePageUrl: product.sourceUrl,
+    });
   };
 
   product.heroImageUrls.forEach((url, index) => {
@@ -490,7 +597,10 @@ function normalizeModelImages(product: DuelParsedProduct): CanonicalImage[] {
   return images;
 }
 
-function normalizeVariantImages(color: DuelParsedColor): CanonicalImage[] {
+function normalizeVariantImages(
+  color: DuelParsedColor,
+  product: DuelParsedProduct,
+): CanonicalImage[] {
   if (!color.imageUrl) {
     return [];
   }
@@ -502,6 +612,8 @@ function normalizeVariantImages(color: DuelParsedColor): CanonicalImage[] {
       role: "product",
       colorCode: code,
       alt: localized(color.name),
+      credit: manufacturerImageCredit(product),
+      sourcePageUrl: product.sourceUrl,
     },
   ];
 }
@@ -590,6 +702,8 @@ export function mapDuelProductToCanonical(
   const bodyType = normalizeBodyType(product);
   const coatingType = normalizeCoatingType(product);
   const trollingSpeed = normalizeTrollingSpeed(product);
+  const primaryAction = normalizeAction(product);
+  const castingRanges = collectCastingRanges(product.specRows);
 
   const modelTags: CanonicalTag[] = [
     { kind: "marketing", value: product.brand, locale: "en" },
@@ -633,7 +747,7 @@ export function mapDuelProductToCanonical(
         spec.catalogNumberPrefix,
         normalizedColor.code,
       );
-      const variantImages = normalizeVariantImages(color);
+      const variantImages = normalizeVariantImages(color, product);
 
       variants.push({
         slug: variantSlug,
@@ -701,6 +815,7 @@ export function mapDuelProductToCanonical(
       bodyType,
       coatingType,
       trollingSpeed,
+      actions: primaryAction ? [primaryAction] : undefined,
       techniques: techniqueRefs.length > 0 ? techniqueRefs : undefined,
       sizes: modelSizes.length > 0 ? modelSizes : undefined,
       weights: modelWeights.length > 0 ? modelWeights : undefined,
@@ -716,7 +831,15 @@ export function mapDuelProductToCanonical(
       hooks: product.specRows
         .map((row) => normalizeHookConfig(row))
         .filter((hook): hook is CanonicalHookConfiguration => Boolean(hook)),
+      splitRings: collectSplitRings(product.specRows),
+      manufacturerNotes: product.description
+        ? localized(product.description)
+        : product.featureBullets.length > 0
+          ? localized(product.featureBullets.join("\n"))
+          : undefined,
       images: normalizeModelImages(product),
+      videos: normalizeVideos(product),
+      downloads: normalizeDownloads(product),
       tags: modelTags,
       externalIdentifiers: productCodes[0]
         ? [{ scheme: "manufacturer_sku", value: productCodes[0] }]
@@ -747,6 +870,9 @@ export function mapDuelProductToCanonical(
         productCodes,
         specifications: product.specRows,
         featureBlocks: product.features,
+        castingRanges,
+        videoUrls: product.videoUrls,
+        downloadUrls: product.downloadUrls,
         categoryListing: category?.products ?? [],
         janSkuMissing: product.janSku.length === 0,
         normalizedTechniques: techniqueTags.map((tag) => tag.value),

@@ -182,6 +182,21 @@ export interface CanonicalHookConfiguration {
   factoryDefault?: boolean;
 }
 
+/** Split ring / hardware specification from manufacturer catalog. */
+export interface CanonicalSplitRingConfiguration {
+  size?: string;
+  count?: number;
+  notes?: CanonicalLocalizedText;
+}
+
+/** Reusable manufacturer technology block — deduplicated at persist time. */
+export interface CanonicalTechnologyRef {
+  slug: string;
+  /** Technology name stays in manufacturer language (typically EN). */
+  name: CanonicalLocalizedText;
+  description?: CanonicalLocalizedText;
+}
+
 // ---------------------------------------------------------------------------
 // Media
 // ---------------------------------------------------------------------------
@@ -197,10 +212,34 @@ export type CanonicalImageRole =
 
 export interface CanonicalImage {
   url: string;
+  sha256Hash?: string;
   role?: CanonicalImageRole;
   alt?: CanonicalLocalizedText;
   sortOrder?: number;
   colorCode?: string;
+  /** Manufacturer attribution — preserved from source page. */
+  credit?: CanonicalLocalizedText;
+  copyright?: CanonicalLocalizedText;
+  sourcePageUrl?: string;
+  /** Managed media asset id when localized during import. */
+  mediaAssetId?: string;
+  mimeType?: string;
+  widthPx?: number;
+  heightPx?: number;
+}
+
+export type CanonicalDownloadRole =
+  | "manual"
+  | "catalog"
+  | "rigging_guide"
+  | "spec_sheet"
+  | (string & {});
+
+export interface CanonicalDownload {
+  url: string;
+  role?: CanonicalDownloadRole;
+  title?: CanonicalLocalizedText;
+  sortOrder?: number;
 }
 
 export type CanonicalVideoRole =
@@ -270,8 +309,14 @@ export interface CanonicalLureModel {
   techniques?: CanonicalTechniqueRef[];
   actions?: CanonicalAction[];
   hooks?: CanonicalHookConfiguration[];
+  splitRings?: CanonicalSplitRingConfiguration[];
+  technologies?: CanonicalTechnologyRef[];
+  manufacturerNotes?: CanonicalLocalizedText;
+  /** Generated editorial short description (filled by enrichment pipeline). */
+  shortDescription?: CanonicalLocalizedText;
   images?: CanonicalImage[];
   videos?: CanonicalVideo[];
+  downloads?: CanonicalDownload[];
   tags?: CanonicalTag[];
   externalIdentifiers?: CanonicalExternalIdentifier[];
 }

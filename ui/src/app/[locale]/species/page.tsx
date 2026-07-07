@@ -39,7 +39,7 @@ export default async function SpeciesPage({ params }: SpeciesPageProps) {
 
   setRequestLocale(locale);
 
-  const species = await listPublicSpecies();
+  const species = await listPublicSpecies(locale as AppLocale);
 
   return (
     <AppMain>

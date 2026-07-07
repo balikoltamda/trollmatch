@@ -101,6 +101,22 @@ export async function findImageByUrl(
   });
 }
 
+export async function findLureImageBySha256(
+  tx: DbClient,
+  lureModelId: string,
+  sha256Hash: string,
+  lureVariantId?: string | null,
+) {
+  return tx.image.findFirst({
+    where: {
+      lureModelId,
+      sha256Hash,
+      lureVariantId: lureVariantId ?? null,
+      deletedAt: null,
+    },
+  });
+}
+
 export async function findTechniqueBySlug(tx: DbClient, slug: string) {
   return tx.technique.findFirst({
     where: { slug, deletedAt: null },

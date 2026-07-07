@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { SubmitCatchReportInput } from "@/modules/catch-report/types";
+import {
+  isUnauthorizedResult,
+  requireModeratorOrUnauthorized,
+} from "@/modules/studio/auth/permissions";
 
 export type CatchReportActionResult =
   | { ok: true }
@@ -143,6 +147,9 @@ function revalidateCatchReportPaths(
 export async function approveCatchReport(
   reportId: string,
 ): Promise<CatchReportActionResult> {
+  const auth = await requireModeratorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   try {
     const report = await prisma.catchReport.update({
       where: { id: reportId, verificationStatus: "PENDING" },
@@ -166,6 +173,9 @@ export async function approveCatchReport(
 export async function rejectCatchReport(
   reportId: string,
 ): Promise<CatchReportActionResult> {
+  const auth = await requireModeratorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   try {
     const slug = await getReportLureSlug(reportId);
     await prisma.catchReport.update({
@@ -183,6 +193,9 @@ export async function mergeCatchReports(
   primaryId: string,
   duplicateId: string,
 ): Promise<CatchReportActionResult> {
+  const auth = await requireModeratorOrUnauthorized();
+  if (isUnauthorizedResult(auth)) return auth;
+
   if (primaryId === duplicateId) {
     return { ok: false, error: "Cannot merge a report with itself" };
   }

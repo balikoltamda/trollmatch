@@ -6,7 +6,7 @@ import type {
 import { prisma } from "@/lib/prisma";
 import { ensureAttentionSuggestions } from "@/modules/studio/lib/suggestion-generator";
 import { computeTrustScore } from "@/modules/trust/lib/derive-verification";
-import { LURE_DETAIL_ENRICHMENTS } from "@/modules/lure/data/lure-detail-enrichment";
+import { countApprovedCatchReportsByLureModelIds } from "@/modules/catch-report/data/community-statistics";
 
 export type AttentionItem = {
   id: string;
@@ -90,6 +90,9 @@ export async function getAttentionInbox(limit = 50): Promise<AttentionItem[]> {
   ]);
 
   const productMap = new Map(products.map((p) => [p.id, p]));
+  const catchReportCounts = await countApprovedCatchReportsByLureModelIds(
+    products.map((product) => product.id),
+  );
 
   const items = grouped
     .map((group) => {
@@ -107,9 +110,7 @@ export async function getAttentionInbox(limit = 50): Promise<AttentionItem[]> {
       const top = sorted[0];
       if (!top) return null;
 
-      const community =
-        LURE_DETAIL_ENRICHMENTS[product.slug]?.communityStatistics
-          .verifiedCatchReportCount ?? 0;
+      const community = catchReportCounts.get(product.id) ?? 0;
 
       const trustScore = computeTrustScore({
         lifecycleState: product.lifecycleState,
@@ -185,6 +186,10 @@ async function listPublishReadyWithoutSuggestions(
     },
   });
 
+  const catchReportCounts = await countApprovedCatchReportsByLureModelIds(
+    ready.map((product) => product.id),
+  );
+
   return ready.map((product) => ({
     id: `publish-${product.id}`,
     productId: product.id,
@@ -202,9 +207,7 @@ async function listPublishReadyWithoutSuggestions(
       lastImportedAt: product.lastImportedAt,
       pendingSuggestions: 0,
       hasEditorNote: product.editorNote !== null,
-      communityCatchReports:
-        LURE_DETAIL_ENRICHMENTS[product.slug]?.communityStatistics
-          .verifiedCatchReportCount ?? 0,
+      communityCatchReports: catchReportCounts.get(product.id) ?? 0,
       manufacturerActive: product.manufacturerStatus === "ACTIVE",
     }),
   }));

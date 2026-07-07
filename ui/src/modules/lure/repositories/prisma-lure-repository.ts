@@ -14,15 +14,22 @@ import {
   PUBLIC_LURE_WHERE,
 } from "@/modules/discovery/lib/public-visibility";
 import {
+  getCommunitySpeciesForLureModel,
+  getCommunityStatisticsForLureModel,
+  getCommunityTechniquesForLureModel,
+} from "@/modules/catch-report/data/community-statistics";
+import {
   buildPublicTrustSummary,
   deriveLastVerifiedAt,
   derivePublicVerificationStatus,
 } from "@/modules/trust/lib/compute-product-trust";
+import { resolvePublicImagePath } from "@/modules/studio/media/lib/media-asset-service";
 import type { LureRepository } from "@/modules/lure/repositories/lure-repository";
 import type {
   LocalizedString,
   LureDetail,
   LureDetailParams,
+  LureRegionalNotesView,
   LureSpecies,
   LureTechnique,
   LureVariant as UiLureVariant,
@@ -43,6 +50,12 @@ type LureModelRecord = LureModel & {
     currentRecommendationTr: string | null;
     shortRecommendationEn: string | null;
     shortRecommendationTr: string | null;
+    mediterraneanNotesEn: string | null;
+    mediterraneanNotesTr: string | null;
+    aegeanNotesEn: string | null;
+    aegeanNotesTr: string | null;
+    northernCyprusNotesEn: string | null;
+    northernCyprusNotesTr: string | null;
   } | null;
   manufacturer: {
     nameEn: string;
@@ -98,13 +111,6 @@ function toOptionalLocalized(
   return { en, tr };
 }
 
-function hasLocalized(value: LocalizedString | undefined): boolean {
-  return Boolean(value && (value.en.trim() || value.tr.trim()));
-}
-
-function hasDivingDepth(depth?: { min: number; max: number }): boolean {
-  return Boolean(depth && (depth.min > 0 || depth.max > 0));
-}
 
 function mapDbDivingDepth(
   record: LureModel,
@@ -146,50 +152,46 @@ function mapDbTrolling(record: LureModel): LureDetail["trolling"] {
   };
 }
 
-function mergeTrollingInfo(
-  dbTrolling: LureDetail["trolling"],
-  enrichmentTrolling: LureDetail["trolling"],
-): LureDetail["trolling"] {
-  const dbSpeed = dbTrolling?.speedKnots;
-  const enrichmentSpeed = enrichmentTrolling?.speedKnots;
-  const hasDbSpeed =
-    Boolean(dbSpeed && (dbSpeed.min > 0 || dbSpeed.max > 0));
-  const hasEnrichmentSpeed =
-    Boolean(
-      enrichmentSpeed &&
-        (enrichmentSpeed.min > 0 || enrichmentSpeed.max > 0),
-    );
+function mapRegionalNotes(
+  editorNote: LureModelRecord["editorNote"],
+): LureRegionalNotesView | null {
+  if (!editorNote) return null;
 
-  if (!hasDbSpeed && !hasEnrichmentSpeed) {
-    const leader = hasLocalized(enrichmentTrolling?.leader)
-      ? enrichmentTrolling?.leader
-      : undefined;
-    const mainLine = hasLocalized(enrichmentTrolling?.mainLine)
-      ? enrichmentTrolling?.mainLine
-      : undefined;
-    const notes = hasLocalized(enrichmentTrolling?.notes)
-      ? enrichmentTrolling?.notes
-      : undefined;
+  const mediterranean = toOptionalLocalized(
+    editorNote.mediterraneanNotesEn,
+    editorNote.mediterraneanNotesTr,
+  );
+  const aegean = toOptionalLocalized(
+    editorNote.aegeanNotesEn,
+    editorNote.aegeanNotesTr,
+  );
+  const northernCyprus = toOptionalLocalized(
+    editorNote.northernCyprusNotesEn,
+    editorNote.northernCyprusNotesTr,
+  );
 
-    if (!leader && !mainLine && !notes) {
-      return undefined;
-    }
-
-    return { leader, mainLine, notes };
+  if (!mediterranean && !aegean && !northernCyprus) {
+    return null;
   }
 
   return {
-    speedKnots: hasDbSpeed ? dbSpeed : enrichmentSpeed,
-    leader: hasLocalized(enrichmentTrolling?.leader)
-      ? enrichmentTrolling?.leader
-      : undefined,
-    mainLine: hasLocalized(enrichmentTrolling?.mainLine)
-      ? enrichmentTrolling?.mainLine
-      : undefined,
-    notes: hasLocalized(enrichmentTrolling?.notes)
-      ? enrichmentTrolling?.notes
-      : undefined,
+    mediterranean: mediterranean ?? null,
+    aegean: aegean ?? null,
+    northernCyprus: northernCyprus ?? null,
   };
+}
+
+function mergeTrollingInfo(dbTrolling: LureDetail["trolling"]): LureDetail["trolling"] {
+  if (!dbTrolling?.speedKnots) {
+    return undefined;
+  }
+
+  const speed = dbTrolling.speedKnots;
+  if (speed.min <= 0 && speed.max <= 0) {
+    return undefined;
+  }
+
+  return dbTrolling;
 }
 
 function mapSpeciesKind(
@@ -228,25 +230,48 @@ function resolveVariantImage(
     variantImages.find((image) => image.role === "PRODUCT") ??
     variantImages[0];
   if (variantProduct?.url) {
-    return variantProduct.url;
+    return resolvePublicImagePath(variantProduct.url);
   }
 
   const modelHero =
     modelImages.find((image) => image.role === "HERO") ?? modelImages[0];
-  return modelHero?.url ?? PLACEHOLDER_IMAGE;
+  return modelHero?.url
+    ? resolvePublicImagePath(modelHero.url)
+    : PLACEHOLDER_IMAGE;
+}
+
+function mapVariantImages(
+  variantImages: Image[],
+  modelImages: Image[],
+): { imageSrc: string; galleryImages: string[] } {
+  const galleryImages = variantImages
+    .map((image) => resolvePublicImagePath(image.url))
+    .filter((url, index, list) => url && list.indexOf(url) === index);
+
+  if (galleryImages.length > 0) {
+    return { imageSrc: galleryImages[0]!, galleryImages };
+  }
+
+  const fallback = resolveVariantImage([], modelImages);
+  return { imageSrc: fallback, galleryImages: [fallback] };
 }
 
 function mapVariant(
   variant: LureModelRecord["variants"][number],
   modelImages: Image[],
 ): UiLureVariant {
+  const { imageSrc, galleryImages } = mapVariantImages(
+    variant.images,
+    modelImages,
+  );
   return {
     id: variant.slug,
     label: toLocalized(variant.labelEn, variant.labelTr),
     lengthMm: variant.lengthMm ?? 0,
     weightG: variant.weightG ?? 0,
     colorCode: resolveColorCode(variant.color),
-    imageSrc: resolveVariantImage(variant.images, modelImages),
+    imageSrc,
+    galleryImages,
   };
 }
 
@@ -323,14 +348,20 @@ function mapEditorialNote(
 function mapRecordToLureDetail(
   record: LureModelRecord,
   trustContext: { pendingSuggestions: number; publishedAt: Date | null },
+  communityContext: {
+    communityStatistics: LureDetail["communityStatistics"];
+    communitySpecies: LureSpecies[];
+    communityTechniques: LureTechnique[];
+  },
 ): LureDetail {
-  const enrichment = getLureDetailEnrichment(record.slug, record.updatedAt);
+  const enrichment = getLureDetailEnrichment(record.updatedAt);
   const variants = record.variants.map((variant) =>
     mapVariant(variant, record.images),
   );
   const defaultVariantId = resolveDefaultVariantId(variants, record.variants);
   const dbSpecies = mapSpeciesLinks(record.lureSpeciesLinks);
   const dbTechniques = mapTechniqueLinks(record.lureTechniques);
+  const dbTechniqueSlugs = dbTechniques.map((technique) => technique.id);
 
   const defaultVariant =
     variants.find((variant) => variant.id === defaultVariantId) ?? variants[0];
@@ -352,7 +383,6 @@ function mapRecordToLureDetail(
   });
 
   const trust = buildPublicTrustSummary({
-    slug: record.slug,
     lifecycleState: record.lifecycleState,
     lastImportedAt: record.lastImportedAt,
     editorConfidence: record.editorNote?.confidence ?? null,
@@ -360,6 +390,7 @@ function mapRecordToLureDetail(
     manufacturerName: record.manufacturer.nameEn,
     publishedAt: trustContext.publishedAt,
     lastVerifiedAt,
+    communityStatistics: communityContext.communityStatistics,
   });
 
   const verificationStatus = derivePublicVerificationStatus({
@@ -395,39 +426,28 @@ function mapRecordToLureDetail(
     specifications: {
       lengthMm: defaultVariant?.lengthMm ?? 0,
       weightG: defaultVariant?.weightG ?? 0,
-      divingDepthM: dbDivingDepth ??
-        (hasDivingDepth(enrichment.specifications.divingDepthM)
-          ? enrichment.specifications.divingDepthM
-          : undefined),
-      buoyancy: hasLocalized(dbBuoyancy)
-        ? dbBuoyancy
-        : hasLocalized(enrichment.specifications.buoyancy)
-          ? enrichment.specifications.buoyancy
-          : undefined,
-      action: hasLocalized(dbAction)
-        ? dbAction
-        : hasLocalized(enrichment.specifications.action)
-          ? enrichment.specifications.action
-          : undefined,
+      divingDepthM: dbDivingDepth,
+      buoyancy: dbBuoyancy,
+      action: dbAction,
       bodyType: dbBodyType,
       coatingType: dbCoatingType,
     },
-    recommendedSpecies:
-      dbSpecies.length > 0
-        ? dbSpecies
-        : (enrichment.recommendedSpecies ?? []),
-    recommendedTechniques:
-      dbTechniques.length > 0
-        ? dbTechniques
-        : (enrichment.recommendedTechniques ?? []),
-    trolling: mergeTrollingInfo(mapDbTrolling(record), enrichment.trolling),
-    communityStatistics: enrichment.communityStatistics,
+    recommendedSpecies: [...dbSpecies, ...communityContext.communitySpecies],
+    recommendedTechniques: [
+      ...dbTechniques,
+      ...communityContext.communityTechniques.filter(
+        (technique) => !dbTechniqueSlugs.includes(technique.id),
+      ),
+    ],
+    trolling: mergeTrollingInfo(mapDbTrolling(record)),
+    communityStatistics: communityContext.communityStatistics,
     aiInsights: enrichment.aiInsights,
     relatedLures: enrichment.relatedLures,
     sponsoredLinks: enrichment.sponsoredLinks,
     changeHistory: enrichment.changeHistory,
     trust,
     editorialNote: mapEditorialNote(record.editorNote),
+    regionalNotes: mapRegionalNotes(record.editorNote),
   };
 }
 
@@ -478,6 +498,12 @@ const lureModelInclude = {
       currentRecommendationTr: true,
       shortRecommendationEn: true,
       shortRecommendationTr: true,
+      mediterraneanNotesEn: true,
+      mediterraneanNotesTr: true,
+      aegeanNotesEn: true,
+      aegeanNotesTr: true,
+      northernCyprusNotesEn: true,
+      northernCyprusNotesTr: true,
     },
   },
 } satisfies Prisma.LureModelInclude;
@@ -527,7 +553,23 @@ export const prismaLureRepository: LureRepository = {
       }
 
       const trustContext = await loadTrustContext(record.id);
-      const lure = mapRecordToLureDetail(record, trustContext);
+      const dbSpeciesSlugs = record.lureSpeciesLinks.map(
+        (link) => link.fishSpecies.slug,
+      );
+      const dbTechniqueSlugs = record.lureTechniques.map(
+        (link) => link.technique.slug,
+      );
+      const [communityStatistics, communitySpecies, communityTechniques] =
+        await Promise.all([
+          getCommunityStatisticsForLureModel(record.id),
+          getCommunitySpeciesForLureModel(record.id, dbSpeciesSlugs),
+          getCommunityTechniquesForLureModel(record.id, dbTechniqueSlugs),
+        ]);
+      const lure = mapRecordToLureDetail(record, trustContext, {
+        communityStatistics,
+        communitySpecies,
+        communityTechniques,
+      });
       const activeVariant = resolveActiveVariant(lure, variantId);
 
       return {

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { publishProduct } from "@/modules/studio/actions/product-actions";
@@ -21,7 +22,9 @@ const CONFIDENCE_TONE = {
 } as const;
 
 export function AttentionInbox({ items }: AttentionInboxProps) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [message, setMessage] = useState<string | null>(null);
 
   if (items.length === 0) {
     return (
@@ -36,6 +39,10 @@ export function AttentionInbox({ items }: AttentionInboxProps) {
   }
 
   return (
+    <div className="space-y-3">
+      {message ? (
+        <p className="text-muted-foreground text-sm">{message}</p>
+      ) : null}
     <ul className="space-y-3">
       {items.map((item) => (
         <li
@@ -130,7 +137,13 @@ export function AttentionInbox({ items }: AttentionInboxProps) {
                   className={buttonVariants({ size: "sm", variant: "outline" })}
                   onClick={() =>
                     startTransition(async () => {
-                      await publishProduct(item.productId);
+                      const result = await publishProduct(item.productId);
+                      if (!result.ok) {
+                        setMessage(result.error);
+                        return;
+                      }
+                      setMessage(`Published ${item.productName}.`);
+                      router.refresh();
                     })
                   }
                 >
@@ -142,5 +155,6 @@ export function AttentionInbox({ items }: AttentionInboxProps) {
         </li>
       ))}
     </ul>
+    </div>
   );
 }

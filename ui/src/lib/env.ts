@@ -5,6 +5,7 @@ const serverEnvSchema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   DATABASE_URL: z.string().min(1),
+  AUTH_SECRET: z.string().min(1).optional(),
 });
 
 const clientEnvSchema = z.object({

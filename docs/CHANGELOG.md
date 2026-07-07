@@ -494,11 +494,20 @@ Two sprint numbering schemes were used early (engineering `S0xx` / product `7.x+
 
 ---
 
+## Sprint 7.6B — Region system foundation (shipped)
+
+| | |
+|---|---|
+| **Purpose** | Canonical fishing geography for editorial and catch-report context — not GIS |
+| **Major changes** | `Region` Prisma model; five seeded water bodies; Studio list/edit/enable/sort/search at `/studio/regions` |
+| **Architectural decisions** | **No FK wiring yet** — CatchReport still uses free-text `region`; FK relations deferred to future sprint · country/major water body scope only |
+
+---
+
 ## Not yet shipped
 
 | Sprint | Purpose |
 |--------|---------|
-| **7.6** | Regional experience on lure pages; wire catch reports into trust stats |
 | **7.7** | Angler-facing AI summaries with cited sources |
 
 See [`AI_CONTEXT.md` § Current Roadmap](../AI_CONTEXT.md#current-roadmap).

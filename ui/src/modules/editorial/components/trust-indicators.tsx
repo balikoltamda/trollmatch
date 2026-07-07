@@ -40,6 +40,8 @@ export async function TrustIndicators({
     ? t("editorialPublished")
     : t("editorialPending");
 
+  const catchReportCount = trust.communityConsensus?.catchReports ?? 0;
+
   const items = [
     {
       label: t("lastVerification"),
@@ -55,6 +57,14 @@ export async function TrustIndicators({
       value: editorialLabel,
       badge: trust.editorialReviewPublished ? "ocean" : "muted",
     },
+    ...(catchReportCount > 0
+      ? [
+          {
+            label: t("catchReports"),
+            value: String(catchReportCount),
+          },
+        ]
+      : []),
     {
       label: t("sourceCount"),
       value: String(trust.sourceCount),

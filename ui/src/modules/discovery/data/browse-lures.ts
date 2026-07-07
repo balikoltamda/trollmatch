@@ -1,6 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { buildPublicLureWhere } from "@/modules/discovery/lib/build-lure-search";
+import { resolvePublicImagePath } from "@/modules/studio/media/lib/media-asset-service";
 import type { LureCardData, PublicLureListResult } from "@/modules/discovery/types";
 
 const PLACEHOLDER_IMAGE = "/lures/placeholder.svg";
@@ -37,7 +38,7 @@ function mapLureCard(row: ListRowRaw): LureCardData {
       en: row.bodyTypeEn ?? "",
       tr: row.bodyTypeTr ?? row.bodyTypeEn ?? "",
     },
-    imageSrc: hero?.url ?? PLACEHOLDER_IMAGE,
+    imageSrc: hero?.url ? resolvePublicImagePath(hero.url) : PLACEHOLDER_IMAGE,
     verified:
       row.lifecycleState === "PUBLISHED" || row.editorNote !== null,
   };

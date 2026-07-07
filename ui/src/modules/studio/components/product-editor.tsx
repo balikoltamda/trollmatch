@@ -2,11 +2,16 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  archiveProduct,
   markProductReady,
   publishProduct,
+  rejectProduct,
+  restoreProduct,
+  deleteProduct,
   saveCanonicalProduct,
   saveEditorNotes,
   unpublishProduct,
@@ -14,6 +19,9 @@ import {
 import { CompletenessBar } from "@/modules/studio/components/completeness-bar";
 import { EditorialStatusBadge } from "@/modules/studio/components/editorial-status-badge";
 import { ImageReviewPanel } from "@/modules/studio/components/image-review-panel";
+import { ImportDiffPanel } from "@/modules/studio/components/import-diff-panel";
+import { ManufacturerSyncPanel } from "@/modules/studio/components/manufacturer-sync-panel";
+import { ProductToolbar } from "@/modules/studio/components/product-toolbar";
 import { SOURCE_LABELS } from "@/modules/studio/lib/suggestion-labels";
 import { TrustSummary } from "@/modules/trust/components/trust-summary";
 import { VerificationPanel } from "@/modules/studio/components/verification-panel";
@@ -51,9 +59,30 @@ export function ProductEditor({
   techniqueOptions,
   speciesOptions,
 }: ProductEditorProps) {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("Trust");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  const restorableLifecycle =
+    product.lifecycleState === "ARCHIVED" ||
+    product.lifecycleState === "REJECTED" ||
+    product.lifecycleState === "DEPRECATED";
+
+  function runAction(
+    action: () => Promise<{ ok: boolean; error?: string }>,
+    success: string,
+  ) {
+    startTransition(async () => {
+      const result = await action();
+      if (!result.ok) {
+        setMessage(result.error ?? "Action failed");
+        return;
+      }
+      setMessage(success);
+      router.refresh();
+    });
+  }
 
   const [canonical, setCanonical] = useState({
     nameEn: product.nameEn,
@@ -81,38 +110,49 @@ export function ProductEditor({
   const [notes, setNotes] = useState(product.editorNote!);
 
   function saveCanonical() {
-    startTransition(async () => {
-      const result = await saveCanonicalProduct(product.id, canonical);
-      setMessage(result.ok ? "Canonical data saved." : result.error);
-    });
+    runAction(
+      () => saveCanonicalProduct(product.id, canonical),
+      "Canonical data saved.",
+    );
   }
 
   function saveNotes() {
-    startTransition(async () => {
-      const result = await saveEditorNotes(product.id, notes);
-      setMessage(result.ok ? "Editor notes saved." : result.error);
-    });
+    runAction(() => saveEditorNotes(product.id, notes), "Editor notes saved.");
   }
 
   function handlePublish() {
-    startTransition(async () => {
-      const result = await publishProduct(product.id);
-      setMessage(result.ok ? "Product published." : result.error);
-    });
+    runAction(() => publishProduct(product.id), "Product published.");
   }
 
   function handleUnpublish() {
-    startTransition(async () => {
-      const result = await unpublishProduct(product.id);
-      setMessage(result.ok ? "Product unpublished." : result.error);
-    });
+    runAction(() => unpublishProduct(product.id), "Product unpublished.");
   }
 
   function handleMarkReady() {
-    startTransition(async () => {
-      const result = await markProductReady(product.id);
-      setMessage(result.ok ? "Marked as Ready." : result.error);
-    });
+    runAction(() => markProductReady(product.id), "Marked as Ready.");
+  }
+
+  function handleReject() {
+    runAction(() => rejectProduct(product.id), "Product rejected.");
+  }
+
+  function handleArchive() {
+    runAction(() => archiveProduct(product.id), "Product archived.");
+  }
+
+  function handleRestore() {
+    runAction(() => restoreProduct(product.id), "Product restored.");
+  }
+
+  function handleDelete() {
+    if (
+      !window.confirm(
+        "Soft-delete this product? It will be hidden from Studio lists.",
+      )
+    ) {
+      return;
+    }
+    runAction(() => deleteProduct(product.id), "Product deleted.");
   }
 
   return (
@@ -131,6 +171,9 @@ export function ProductEditor({
           missing={product.completeness.missing}
           className="min-w-48"
         />
+        {product.changesAvailable > 0 ? (
+          <Badge variant="coral">{product.changesAvailable} changes</Badge>
+        ) : null}
         {product.lifecycleState !== "PUBLISHED" ? (
           <button
             type="button"
@@ -160,6 +203,44 @@ export function ProductEditor({
             Mark Ready
           </button>
         ) : null}
+        {product.lifecycleState !== "REJECTED" ? (
+          <button
+            type="button"
+            disabled={pending}
+            className={buttonVariants({ size: "sm", variant: "outline" })}
+            onClick={handleReject}
+          >
+            Reject
+          </button>
+        ) : null}
+        {product.lifecycleState !== "ARCHIVED" ? (
+          <button
+            type="button"
+            disabled={pending}
+            className={buttonVariants({ size: "sm", variant: "outline" })}
+            onClick={handleArchive}
+          >
+            Archive
+          </button>
+        ) : null}
+        {restorableLifecycle ? (
+          <button
+            type="button"
+            disabled={pending}
+            className={buttonVariants({ size: "sm", variant: "secondary" })}
+            onClick={handleRestore}
+          >
+            Restore
+          </button>
+        ) : null}
+        <button
+          type="button"
+          disabled={pending}
+          className={buttonVariants({ size: "sm", variant: "ghost" })}
+          onClick={handleDelete}
+        >
+          Delete
+        </button>
         <Link
           href={`/en/lures/${product.slug}`}
           className={buttonVariants({ size: "sm", variant: "outline" })}
@@ -168,6 +249,15 @@ export function ProductEditor({
           Preview public page
         </Link>
       </div>
+
+      <ProductToolbar
+        productId={product.id}
+        slug={product.slug}
+        lifecycleState={product.lifecycleState}
+        canRefreshManufacturer={product.canRefreshManufacturer}
+        pending={pending}
+        onMessage={setMessage}
+      />
 
       <div className="border-border/70 flex flex-wrap gap-1 border-b pb-px">
         {TABS.map((item) => (
@@ -202,19 +292,34 @@ export function ProductEditor({
       ) : null}
 
       {tab === "Verify" && (
-        <VerificationPanel
-          lureModelId={product.id}
-          productName={product.nameEn}
-          suggestions={
-            product.pendingSuggestions.map(
-              (s) =>
-                ({
-                  ...s,
-                  source: s.source in SOURCE_LABELS ? s.source : "AI_ENRICHMENT",
-                }) as VerificationSuggestion,
-            )
-          }
-        />
+        <>
+          <VerificationPanel
+            lureModelId={product.id}
+            productName={product.nameEn}
+            suggestions={
+              product.pendingSuggestions.map(
+                (s) =>
+                  ({
+                    ...s,
+                    source: s.source in SOURCE_LABELS ? s.source : "AI_ENRICHMENT",
+                  }) as VerificationSuggestion,
+              )
+            }
+          />
+          <p className="text-muted-foreground mt-4 text-xs leading-relaxed">
+            Lure AI suggestions use the catalog verification flow (accept/reject is audited).
+            Species, techniques, manufacturers, and knowledge sources use the shared Studio AI Review panel.
+          </p>
+          {product.pendingImportDiffs.length > 0 ? (
+            <section className="mt-8 space-y-3">
+              <h3 className="text-sm font-semibold">Pending import changes</h3>
+              <ImportDiffPanel
+                lureModelId={product.id}
+                diffs={product.pendingImportDiffs}
+              />
+            </section>
+          ) : null}
+        </>
       )}
 
       {tab === "General" && (
@@ -235,35 +340,24 @@ export function ProductEditor({
       )}
 
       {tab === "Manufacturer" && (
-        <div className="space-y-4">
-          <p className="text-muted-foreground text-sm">
-            Importer-owned fields — read only. Imports never touch editor notes.
-          </p>
-          <div className="grid gap-4 md:grid-cols-2">
-            <ReadOnlyField label="Form factor (EN)" value={product.formFactorEn} />
-            <ReadOnlyField label="Form factor (TR)" value={product.formFactorTr} />
-            <ReadOnlyField label="Short description (EN)" value={product.shortDescriptionEn} />
-            <ReadOnlyField label="Short description (TR)" value={product.shortDescriptionTr} />
-            <ReadOnlyField label="First seen" value={product.firstSeenAt?.toISOString()} />
-            <ReadOnlyField label="Last seen" value={product.lastSeenAt?.toISOString()} />
-            <ReadOnlyField
-              label="Missing import count"
-              value={String(product.missingImportCount)}
-            />
-          </div>
-          {product.aliases.length > 0 ? (
-            <div>
-              <p className="mb-2 text-sm font-medium">Aliases</p>
-              <ul className="text-muted-foreground space-y-1 text-sm">
-                {product.aliases.map((a) => (
-                  <li key={`${a.kind}-${a.alias}`}>
-                    {a.alias} <span className="text-xs">({a.kind})</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </div>
+        <ManufacturerSyncPanel
+          lureModelId={product.id}
+          manufacturerSourceUrl={product.manufacturerSourceUrl}
+          canRefreshManufacturer={product.canRefreshManufacturer}
+          lastImportedAt={product.lastImportedAt}
+          lastEditorialReviewAt={product.lastEditorialReviewAt}
+          changesAvailable={product.changesAvailable}
+          pendingImportDiffs={product.pendingImportDiffs}
+          digitalTwin={product.digitalTwin}
+          formFactorEn={product.formFactorEn}
+          formFactorTr={product.formFactorTr}
+          shortDescriptionEn={product.shortDescriptionEn}
+          shortDescriptionTr={product.shortDescriptionTr}
+          firstSeenAt={product.firstSeenAt}
+          lastSeenAt={product.lastSeenAt}
+          missingImportCount={product.missingImportCount}
+          aliases={product.aliases}
+        />
       )}
 
       {tab === "Manual override" && (

@@ -112,7 +112,7 @@ UI · Search · AI summaries · Importers · Studio · Public pages · APIs
 | Area | Feature |
 |------|---------|
 | **Schema** | `KnowledgeSource`, `KnowledgeItem`, `KnowledgeEvidence`, `KnowledgeSuggestion`, `KnowledgeGraphLink`, `KnowledgeAuditEntry` |
-| **Studio** | `/studio/knowledge` — editor inbox sorted by confidence |
+| **Studio** | `/studio/source-archive` — editor inbox sorted by confidence |
 | **Actions** | Approve, reject, merge, ignore, open source (all audited) |
 | **Architecture** | Vision pipeline interfaces, knowledge graph prep, multi-source type design |
 | **Index policy** | Metadata + URL + AI summary only — no third-party content republishing |
@@ -251,7 +251,7 @@ See [`AI_CONTEXT.md` § Core Product Philosophy](../AI_CONTEXT.md#core-product-p
 
 | Area | Feature |
 |------|---------|
-| **Studio** | Knowledge Hub at `/studio/knowledge` — richer workspace with source scoring |
+| **Studio** | Source Archive at `/studio/source-archive` — richer workspace with source scoring |
 | **Source scoring** | Category-based engine (manufacturer, scientific, forum tiers, etc.) |
 | **Relations** | Multiple species, lures, techniques, manufacturers via knowledge graph |
 | **Public** | Related knowledge sections on lure + species pages |
@@ -278,6 +278,19 @@ Async workflow: [`AI_CONTEXT.md` § Importer pipeline](../AI_CONTEXT.md#importer
 - Region selector or default Eastern Mediterranean lens
 - Collections filter by region + species + technique
 - Wire approved catch reports into trust layer + community statistics (replace enrichment mock)
+
+---
+
+## Sprint 7.6B — Region system foundation (shipped)
+
+**Goal:** Canonical fishing geography inside the platform — major water bodies only.
+
+- `Region` entity with bilingual names and descriptions
+- Five seeded regions (Black Sea, Marmara, Aegean, Turkish Mediterranean, Northern Cyprus)
+- Studio management at `/studio/regions` — list, edit, enable/disable, sort, search
+- No public pages; no GPS, polygons, or city-level regions
+
+**Next wiring (deferred):** attach `regionId` to CatchReport, editor notes, knowledge, species, and lures when those flows migrate off free-text region slugs.
 
 ---
 

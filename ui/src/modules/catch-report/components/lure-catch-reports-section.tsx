@@ -10,12 +10,7 @@ import {
 import type { AppLocale } from "@/i18n/routing";
 import { pickLocalized } from "@/modules/home/data/home-content";
 
-const REGION_LABELS: Record<string, { en: string; tr: string }> = {
-  aegean: { en: "Aegean", tr: "Ege" },
-  bosphorus: { en: "Bosphorus & Marmara", tr: "Boğaz & Marmara" },
-  mediterranean: { en: "Mediterranean", tr: "Akdeniz" },
-  "northern-cyprus": { en: "Northern Cyprus", tr: "Kıbrıs" },
-};
+import { regionLabel } from "@/modules/catch-report/lib/regions";
 
 type LureCatchReportsSectionProps = {
   lureSlug: string;
@@ -58,13 +53,7 @@ export async function LureCatchReportsSection({
                 <Badge variant="turquoise">{t("verified")}</Badge>
               </div>
               <p className="text-muted-foreground mt-1 text-sm">
-                {pickLocalized(
-                  REGION_LABELS[report.region] ?? {
-                    en: report.region,
-                    tr: report.region,
-                  },
-                  locale,
-                )}{" "}
+                {pickLocalized(regionLabel(report.region), locale)}{" "}
                 · {report.month}/{report.year} ·{" "}
                 {report.boatOrShore === "BOAT" ? t("boat") : t("shore")} ·{" "}
                 {t("catchCount", { count: report.catchCount })}
