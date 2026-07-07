@@ -1,16 +1,12 @@
-import { resolve } from "node:path";
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import {
   buildImportReport,
-  writeImportReport,
 } from "@/modules/import/reporting/import-report";
 import { manufacturerRegistry } from "@/modules/import/registry/registered-manufacturers";
 import { resolveImporterSlug } from "@/modules/import/registry/manufacturer-slugs";
 import type { ManufacturerImportResult } from "@/modules/import/registry/manufacturer-importer";
 import type { ImportReport } from "@/modules/import/reporting/import-report";
 import { recordCatalogAudit } from "@/modules/studio/data/audit";
-
-const REPO_ROOT = resolve(process.cwd(), "..");
 
 function countMissing(summary: ImportReport["summary"]): number {
   return (
@@ -174,25 +170,34 @@ export async function executeImportBatch(
       prisma,
       offline: false,
       downloadImages: true,
+      importBatchId: batchId,
     });
 
-    const report = buildImportReport({
-      manufacturer: result.manufacturer,
-      displayName: result.displayName,
-      startedAt: new Date(result.startedAt),
-      completedAt: new Date(result.completedAt),
-      productsProcessed: result.productsProcessed,
-      summary: result.summary,
-      warnings: result.summary.warnings,
-    });
+    if (!result.reportPath) {
+      await markImportBatchFailed(
+        prisma,
+        batchId,
+        "Import completed without a report path",
+        startedAt,
+      );
+      return;
+    }
 
-    const reportPath = await writeImportReport(report, REPO_ROOT);
-    report.reportPath = reportPath;
+    const report =
+      result.report ??
+      buildImportReport({
+        manufacturer: result.manufacturer,
+        displayName: result.displayName,
+        startedAt: new Date(result.startedAt),
+        completedAt: new Date(result.completedAt),
+        productsProcessed: result.productsProcessed,
+        summary: result.summary,
+        warnings: result.summary.warnings,
+      });
 
-    await finalizeImportBatch(prisma, batchId, result, {
-      ...report,
-      reportPath,
-    });
+    report.reportPath = result.reportPath;
+
+    await finalizeImportBatch(prisma, batchId, result, report);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Import failed unexpectedly";

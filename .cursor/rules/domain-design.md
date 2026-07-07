@@ -1,27 +1,15 @@
 # Domain Design Rules
 
-Read `docs/002_ENGINEERING_PRINCIPLES.md` §2 before adding schema, types, or fishing domain concepts.
+**Platform law summary:** [`AI_CONTEXT.md` § Core Product Philosophy](../../AI_CONTEXT.md#core-product-philosophy)  
+**Detailed modeling guide:** `docs/002_ENGINEERING_PRINCIPLES.md` §2
 
-## Simplicity gate (mandatory)
+## Before adding schema, types, or domain concepts
 
-**Do not over-model fishing knowledge.**
-
-| Do | Don't |
-|----|-------|
-| Model only what the current product requires | Build full `007` ontology ahead of product need |
-| Design entities to be extensible (nullable fields, stable slugs) | Add sub-techniques, rigging matrices, presentation enums prematurely |
-| Prefer evolutionary design | Premature complexity for “completeness” |
-| Keep domain understandable for anglers and developers | Abstract layers that need diagrams for daily use |
-
-## Defer until sprint demands
-
-Sub-techniques · advanced rigging · lure presentations · speed/depth aggregate tables · environmental taxonomies beyond current catch-report fields
-
-## Before adding a new entity
-
-1. Name the current product requirement
+1. Name the current product requirement (user story or sprint)
 2. Check if an existing entity can carry it
 3. Add minimum schema with extension points
-4. Document what remains deferred
+4. Document deferrals explicitly
 
-Cross-gates still apply: lexicon-first, Species → Technique → Lure.
+**Defer until sprint demands:** sub-techniques · advanced rigging · lure presentations · speed/depth aggregate tables · environmental taxonomies beyond current catch-report fields
+
+Cross-gates: lexicon-first · Species → Technique → Lure — see `AI_CONTEXT.md`.

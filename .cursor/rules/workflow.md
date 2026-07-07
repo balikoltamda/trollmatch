@@ -1,5 +1,7 @@
 # Workflow Rules
 
+**Onboarding:** [`AI_CONTEXT.md`](../../AI_CONTEXT.md) · verify steps below.
+
 - Always modify real project files.
 - Always save every modified file to disk.
 - Never leave completed work only in chat.

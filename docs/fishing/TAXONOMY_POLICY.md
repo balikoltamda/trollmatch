@@ -4,6 +4,8 @@
 **Status:** Authoritative reference (Sprint 7.2, refined 7.4.1)  
 **Scope:** Fish species naming — scientific, preferred, aliases, regional, confusion
 
+**Onboarding summary:** [`AI_CONTEXT.md`](../../AI_CONTEXT.md) § Fishing Knowledge Rules. **This document** defines species identity fields, schema mapping, search behaviour, and editorial examples.
+
 ---
 
 ## 1. Principle
@@ -26,7 +28,7 @@ parent hierarchy            regional names (country/region scope)
 
 A fish is **one** `FishSpecies` record. It has exactly one scientific name. It may have many regional names and aliases — all subordinate to the scientific identity.
 
-**Lexicon-first:** Preferred Turkish and English species names, aliases, and regional names must be authored in the Fishing Lexicon (`TERMINOLOGY.md` + `ui/src/modules/terminology/data/`) **before** they appear in `FishSpecies`, seeds, UI, or search. Scientific names follow taxonomic authority; display-layer vocabulary still requires lexicon registration.
+**Lexicon-first:** [`AI_CONTEXT.md`](../../AI_CONTEXT.md) and `TERMINOLOGY.md` — register display-layer vocabulary before seeds, UI, or search.
 
 ---
 

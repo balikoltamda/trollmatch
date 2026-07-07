@@ -2,21 +2,11 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { CanonicalLureImport } from "../../core/canonical-lure";
 import {
-  collectImageUrlsFromRecords,
-  downloadManufacturerImages,
-  resolveManufacturerImagesRoot,
-} from "../../images/image-download-pipeline";
-import { reconcileManufacturerLifecycle } from "../../persistence/lifecycle-reconciler";
-import {
-  createEmptyImportSummary,
-  mergeImportSummaries,
-} from "../../persistence/types";
-import {
-  buildImportReport,
-  writeImportReport,
-} from "../../reporting/import-report";
+  finalizeManufacturerImport,
+  persistValidatedRecords,
+  updateImportBatchProgress,
+} from "../../pipeline/manufacturer-import-pipeline";
 import { validateCanonicalLureImport } from "../../validators/canonical-lure-validator";
-import { upsertDuelCanonicalImport } from "../duel/duel-persister";
 import { normalizeProductRecord } from "./normalize-product-record";
 import type {
   ManufacturerImporter,
@@ -72,82 +62,78 @@ export function createStaticJsonImporter(
 
     async run(options: ManufacturerImportRunOptions): Promise<ManufacturerImportResult> {
       const startedAt = new Date();
-      const summary = createEmptyImportSummary();
-      const observedLureModelIds: string[] = [];
       const productsDir = join(config.repoRoot, config.productsDir);
-
       const records = await loadCanonicalRecords(productsDir, config.code);
+      const validationErrors: string[] = [];
+      const validationWarnings: string[] = [];
 
       if (records.length === 0) {
-        summary.warnings.push(
+        validationWarnings.push(
           `No product JSON found in ${config.productsDir}. Add CanonicalLureImport files to enable ${config.displayName} imports.`,
         );
       }
 
       const limit = options.limit ?? records.length;
       const selected = records.slice(0, limit);
+      const validated: CanonicalLureImport[] = [];
 
       for (const record of selected) {
         const validation = validateCanonicalLureImport(record);
 
         if (!validation.valid) {
-          summary.errors.push(
+          validationErrors.push(
             `${record.recordKey}: ${validation.errors.map((issue) => issue.code).join(", ")}`,
           );
           continue;
         }
 
-        const persistResult = await upsertDuelCanonicalImport(
-          options.prisma,
-          validation.normalized,
-          startedAt,
-        );
-
-        mergeImportSummaries(summary, persistResult.summary);
-        if (persistResult.lureModelId) {
-          observedLureModelIds.push(persistResult.lureModelId);
-        }
+        validated.push(validation.normalized);
       }
 
-      const reconcile = await reconcileManufacturerLifecycle(
-        options.prisma,
-        config.manufacturerSlug,
-        observedLureModelIds,
-      );
+      const { summary, observedLureModelIds, outcomes } =
+        await persistValidatedRecords({
+          prisma: options.prisma,
+          records: validated,
+          importedAt: startedAt,
+          importBatchId: options.importBatchId,
+          onRecordPersisted: async (_outcome, processed, total) => {
+            if (options.onProgress) {
+              await options.onProgress(processed, total);
+            }
 
-      for (const slug of reconcile.missing) {
-        summary.removed?.push(`MISSING: ${slug}`);
+            if (options.importBatchId) {
+              await updateImportBatchProgress(
+                options.prisma,
+                options.importBatchId,
+                processed,
+              );
+            }
+          },
+        });
+
+      for (const message of validationErrors) {
+        summary.errors.push(message);
       }
 
-      for (const slug of reconcile.discontinued) {
-        summary.removed?.push(`DISCONTINUED: ${slug}`);
-      }
+      summary.warnings.push(...validationWarnings);
 
-      if (options.downloadImages !== false && selected.length > 0) {
-        const imageUrls = collectImageUrlsFromRecords(selected);
-        const imageResult = await downloadManufacturerImages(
-          config.manufacturerSlug,
-          imageUrls,
-          resolveManufacturerImagesRoot(config.repoRoot),
-          options.fetchFn,
-        );
-
-        summary.warnings.push(
-          ...imageResult.errors.map((error: string) => `Image: ${error}`),
-        );
-      }
-
-      const completedAt = new Date();
-      const report = buildImportReport({
-        manufacturer: config.code,
+      const finalized = await finalizeManufacturerImport(options.prisma, {
+        manufacturerCode: config.code,
+        manufacturerSlug: config.manufacturerSlug,
         displayName: config.displayName,
         startedAt,
-        completedAt,
-        productsProcessed: selected.length,
+        records: validated,
         summary,
+        observedLureModelIds,
+        productsProcessed: selected.length,
+        outcomes,
+        downloadImages: options.downloadImages,
+        fetchFn: options.fetchFn,
+        repoRoot: config.repoRoot,
+        reportsRoot: config.reportsRoot,
       });
 
-      const reportPath = await writeImportReport(report, config.reportsRoot);
+      const completedAt = new Date(finalized.report.completedAt);
 
       return {
         manufacturer: config.code,
@@ -156,10 +142,13 @@ export function createStaticJsonImporter(
         completedAt: completedAt.toISOString(),
         durationMs: completedAt.getTime() - startedAt.getTime(),
         productsProcessed: selected.length,
-        summary,
+        summary: finalized.summary,
         observedLureModelIds,
-        success: summary.errors.length === 0,
-        reportPath,
+        success:
+          finalized.summary.errors.length === 0 &&
+          finalized.report.failed === 0,
+        reportPath: finalized.reportPath,
+        report: finalized.report,
       };
     },
   };

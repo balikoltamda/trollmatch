@@ -5,6 +5,8 @@
 **Route prefix:** `/studio`  
 **Status:** First version shipped (no auth)
 
+**Current routes and overview:** [`AI_CONTEXT.md`](../AI_CONTEXT.md) § Studio. This document covers **Studio-specific schema, brand separation, and module layout**.
+
 ## Purpose
 
 Balık Oltamda Studio is the internal operating system for TrollMatch — not a generic admin panel. It is where imports land, editors enrich catalog data, and publish workflow begins.
@@ -21,6 +23,8 @@ Brand separation:
 **Core rule:** imports must never overwrite `lure_editor_notes`.
 
 ## Architecture
+
+Route map (current): [`AI_CONTEXT.md`](../AI_CONTEXT.md) § Studio. Original Sprint 6 routes:
 
 ```
 /studio                    Dashboard (live DB stats)

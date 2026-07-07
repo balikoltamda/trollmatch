@@ -3,14 +3,16 @@
 **Document:** 010_CURSOR_RULES  
 **Project (internal):** TrollMatch  
 **Platform (public):** Balık Oltamda Guide  
-**Status:** Sprint 0 — Agent and developer rules for Cursor IDE  
-**Extends:** `.cursor/rules/project.md` and specialized rule files under `.cursor/rules/` (including `terminology.md`, `compatibility.md`, `domain-design.md`)
+**Status:** Agent and developer rules for Cursor IDE  
+**Extends:** `.cursor/rules/project.md` and specialized rule files under `.cursor/rules/`
+
+**Documentation hierarchy:** [`README.md`](../README.md) → [`AI_CONTEXT.md`](../AI_CONTEXT.md) → this file and other specialized docs. Product identity, current architecture, platform laws, and sprint status live in **`AI_CONTEXT.md`** — do not duplicate them here.
 
 ---
 
 ## 1. Purpose
 
-Cursor AI agents and developers using Cursor must produce code and documentation aligned with Balık Oltamda Guide’s **data quality**, **trust**, and **modular architecture** mission—not generic web app patterns.
+Cursor AI agents and developers using Cursor must produce code aligned with Balık Oltamda Guide’s **data quality**, **trust**, and **modular architecture** mission—not generic web app patterns.
 
 These rules bind all automated edits unless the user explicitly overrides in a task prompt.
 
@@ -18,39 +20,23 @@ These rules bind all automated edits unless the user explicitly overrides in a t
 
 ## 2. Mandatory Reading Order
 
-Before **any production code** change, read in order:
+**Start with [`AI_CONTEXT.md`](../AI_CONTEXT.md).** Then read specialized docs for your task:
 
-1. `docs/000_DISCOVERY.md`
-2. `docs/001_PROJECT_CHARTER.md`
-3. `docs/002_ENGINEERING_PRINCIPLES.md`
-4. `docs/003_MASTER_CONTEXT.md`
-5. `docs/004_DECISIONS.md`
+| Task | Also read |
+|------|-----------|
+| Any production code | `docs/001_PROJECT_CHARTER.md`, `002`, `003`, `004` |
+| Database, API, LureAtlas (target) | `006`, `007`, `008` |
+| Fishing vocabulary / copy | `docs/fishing/TERMINOLOGY.md`, `TAXONOMY_POLICY.md`, `SPECIES_TECHNIQUE_LURE_POLICY.md`, `LOCALIZATION_GUIDE.md` |
 
-Before **database, API, or LureAtlas** work, also read:
+**Platform gates** (full detail in `AI_CONTEXT.md`): lexicon-first · Species → Technique → Lure · evolutionary domain design · feature gate.
 
-6. `docs/006_SYSTEM_ARCHITECTURE.md`
-7. `docs/007_DATABASE_VISION.md`
-8. `docs/008_TECH_STACK.md`
-
-Before **domain terminology** in user-facing copy or types:
-
-9. `docs/fishing/TERMINOLOGY.md` — **mandatory**; lexicon-first gate applies
-10. `docs/fishing/TAXONOMY_POLICY.md` — when adding or changing species names
-11. `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md` — species–lure relationships and recommendations
-12. `docs/fishing/LOCALIZATION_GUIDE.md` — when authoring tr/en labels
-13. `docs/011_GLOSSARY.md` (when populated)
-
-**Lexicon-first law:** No fishing terminology or taxonomy in production code without a Fishing Lexicon entry first. See `.cursor/rules/terminology.md`.
-
-**Species–technique–lure law:** Effectiveness and recommendations require Species → Technique → Lure. See `.cursor/rules/compatibility.md`.
-
-**Domain simplicity law:** Do not over-model fishing knowledge — model only what the current product requires; prefer evolutionary design. See `docs/002_ENGINEERING_PRINCIPLES.md` §2 and `.cursor/rules/domain-design.md`.
-
-**Task prompts must name the module** (e.g., `platform/trust`, `lure-atlas`, `moderation`) and explicit non-goals.
+**Task prompts must name the module** (e.g., `discovery`, `import`, `studio`) and explicit non-goals.
 
 ---
 
 ## 3. Project Identity (Do Not Drift)
+
+See [`AI_CONTEXT.md`](../AI_CONTEXT.md) for product summary. Binding names:
 
 | Correct | Wrong |
 |---------|-------|
@@ -65,7 +51,9 @@ Platform is **not e-commerce**. Never add cart, checkout, inventory, or payment 
 
 ## 4. Repository Layout Law
 
-Only these top-level code directories unless ADR amends:
+**Current layout:** [`AI_CONTEXT.md` § Architecture](../AI_CONTEXT.md#architecture). Active app code is in `ui/` (Prisma migrations in `ui/prisma/` today).
+
+**Target layout** (when `api/` and `database/` are implemented):
 
 | Path | Purpose |
 |------|---------|
@@ -82,7 +70,9 @@ Do **not** create `backend/`, `services/`, `src/` at root, or duplicate module t
 
 ## 5. Architecture Rules for Agents
 
-### 5.1 Modular Monolith
+**Implemented today:** modular monolith in `ui/src/modules/` — see `AI_CONTEXT.md`. Below is **target** architecture from ADRs; do not build ahead of sprint need.
+
+### 5.1 Modular Monolith (target)
 
 - LureAtlas code under `api/src/modules/lure-atlas/` and matching UI routes.
 - Platform services under `api/src/platform/`—no lure-specific filters in platform search kernel.
@@ -110,7 +100,9 @@ Do **not** create `backend/`, `services/`, `src/` at root, or duplicate module t
 
 ## 6. Coding Rules for Agents
 
-- **TypeScript strict** only in `api/`, `ui/`, `shared/`.
+See also [`AI_CONTEXT.md` § Contributing conventions](../AI_CONTEXT.md#contributing-conventions).
+
+- **TypeScript strict** in `ui/` (and `api/`, `shared/` when implemented).
 - Validate all request bodies with **Zod** at HTTP boundary.
 - State transitions via named services—no ad hoc `UPDATE lifecycle_state` in random handlers.
 - Turkish strings: never raw `toLowerCase()` for slugs—use locale utilities (ADR-011).
@@ -122,7 +114,9 @@ Do **not** create `backend/`, `services/`, `src/` at root, or duplicate module t
 
 ## 7. Database Rules for Agents
 
-- Migrations in `database/migrations/` only—linear, reviewed.
+**Current:** Prisma migrations in `ui/prisma/migrations/`. **Target:** `database/migrations/` per ADR.
+
+- Forward-only migrations; linear, reviewed.
 - Schemas: `platform`, `lure_atlas`, `audit`.
 - Metric canonical storage (mm, g, Celsius, knots for Speed Range).
 - Soft deprecate catalog entities—no hard delete of published models.

@@ -4,6 +4,8 @@
 **Status:** Authoritative reference (Sprint 7.2)  
 **Locales at launch:** Turkish (`tr`), English (`en`)
 
+**Onboarding summary:** [`AI_CONTEXT.md`](../../AI_CONTEXT.md) § Fishing Knowledge Rules. **This document** defines how tr/en labels are authored — roles, forbidden patterns, field-by-field rules, and worked examples.
+
 ---
 
 ## 1. Principle

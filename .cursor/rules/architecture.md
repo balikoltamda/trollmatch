@@ -1,8 +1,11 @@
 # Architecture Rules
 
-- Read docs/000_DISCOVERY.md, 001_PROJECT_CHARTER.md and 002_ENGINEERING_PRINCIPLES.md before major work.
-- Prefer modular architecture.
-- Do not over-model the fishing domain — see `002_ENGINEERING_PRINCIPLES.md` §2.
-- Avoid vendor lock-in.
-- Heavy tasks must be asynchronous.
-- Design for long-term scalability.
+**Current implementation:** [`AI_CONTEXT.md` § Architecture](../../AI_CONTEXT.md#architecture) — repo layout, modules, importer, deployment reality.
+
+Before major structural work, also read `docs/006_SYSTEM_ARCHITECTURE.md` and `docs/004_DECISIONS.md` (ADRs).
+
+Cursor-specific:
+
+- Prefer modular boundaries under `ui/src/modules/`.
+- Heavy tasks must be asynchronous (imports, batch jobs).
+- Target long-horizon layout in `docs/006` — implement only what the current sprint needs (`AI_CONTEXT.md` § Key data concepts).

@@ -3,9 +3,11 @@
 **Document:** 003_MASTER_CONTEXT  
 **Project (internal):** TrollMatch  
 **Platform (public):** Balık Oltamda Guide  
-**Status:** Sprint 0 — Living domain reference  
+**Status:** Living domain reference  
 **Authority:** Subordinate to `001_PROJECT_CHARTER.md`; informs all implementation  
 **Audience:** Engineers, curators, moderators, product owners, AI agents
+
+**Onboarding summary:** [`AI_CONTEXT.md`](../AI_CONTEXT.md). This document is the **domain encyclopedia** — workflows, module interaction, and operational narrative in depth.
 
 ---
 
@@ -21,25 +23,15 @@ When terminology conflicts arise, `011_GLOSSARY.md` wins on definitions; this do
 
 ## 2. Platform in One Page
 
-Balık Oltamda Guide is a **global fishing knowledge platform**—not a shop. Anglers use it to discover, compare, and trust structured information about gear (starting with lures), species, techniques, and real-world effectiveness under geographic and seasonal context.
+Product identity, mission, and current implementation: [`AI_CONTEXT.md`](../AI_CONTEXT.md).
 
-| Dimension | Choice |
-|-----------|--------|
-| Public brand | Balık Oltamda Guide |
-| Internal engineering name | TrollMatch |
-| Planned URL | guide.balikoltamda.net |
-| Parent company | Balık Oltamda (Cyprus; tackle retail and educational content) |
-| Launch locales | Turkish (`tr`) and English (`en`) |
-| First module | **LureAtlas** — artificial lure catalog and discovery |
-| Trust model | Knowledge Claims + Provenance Attribution + Verification Events |
-| AI role | Assistant to users and moderators; never silent canonical source |
-| Commerce | Optional labeled sponsored outbound links only |
-
-The platform aspires to combine:
+This document adds **domain framing** — how the platform aspires to combine:
 
 - **Discogs-style catalog discipline** (manufacturers, lines, variants, external IDs, merges).
 - **IMDb-style credits and verification** (who said what, who confirmed it).
 - **Wikipedia-style community evidence** (assertions, disputes, consensus, revision history).
+
+Launch locales: Turkish (`tr`) and English (`en`). First module: **LureAtlas**. Trust model: Knowledge Claims + Provenance + Verification Events (long-horizon — see `007`).
 
 ---
 
@@ -73,7 +65,7 @@ The business model organizes into layers documented fully in `007_DATABASE_VISIO
 
 **Rule:** Modules own catalog aggregates (e.g., LureAtlas Model). The platform owns taxonomies and trust primitives. Modules **reference** platform ids; they never fork species or technique lists.
 
-**Evolutionary design:** `007` describes the long-horizon model. The running product implements **only what current sprints require**. Do not over-model fishing knowledge — sub-techniques, advanced rigging, and presentation matrices wait until product need. See `002_ENGINEERING_PRINCIPLES.md` §2.
+**Evolutionary design:** [`AI_CONTEXT.md` § Core Product Philosophy](../AI_CONTEXT.md#core-product-philosophy) and `002` §2. `007` describes the long-horizon model; the running product implements only what current sprints require.
 
 ---
 
@@ -282,11 +274,13 @@ LureAtlas must not absorb species biology or technique article CMS concerns—th
 
 | Question | Read |
 |----------|------|
+| Onboarding summary | [`AI_CONTEXT.md`](../AI_CONTEXT.md) |
 | Goals, scope, non-goals | `001_PROJECT_CHARTER.md` |
 | Coding, review, AI, security law | `002_ENGINEERING_PRINCIPLES.md` |
 | Domain narrative (this doc) | `003_MASTER_CONTEXT.md` |
-| Why we chose X | `004_DECISIONS.md` |
+| Why we chose X | `004_DECISIONS.md`, `KNOWN_DECISIONS.md` |
 | What to build next | `005_BACKLOG.md` |
+| Shipped angler sprints | `010_ANGLER_PRODUCT.md` |
 | Components, deployment, data flow | `006_SYSTEM_ARCHITECTURE.md` |
 | Entities and relationship law | `007_DATABASE_VISION.md` |
 | Languages, frameworks, infra | `008_TECH_STACK.md` |

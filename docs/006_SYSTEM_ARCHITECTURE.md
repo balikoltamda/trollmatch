@@ -3,8 +3,10 @@
 **Document:** 006_SYSTEM_ARCHITECTURE  
 **Project (internal):** TrollMatch  
 **Platform (public):** Balık Oltamda Guide  
-**Status:** Sprint 0 — Architecture baseline  
+**Status:** Architecture baseline (target)  
 **Companion docs:** `004_DECISIONS.md`, `007_DATABASE_VISION.md`, `008_TECH_STACK.md`
+
+**Current implementation:** [`AI_CONTEXT.md`](../AI_CONTEXT.md) § Architecture. This document describes **target** C4 diagrams, deployment topology, and module boundaries.
 
 ---
 

@@ -3,17 +3,21 @@
 **Document:** PROJECT_STATE  
 **Project (internal):** TrollMatch  
 **Platform (public):** Balık Oltamda Guide  
-**Purpose:** Single source of truth for project progress  
+**Purpose:** Engineering sprint log — commits, blockers, ADR status  
 **Last updated:** 2026-07-02  
-**Maintainer:** Update this file at the end of every sprint or significant milestone.
+**Maintainer:** Update this file at the end of every engineering sprint or significant milestone.
+
+**Product sprint status** (angler-facing): [`AI_CONTEXT.md`](../AI_CONTEXT.md) · [`010_ANGLER_PRODUCT.md`](010_ANGLER_PRODUCT.md)
 
 ---
 
 ## Current Sprint
 
-**Sprint S018 — Unified Import Runner** — **Complete**
+**Engineering:** Sprint S018 — Unified Import Runner — **Complete**
 
-`scripts/run-import.ts` is the single catalog import entry point. Import registry at `ui/src/modules/import/registry/` registers DUEL (default) and demo importers — new manufacturers register in `registered-importers.ts` only. `import:duel:run` aliases `import:run duel`. Preserves `printImportSummary` output.
+**Product (next):** Sprint 7.6 — Regional experience — see [`AI_CONTEXT.md`](../AI_CONTEXT.md)
+
+`scripts/run-import.ts` is the single catalog import entry point. Import registry at `ui/src/modules/import/registry/` — register new manufacturers in `registered-manufacturers.ts`. `import:duel:run` aliases `import:run duel`.
 
 ---
 

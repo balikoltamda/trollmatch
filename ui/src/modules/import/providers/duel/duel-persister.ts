@@ -39,13 +39,16 @@ import {
 import { pickChangedFields } from "../../persistence/lifecycle-reconciler";
 import { recordImportFieldChanges } from "../../persistence/import-field-diff";
 
-export type UpsertDuelImportResult = {
+export type UpsertCanonicalImportResult = {
   summary: ImportSummary;
   lureModelId: string;
   modelSlug: string;
   isNew: boolean;
   dataChanged: boolean;
 };
+
+/** @deprecated Use UpsertCanonicalImportResult */
+export type UpsertDuelImportResult = UpsertCanonicalImportResult;
 
 const LURE_MODEL_COMPARE_KEYS = [
   "manufacturerId",
@@ -144,6 +147,19 @@ async function ensureColor(
   return colorRecord.id;
 }
 
+async function modelHasEditorCover(tx: DbClient, lureModelId: string): Promise<boolean> {
+  const hero = await tx.image.findFirst({
+    where: {
+      lureModelId,
+      role: ImageRole.HERO,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+
+  return hero !== null;
+}
+
 async function ensureImages(
   tx: DbClient,
   lureModelId: string,
@@ -152,12 +168,22 @@ async function ensureImages(
   summary: ImportSummary,
   labelPrefix: string,
 ): Promise<void> {
+  const preserveCover = await modelHasEditorCover(tx, lureModelId);
+
   for (const [index, image] of (images ?? []).entries()) {
     const existing = await findImageByUrl(tx, lureModelId, image.url, lureVariantId);
 
     if (existing) {
       summary.skipped.push(`${labelPrefix} Image: ${image.url}`);
       continue;
+    }
+
+    let role = mapImageRole(image.role);
+    if (preserveCover && role === ImageRole.HERO) {
+      role = ImageRole.PRODUCT;
+      summary.warnings.push(
+        `${labelPrefix} Image cover preserved (editor HERO): ${image.url}`,
+      );
     }
 
     await tx.image.create({
@@ -167,7 +193,7 @@ async function ensureImages(
         url: image.url,
         altTextEn: image.alt ? resolveLocalized(image.alt, "en") : null,
         altTextTr: image.alt ? resolveLocalized(image.alt, "tr") : null,
-        role: mapImageRole(image.role),
+        role,
         sortOrder: image.sortOrder ?? index,
       },
     });
@@ -455,7 +481,8 @@ async function upsertSingleRecord(
   tx: DbClient,
   record: CanonicalLureImport,
   importedAt: Date,
-): Promise<UpsertDuelImportResult> {
+  importBatchId: string | null = null,
+): Promise<UpsertCanonicalImportResult> {
   const summary = createEmptyImportSummary();
   const manufacturerInput = record.manufacturer;
   const productLineInput = record.productLine;
@@ -629,7 +656,7 @@ async function upsertSingleRecord(
       await recordImportFieldChanges(
         tx,
         lureModel.id,
-        null,
+        importBatchId,
         lureModel as unknown as Record<string, unknown>,
         changedFields as Record<string, unknown>,
       );
@@ -712,25 +739,44 @@ async function upsertSingleRecord(
   };
 }
 
-/** Upsert a canonical DUEL record with manufacturer lifecycle fields. Never deletes rows. */
+/** Upsert a canonical lure record with manufacturer lifecycle fields. Never deletes rows. */
+export async function upsertCanonicalImport(
+  prisma: PrismaClient,
+  record: CanonicalLureImport,
+  importedAt: Date = new Date(),
+  importBatchId: string | null = null,
+): Promise<UpsertCanonicalImportResult> {
+  return prisma.$transaction(async (tx) =>
+    upsertSingleRecord(tx, record, importedAt, importBatchId),
+  );
+}
+
+/** @deprecated Use upsertCanonicalImport */
 export async function upsertDuelCanonicalImport(
   prisma: PrismaClient,
   record: CanonicalLureImport,
   importedAt: Date = new Date(),
-): Promise<UpsertDuelImportResult> {
-  return prisma.$transaction(async (tx) => upsertSingleRecord(tx, record, importedAt));
+  importBatchId: string | null = null,
+): Promise<UpsertCanonicalImportResult> {
+  return upsertCanonicalImport(prisma, record, importedAt, importBatchId);
 }
 
-export async function upsertDuelCanonicalImports(
+export async function upsertCanonicalImports(
   prisma: PrismaClient,
   records: CanonicalLureImport[],
   importedAt: Date = new Date(),
+  importBatchId: string | null = null,
 ): Promise<ImportSummary> {
   const aggregate = createEmptyImportSummary();
 
   for (const record of records) {
     try {
-      const result = await upsertDuelCanonicalImport(prisma, record, importedAt);
+      const result = await upsertCanonicalImport(
+        prisma,
+        record,
+        importedAt,
+        importBatchId,
+      );
       mergeImportSummaries(aggregate, result.summary);
     } catch (error) {
       const message =
@@ -740,4 +786,14 @@ export async function upsertDuelCanonicalImports(
   }
 
   return aggregate;
+}
+
+/** @deprecated Use upsertCanonicalImports */
+export async function upsertDuelCanonicalImports(
+  prisma: PrismaClient,
+  records: CanonicalLureImport[],
+  importedAt: Date = new Date(),
+  importBatchId: string | null = null,
+): Promise<ImportSummary> {
+  return upsertCanonicalImports(prisma, records, importedAt, importBatchId);
 }

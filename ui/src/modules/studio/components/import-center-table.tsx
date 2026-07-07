@@ -99,6 +99,14 @@ function ImportRow({ row }: { row: ImportManufacturerRow }) {
   const importActive =
     row.lastImport !== null && ACTIVE_STATUSES.has(row.lastImport.status);
   const canCancel = row.lastImport?.status === "QUEUED";
+  const canRetry = row.lastImport?.status === "FAILED";
+  const importLabel = importActive
+    ? "In progress…"
+    : pending
+      ? "Queueing…"
+      : canRetry
+        ? "Retry import"
+        : "Import now";
 
   return (
     <tr className="hover:bg-muted/30">
@@ -188,7 +196,7 @@ function ImportRow({ row }: { row: ImportManufacturerRow }) {
                 });
               }}
             >
-              {importActive ? "In progress…" : pending ? "Queueing…" : "Import now"}
+              {importLabel}
             </button>
             {canCancel && row.lastImport ? (
               <button

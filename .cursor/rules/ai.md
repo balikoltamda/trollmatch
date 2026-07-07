@@ -1,13 +1,10 @@
 # AI Rules
 
-Before any AI-related or AI-adjacent feature, apply the angler product gate:
+**Platform law summary:** [`AI_CONTEXT.md` § Core Product Philosophy](../../AI_CONTEXT.md#core-product-philosophy) and [Things AI Must Never Do](../../AI_CONTEXT.md#things-ai-must-never-do)
 
-> Will this make TrollMatch more valuable than ChatGPT for anglers?
+Apply the angler feature gate before any AI-related feature. Detail: `docs/010_CURSOR_RULES.md` §10 (target architecture) and `docs/013_KNOWLEDGE_PIPELINE.md` (Knowledge Hub).
 
-If no — redesign. Competitive advantage is **verified fishing knowledge**, **structured relationships**, and **editorial trust** — not AI capability.
-
-- AI assists; humans decide.
+- AI assists; humans verify.
 - Never invent fishing facts.
 - Clearly separate AI suggestions from verified data.
-- Prefer structured data over generated text.
-- AI summaries must cite approved sources and link to the catalog graph — never open-web guessing.
+- AI summaries must cite approved sources — never open-web guessing.

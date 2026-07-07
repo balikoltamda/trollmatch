@@ -4,6 +4,8 @@
 **Status:** Authoritative platform law  
 **Scope:** All species–lure relationships, recommendations, and effectiveness claims
 
+**Onboarding summary:** [`AI_CONTEXT.md`](../../AI_CONTEXT.md) § Fishing Knowledge Rules. **This document** is the authoritative policy — UI behaviour, catalog vs effectiveness, and schema direction.
+
 ---
 
 ## 1. Principle

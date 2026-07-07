@@ -4,8 +4,10 @@
 **Project (internal):** TrollMatch  
 **Platform (public):** Balık Oltamda Guide  
 **Module:** LureAtlas / Import  
-**Status:** Sprint S014 — Schema + policy (logic not yet implemented)  
+**Status:** Sprint S014 — Schema + policy  
 **Authority:** Subordinate to `007_DATABASE_VISION.md`, `LURE_DOMAIN_MODEL.md`, and `CanonicalLureImport` import contract
+
+**Two lifecycles summary:** [`AI_CONTEXT.md`](../../AI_CONTEXT.md) § Key data concepts. **This document** defines manufacturer feed presence policy and transition rules.
 
 ---
 

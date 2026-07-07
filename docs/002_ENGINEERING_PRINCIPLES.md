@@ -6,6 +6,8 @@
 **Status:** Authoritative — binds engineers and AI agents  
 **Authority:** Subordinate to `001_PROJECT_CHARTER.md`
 
+**Onboarding summary:** [`AI_CONTEXT.md`](../AI_CONTEXT.md) — platform laws, architecture, contributing conventions. This document expands **engineering law** not duplicated there.
+
 ---
 
 ## 1. Software engineering
@@ -30,29 +32,11 @@
 ### 1.4 Bilingual by design
 
 - Turkish and English are independently authored angler language — not machine translation
-- See `docs/fishing/LOCALIZATION_GUIDE.md`
+- See `docs/fishing/LOCALIZATION_GUIDE.md` (rules summary in `AI_CONTEXT.md`)
 
-### 1.5 Trust over inference
+### 1.5–1.8 Platform laws
 
-- Verified structured data beats AI-generated text
-- Community field evidence ranks above manufacturer marketing for effectiveness claims
-- AI assists; humans and editorial workflow decide
-
-### 1.6 Feature gate (angler value)
-
-Before angler-facing work ask:
-
-> Will this make TrollMatch more valuable than ChatGPT for anglers?
-
-Competitive advantage = verified knowledge + structured relationships + editorial trust — not AI capability.
-
-### 1.7 Lexicon-first (terminology)
-
-No fishing terminology or taxonomy ships without a Fishing Lexicon entry first. See `docs/fishing/TERMINOLOGY.md` and `.cursor/rules/terminology.md`.
-
-### 1.8 Species → Technique → Lure (compatibility)
-
-Effectiveness and recommendations require the triple — never bare Species → Lure. See `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`.
+Trust over inference, feature gate, lexicon-first, and Species → Technique → Lure are defined in [`AI_CONTEXT.md` § Core Product Philosophy](../AI_CONTEXT.md#core-product-philosophy). Authoritative fishing docs: `docs/fishing/`.
 
 ### 1.9 Dependencies
 
@@ -126,18 +110,16 @@ When adding schema:
 
 ## 3. Repository and layout
 
-- Top-level code: `api/`, `ui/`, `shared/`, `database/` only unless ADR amends
+See [`AI_CONTEXT.md` § Architecture](../AI_CONTEXT.md#architecture) for current repo layout and contributing conventions.
+
 - `research/` never imported at runtime by production API
-- Forward-only SQL migrations; idempotent seeds
+- Forward-only migrations; idempotent seeds
 
 ---
 
 ## 4. AI and agents
 
-- Never invent fishing facts
-- Clearly separate AI suggestions from verified data
-- Prefer structured data over generated prose
-- Read mandatory docs before production edits (`010_CURSOR_RULES.md`)
+See [`AI_CONTEXT.md` § Things AI Must Never Do](../AI_CONTEXT.md#things-ai-must-never-do). Cursor binding rules: `010_CURSOR_RULES.md`.
 
 ---
 
@@ -155,6 +137,7 @@ When adding schema:
 
 | Document | Role |
 |----------|------|
+| [`AI_CONTEXT.md`](../AI_CONTEXT.md) | Onboarding summary |
 | `003_MASTER_CONTEXT.md` | Domain narrative |
 | `007_DATABASE_VISION.md` | Long-horizon model (not all implemented) |
 | `docs/fishing/TERMINOLOGY.md` | Vocabulary law |

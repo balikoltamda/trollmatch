@@ -1,18 +1,9 @@
 # Project Rules
 
-Before every task:
-1. Read docs/000_DISCOVERY.md
-2. Read docs/001_PROJECT_CHARTER.md
-3. Read docs/002_ENGINEERING_PRINCIPLES.md
-4. Read docs/003_MASTER_CONTEXT.md
-5. Read docs/004_DECISIONS.md
+**Onboarding:** Read [`AI_CONTEXT.md`](../../AI_CONTEXT.md) first — product identity, architecture, platform laws, current sprint, and gates.
 
-**Feature gate (angler-facing work):** Will this make TrollMatch more valuable than ChatGPT for anglers? If no, redesign. Advantage = verified knowledge + structured relationships + editorial trust — not AI.
+Before specialized work, read the docs listed in [`AI_CONTEXT.md` § Reading Order](../../AI_CONTEXT.md#reading-order) for your task type (charter, ADRs, lexicon, etc.).
 
-**Lexicon gate (terminology & taxonomy):** No fishing terminology or taxonomy may be introduced without being added to the Fishing Lexicon first (`docs/fishing/TERMINOLOGY.md`, `ui/src/modules/terminology/data/`). Species names also require `TAXONOMY_POLICY.md` alignment. Lexicon entry → docs → integration. Never the reverse.
-
-**Compatibility gate (species–lure):** Every species–lure relationship for recommendations or effectiveness must be qualified by fishing technique — **Species → Technique → Lure**, never Species → Lure alone. See `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`.
-
-**Simplicity gate (domain modeling):** Do not over-model fishing knowledge. Model only what the current product requires; design entities to be extensible; add sub-techniques, advanced rigging, presentations, and other future detail only when a sprint needs them. See `docs/002_ENGINEERING_PRINCIPLES.md` §2.
+**Platform gates** (detail in `AI_CONTEXT.md` § Core Product Philosophy): feature gate · lexicon-first · Species → Technique → Lure · simplicity / evolutionary design.
 
 Then execute the task.

@@ -80,6 +80,8 @@ export const duelManufacturerImporter: ManufacturerImporter = {
       fetchFn: options.fetchFn,
       repoRoot: REPO_ROOT,
       reportsRoot: REPO_ROOT,
+      importBatchId: options.importBatchId,
+      onProgress: options.onProgress,
     });
 
     const summary = mapDuelResultToSummary(duelResult);
@@ -93,6 +95,12 @@ export const duelManufacturerImporter: ManufacturerImporter = {
       productsProcessed: duelResult.processedProducts,
       summary,
       imageDownloads: duelResult.imageDownloads,
+      outcomes: duelResult.outcomes.map((outcome) => ({
+        recordKey: outcome.recordKey ?? `duel:pid:${outcome.pid}`,
+        modelSlug: outcome.modelSlug,
+        status: outcome.status,
+        message: outcome.message,
+      })),
     });
 
     const reportPath =
@@ -110,6 +118,7 @@ export const duelManufacturerImporter: ManufacturerImporter = {
       observedLureModelIds: duelResult.observedLureModelIds,
       success: summary.errors.length === 0 && duelResult.summary.failed === 0,
       reportPath,
+      report,
     };
   },
 };

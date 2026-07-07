@@ -3,11 +3,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { PrismaClient } from "@/generated/prisma/client";
 import {
-  collectImageUrlsFromRecords,
-  downloadManufacturerImages,
-  resolveManufacturerImagesRoot,
-} from "../../images/image-download-pipeline";
-import { reconcileManufacturerLifecycle } from "../../persistence/lifecycle-reconciler";
+  finalizeManufacturerImport,
+  updateImportBatchProgress,
+} from "../../pipeline/manufacturer-import-pipeline";
 import { createEmptyImportSummary, type ImportSummary } from "../../persistence/types";
 import {
   buildImportReport,
@@ -16,7 +14,7 @@ import {
 import { validateCanonicalLureImport } from "../../validators/canonical-lure-validator";
 import { fetchDuelSnapshots } from "./duel-fetcher";
 import { mapDuelProductToCanonical } from "./duel-mapper";
-import { upsertDuelCanonicalImport } from "./duel-persister";
+import { upsertCanonicalImport } from "./duel-persister";
 import { parseDuelCategoryHtml, parseDuelProductHtml } from "./duel-parser";
 import {
   DUEL_DEFAULT_CATEGORY_SOURCE_URL,
@@ -59,6 +57,8 @@ export type DuelImportRunOptions = {
   /** Custom fetch implementation (for tests). */
   fetchFn?: typeof fetch;
   prisma?: PrismaClient;
+  importBatchId?: string;
+  onProgress?: (processed: number, total: number) => void | Promise<void>;
 };
 
 export type DuelProductOutcome = {
@@ -94,6 +94,7 @@ export type DuelImportRunResult = {
   imageDownloads?: {
     downloaded: number;
     skipped: number;
+    broken: number;
     errors: string[];
   };
   reportPath: string;
@@ -390,10 +391,11 @@ export async function runDuelImport(
         continue;
       }
 
-      const persistResult = await upsertDuelCanonicalImport(
+      const persistResult = await upsertCanonicalImport(
         options.prisma,
         validation.normalized,
         startedAt,
+        options.importBatchId ?? null,
       );
 
       aggregatePersistence.created.push(...persistResult.summary.created);
@@ -438,6 +440,18 @@ export async function runDuelImport(
       });
 
       processedCount += 1;
+
+      if (options.onProgress) {
+        await options.onProgress(processedCount, discoveredPids.length);
+      }
+
+      if (options.importBatchId) {
+        await updateImportBatchProgress(
+          options.prisma,
+          options.importBatchId,
+          processedCount,
+        );
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       outcomes.push({
@@ -451,56 +465,50 @@ export async function runDuelImport(
   const completedAt = new Date();
   let reconcile: DuelImportRunResult["reconcile"];
   let imageDownloads: DuelImportRunResult["imageDownloads"];
+  let reportPath: string;
+
+  const pipelineOutcomes = outcomes.map((outcome) => ({
+    recordKey: outcome.recordKey ?? `duel:pid:${outcome.pid}`,
+    modelSlug: outcome.modelSlug,
+    status: outcome.status,
+    message: outcome.message,
+  }));
 
   if (options.prisma) {
-    reconcile = await reconcileManufacturerLifecycle(
-      options.prisma,
-      "duel",
+    const finalized = await finalizeManufacturerImport(options.prisma, {
+      manufacturerCode: "duel",
+      manufacturerSlug: "duel",
+      displayName: "DUEL",
+      startedAt,
+      records: normalizedRecords,
+      summary: aggregatePersistence,
       observedLureModelIds,
-    );
-
-    for (const slug of reconcile.missing) {
-      aggregatePersistence.removed?.push(`MISSING: ${slug}`);
-    }
-
-    for (const slug of reconcile.discontinued) {
-      aggregatePersistence.removed?.push(`DISCONTINUED: ${slug}`);
-    }
-  }
-
-  if (options.downloadImages !== false && normalizedRecords.length > 0) {
-    const imageUrls = collectImageUrlsFromRecords(normalizedRecords);
-    const imageResult = await downloadManufacturerImages(
-      "duel",
-      imageUrls,
-      resolveManufacturerImagesRoot(repoRoot),
+      productsProcessed: outcomes.length,
+      outcomes: pipelineOutcomes,
+      downloadImages: options.downloadImages,
       fetchFn,
-    );
+      repoRoot,
+      reportsRoot,
+    });
 
-    imageDownloads = {
-      downloaded: imageResult.downloaded.length,
-      skipped: imageResult.skipped.length,
-      errors: imageResult.errors,
-    };
+    reconcile = finalized.reconcile;
+    imageDownloads = finalized.imageDownloads;
+    reportPath = finalized.reportPath;
+  } else {
+    const jsonReport = buildImportReport({
+      manufacturer: "duel",
+      displayName: "DUEL",
+      startedAt,
+      completedAt,
+      productsProcessed: outcomes.length,
+      summary: aggregatePersistence,
+      outcomes: pipelineOutcomes,
+    });
 
-    aggregatePersistence.warnings.push(
-      ...imageResult.errors.map((error) => `Image: ${error}`),
-    );
+    reportPath = await writeImportReport(jsonReport, reportsRoot);
   }
 
   const summary = countSummary(outcomes);
-
-  const jsonReport = buildImportReport({
-    manufacturer: "duel",
-    displayName: "DUEL",
-    startedAt,
-    completedAt,
-    productsProcessed: outcomes.length,
-    summary: aggregatePersistence,
-    imageDownloads,
-  });
-
-  const reportPath = await writeImportReport(jsonReport, reportsRoot);
 
   await mkdir(dirname(legacyReportPath), { recursive: true });
   await writeFile(

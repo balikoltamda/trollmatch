@@ -4,20 +4,15 @@
 **Status:** Active architecture (Sprint 7.4)  
 **Module:** `ui/src/modules/knowledge-pipeline/`
 
+**Onboarding summary:** [`AI_CONTEXT.md`](../AI_CONTEXT.md) (Knowledge Hub module, index policy). **This document** covers pipeline architecture, schema, Studio workflow, and source scoring.
+
 ---
 
 ## Philosophy
 
-TrollMatch must not depend on users constantly contributing data.
+TrollMatch must not depend on users constantly contributing data — primary growth from manufacturer data, trusted sources, and editor verification. Community reports are valuable but optional.
 
-Most anglers consume information. Very few produce it. The platform should continuously expand its knowledge from trustworthy sources and present only verified information.
-
-| Role | Responsibility |
-|------|----------------|
-| **Editor** | Verifies |
-| **System** | Discovers |
-
-Community reports are valuable but optional. Primary knowledge growth comes from manufacturer data, trusted public information, future AI agents, and editor verification.
+Platform laws: [`AI_CONTEXT.md` § Core Product Philosophy](../AI_CONTEXT.md#core-product-philosophy).
 
 ---
 

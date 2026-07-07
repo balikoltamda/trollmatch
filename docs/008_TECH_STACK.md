@@ -3,8 +3,10 @@
 **Document:** 008_TECH_STACK  
 **Project (internal):** TrollMatch  
 **Platform (public):** Balık Oltamda Guide  
-**Status:** Sprint 0 — Ratified stack  
+**Status:** Ratified stack (target)  
 **Authority:** Implements ADRs in `004_DECISIONS.md`
+
+**Current implementation:** [`AI_CONTEXT.md`](../AI_CONTEXT.md) § Architecture — today: Next.js + Prisma in `ui/`. This document describes **target** stack from ADRs; drift is noted in `PROJECT_STATE.md`.
 
 ---
 

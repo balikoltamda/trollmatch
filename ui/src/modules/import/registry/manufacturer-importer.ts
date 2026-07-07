@@ -12,6 +12,10 @@ export type ManufacturerImportRunOptions = {
   /** Download manufacturer images to local storage. */
   downloadImages?: boolean;
   fetchFn?: typeof fetch;
+  /** Studio import batch — links field diffs and progress updates. */
+  importBatchId?: string;
+  /** Called after each product is persisted (for live progress). */
+  onProgress?: (processed: number, total: number) => void | Promise<void>;
 };
 
 /** Result returned by every manufacturer importer. */
@@ -26,6 +30,7 @@ export type ManufacturerImportResult = {
   observedLureModelIds: string[];
   success: boolean;
   reportPath?: string;
+  report?: import("../reporting/import-report").ImportReport;
 };
 
 /**

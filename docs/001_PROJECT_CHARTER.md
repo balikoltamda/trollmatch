@@ -4,9 +4,11 @@
 **Project (internal):** TrollMatch  
 **Platform (public):** Balık Oltamda Guide  
 **Owner:** Balık Oltamda  
-**Status:** Sprint 0 — Charter ratification  
+**Status:** Charter ratification — **binding scope and governance**  
 **Classification:** Private repository; public-facing product  
 **Primary languages at launch:** Turkish (tr), English (en)
+
+**Onboarding summary:** [`AI_CONTEXT.md`](../AI_CONTEXT.md). This charter is the **authoritative** reference for goals, scope, non-goals, success criteria, and governance — not superseded by the summary.
 
 ---
 
@@ -415,7 +417,8 @@ Sprint 0 completes when discovery, architecture, tech stack, and backlog documen
 
 This charter sits at the root of the TrollMatch documentation hierarchy:
 
-- `000_DISCOVERY.md` — market and user research feeding charter refinements.
+- [`AI_CONTEXT.md`](../AI_CONTEXT.md) — onboarding summary for humans and AI agents
+- `000_DISCOVERY.md` — market and user research feeding charter refinements
 - `002_ENGINEERING_PRINCIPLES.md` — coding and review standards.
 - `003_MASTER_CONTEXT.md` — living domain encyclopedia.
 - `004_DECISIONS.md` — architecture decision records.
@@ -426,7 +429,7 @@ This charter sits at the root of the TrollMatch documentation hierarchy:
 - `009_ROADMAP.md` — phased delivery timeline.
 - `011_GLOSSARY.md` — canonical terminology (LureAtlas, usage assertion, provenance, etc.).
 
-Agents and engineers read `000` through `004` before writing production code, per `.cursor/rules/project.md`.
+Agents and engineers read [`AI_CONTEXT.md`](../AI_CONTEXT.md) first, then this charter and `002`–`004` before writing production code, per `.cursor/rules/project.md`.
 
 ---
 

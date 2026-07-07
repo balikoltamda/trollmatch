@@ -1,16 +1,16 @@
 # Angler Product — Sprint 7+
 
 **Document:** 010_ANGLER_PRODUCT  
-**Status:** Active product direction  
+**Status:** Active product direction — **sprint delivery record**  
 **Supersedes:** Infrastructure-first Studio sprints as primary focus
+
+**Onboarding summary:** [`AI_CONTEXT.md`](../AI_CONTEXT.md) — current sprint, modules, routes, priorities. This document records **what shipped** in each angler-facing sprint.
 
 ---
 
 ## Philosophy
 
-Stop building infrastructure. The foundation is strong enough.
-
-From this point forward, every sprint must create **visible value for anglers**.
+Angler-facing sprints must create **visible value for anglers**. Studio work continues only when it unblocks an angler-facing loop.
 
 | Role | Responsibility |
 |------|----------------|
@@ -18,29 +18,7 @@ From this point forward, every sprint must create **visible value for anglers**.
 | **Community** | Creates |
 | **Platform** | Learns |
 
-Every new feature should make anglers **return to the site**, not just improve the admin experience.
-
-Studio work continues only when it unblocks an angler-facing loop.
-
-### Feature gate
-
-Before implementing any feature, ask:
-
-> **Will this feature make TrollMatch more valuable than ChatGPT for anglers?**
-
-If the answer is **no**, redesign the feature.
-
-### Competitive advantage
-
-The advantage is **not** AI.
-
-| What wins | What does not |
-|-----------|----------------|
-| Verified fishing knowledge | Generic chat answers |
-| Structured relationships (species ↔ lure ↔ technique ↔ source) | Unstructured text dumps |
-| Editorial trust (Balık Oltamda verifies) | Ungrounded model output |
-
-AI may assist summarization and discovery, but only when it **surfaces verified, cited, structured knowledge** that ChatGPT cannot replicate.
+Platform laws and feature gate: [`AI_CONTEXT.md` § Core Product Philosophy](../AI_CONTEXT.md#core-product-philosophy).
 
 ---
 
@@ -97,12 +75,7 @@ AI may assist summarization and discovery, but only when it **surfaces verified,
 
 ### Rules locked
 
-- Never translate fishing terminology literally
-- Turkish = angler language of Türkiye / Northern Cyprus
-- English = internationally accepted fishing terminology
-- Regional names never replace scientific taxonomy
-- **Lexicon-first:** no terminology or taxonomy without Fishing Lexicon entry
-- Application **not wired yet** — standards first, integration in later sprints
+See [`AI_CONTEXT.md` § Fishing Knowledge Rules](../AI_CONTEXT.md#fishing-knowledge-rules) and `docs/fishing/TERMINOLOGY.md`.
 
 ### Consumers (future)
 
@@ -172,24 +145,13 @@ See `docs/013_KNOWLEDGE_PIPELINE.md` for full architecture.
 
 ### Rules locked
 
-- No city-level regional names
-- Scientific taxonomy always wins
-- Confused species ≠ aliases
+See [`AI_CONTEXT.md` § Fishing Knowledge Rules](../AI_CONTEXT.md#fishing-knowledge-rules) and `docs/fishing/TAXONOMY_POLICY.md`.
 
 ---
 
-## Species → Technique → Lure (platform law)
+## Species → Technique → Lure
 
-**Goal:** Never generalize lure recommendations to a species without fishing technique.
-
-### Rules locked
-
-- **Species → Technique → Lure** — not Species → Lure for effectiveness
-- Catch reports require `techniqueId`
-- Species page rankings grouped by technique
-- `LureSpecies` = catalog metadata only — not effectiveness UI
-
-See `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`.
+Platform law — detail: [`AI_CONTEXT.md`](../AI_CONTEXT.md) and `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`.
 
 ---
 
@@ -209,7 +171,7 @@ See `docs/fishing/SPECIES_TECHNIQUE_LURE_POLICY.md`.
 
 ### Voice rule
 
-Sound like an experienced angler — not a software company.
+See [`AI_CONTEXT.md`](../AI_CONTEXT.md) (brand voice). Sound like an experienced angler — not a software company.
 
 ---
 
@@ -275,18 +237,9 @@ Every information block shows its source. No database changes — presentation a
 
 ---
 
-## Evolutionary domain design (platform law)
+## Evolutionary domain design
 
-**Goal:** Keep fishing knowledge models simple — extensible, not premature.
-
-### Rules locked
-
-- Model only concepts **required by the current product**
-- Design entities for extension; defer sub-techniques, advanced rigging, presentations until needed
-- `007_DATABASE_VISION.md` is long-horizon — not a build-everything checklist
-- Platform must stay understandable for anglers and developers
-
-See `docs/002_ENGINEERING_PRINCIPLES.md` §2.
+See [`AI_CONTEXT.md` § Core Product Philosophy](../AI_CONTEXT.md#core-product-philosophy) and `docs/002_ENGINEERING_PRINCIPLES.md` §2.
 
 ---
 
@@ -313,33 +266,7 @@ See `docs/013_KNOWLEDGE_PIPELINE.md`.
 
 **Goal:** Imports never block HTTP requests — no more 504 Gateway Timeout.
 
-### Workflow
-
-1. **Import now** → creates `ImportBatch` with status `QUEUED`
-2. Server returns **HTTP 200 immediately**
-3. Detached worker (`scripts/run-import-batch.ts`) claims batch → `RUNNING` → runs importer
-4. UI polls every **2 seconds** until terminal status
-
-### Statuses
-
-| Status | Meaning |
-|--------|---------|
-| `QUEUED` | Waiting for worker; can cancel |
-| `RUNNING` | Importer executing |
-| `COMPLETED` | Success |
-| `FAILED` | Importer or worker error |
-| `CANCELLED` | User cancelled while queued |
-
-### Survives navigation
-
-- Browser can navigate anywhere while imports continue
-- Page refresh does not interrupt the worker
-- Closing the browser does not interrupt the worker (process is detached)
-
-### API
-
-- `GET /api/studio/import/batch/[id]` — JSON status for polling
-- `npm run import:batch -- <batch-id>` — manual worker entry
+Async workflow: [`AI_CONTEXT.md` § Importer pipeline](../AI_CONTEXT.md#importer-pipeline).
 
 ---
 
