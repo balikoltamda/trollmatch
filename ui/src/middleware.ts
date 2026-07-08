@@ -2,10 +2,7 @@ import NextAuth from "next-auth";
 import { authConfig } from "@/auth.config";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
-import {
-  middlewareMatchers,
-  shouldApplyLocaleMiddleware,
-} from "@/lib/middleware-routing";
+import { shouldApplyLocaleMiddleware } from "@/lib/middleware-routing";
 
 const { auth } = NextAuth(authConfig);
 const intlMiddleware = createMiddleware(routing);
@@ -45,5 +42,8 @@ export default auth((request) => {
 });
 
 export const config = {
-  matcher: [...middlewareMatchers],
+  matcher: [
+    "/api/studio/:path*",
+    "/((?!api|_next|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
+  ],
 };

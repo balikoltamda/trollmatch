@@ -38,7 +38,7 @@ export function shouldApplyLocaleMiddleware(pathname: string): boolean {
 }
 
 /**
- * Mirrors `config.matcher` — used by tests to assert production routing boundaries.
+ * Mirrors `config.matcher` in middleware.ts (must stay in sync) — used by tests.
  */
 export function isMiddlewareMatched(pathname: string): boolean {
   if (pathname.startsWith("/api/studio")) {
@@ -64,8 +64,3 @@ export function isMiddlewareMatched(pathname: string): boolean {
 
   return true;
 }
-
-export const middlewareMatchers = [
-  "/api/studio/:path*",
-  "/((?!api|_next|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
-] as const;
