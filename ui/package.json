@@ -27,7 +27,8 @@
     "backfill:editorial-imports": "tsx scripts/backfill-editorial-imports.ts",
     "backfill:image-urls": "tsx scripts/backfill-image-urls.ts",
     "backfill:media-assets": "tsx scripts/backfill-media-assets.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test:middleware": "tsx --test src/middleware.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
